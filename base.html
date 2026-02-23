@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="CSE(AI&ML) Coding Contest — Test your coding skills in a live competitive environment.">
+    <title>{% block title %}CSE(AI&ML) Coding Contest{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="/" class="nav-brand">⚡ CSE(AI&ML) Contest</a>
+            <div class="nav-links">
+                {% if session.get('user') %}
+                <a href="/contest" class="nav-link">Contest</a>
+                <a href="/logout" class="nav-link nav-link-danger">Logout</a>
+                {% elif session.get('admin') %}
+                <a href="/admin/dashboard" class="nav-link">Dashboard</a>
+                <a href="/admin/problems" class="nav-link">Problems</a>
+                <a href="/leaderboard" class="nav-link">Leaderboard</a>
+                <a href="/logout" class="nav-link nav-link-danger">Logout</a>
+                {% else %}
+                <a href="/" class="nav-link">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+        {% for category, message in messages %}
+        <div class="flash-msg flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    {% block content %}{% endblock %}
+
+    <!-- Footer -->
+    {% block footer %}
+    <footer class="footer">
+        <p>© 2026 CSE(AI&ML) Coding Contest · Built with ❤️</p>
+    </footer>
+    {% endblock %}
+
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>
