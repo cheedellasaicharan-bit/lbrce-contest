@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 services:
   - type: web
     name: lbrce-csm-contest
@@ -10,16 +9,3 @@ services:
         generateValue: true
       - key: PORT
         value: 10000
-=======
-services:
-  - type: web
-    name: lbrce-csm-contest
-    runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
-    envVars:
-      - key: SECRET_KEY
-        generateValue: true
-      - key: PORT
-        value: 10000
->>>>>>> master
