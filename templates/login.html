@@ -1,62 +1,63 @@
 {% extends "base.html" %}
-{% block title %}Arena Entry — LBRCE Coding Contest{% endblock %}
-
-{% block body_class %}login-body{% endblock %}
+{% block title %}Sign In — LBRCE Coding Contest{% endblock %}
 
 {% block navbar %}{% endblock %}
 
 {% block content %}
-<div class="login-container fade-in">
-    <div class="cyber-card" style="text-align: center; border-width: 2px;">
-        <div style="margin-bottom: 2rem;">
-            <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">⚡ Login</h1>
-            <p style="color: var(--text-muted);">Enter the LBRCE coding arena</p>
+<div class="login-wrapper">
+    <!-- Left Panel: Branding & Info -->
+    <div class="login-left">
+        <div>
+            <h1>CSE(AI&ML) Coding Contest</h1>
+            <p>Put your coding skills to the test. Solve problems, climb the leaderboard, and prove you're the best.</p>
         </div>
+    </div>
 
-        <!-- Custom Login Toggle (Admin/User) -->
-        <div
-            style="display: flex; background: rgba(255,255,255,0.05); border-radius: 50px; padding: 4px; margin-bottom: 2rem;">
-            <button class="cyber-btn" id="btn-user" onclick="switchLogin('user')"
-                style="flex: 1; border-radius: 50px; background: var(--accent-gradient); color: white;">User</button>
-            <button class="cyber-btn" id="btn-admin" onclick="switchLogin('admin')"
-                style="flex: 1; border-radius: 50px; background: transparent; color: var(--text-muted);">Admin</button>
+    <!-- Right Panel: Login Form -->
+    <div class="login-right">
+        <div class="login-form-container">
+            <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 2rem; color: var(--text-primary);">Sign In</h2>
+
+            <!-- Tabs Toggle -->
+            <div class="tab-toggle">
+                <button type="button" class="tab-btn active" id="btn-user" onclick="switchLogin('user')">User</button>
+                <button type="button" class="tab-btn" id="btn-admin" onclick="switchLogin('admin')">Admin</button>
+            </div>
+
+            <!-- User Form -->
+            <form action="/login/credentials" method="POST" id="form-user">
+                <div class="form-group">
+                    <label class="form-label">Registration ID</label>
+                    <input type="text" name="reg_id" required placeholder="Registration ID" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" required placeholder="••••••••" class="form-control">
+                </div>
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; font-size: 0.85rem;">
+                    <label
+                        style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); cursor: pointer;">
+                        <input type="checkbox" style="accent-color: var(--primary);"> Remember me
+                    </label>
+                    <a href="/forgot-password" style="font-weight: 600;">Forgot password?</a>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+
+            <!-- Admin Form -->
+            <form action="/admin_login" method="POST" id="form-admin" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">Admin Username</label>
+                    <input type="text" name="user" required placeholder="Admin ID" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" required placeholder="••••••••" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary">Admin Access</button>
+            </form>
         </div>
-
-        <!-- User Form -->
-        <form action="/login/credentials" method="POST" id="form-user">
-            <div class="form-group" style="text-align: left;">
-                <label class="form-label">Registration ID</label>
-                <input type="text" name="reg_id" required placeholder="Enter your ID" class="cyber-input">
-            </div>
-            <div class="form-group" style="text-align: left;">
-                <label class="form-label">Password</label>
-                <input type="password" name="password" required placeholder="••••••••" class="cyber-input">
-            </div>
-
-            <div
-                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; font-size: 0.85rem;">
-                <label
-                    style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: var(--text-muted);">
-                    <input type="checkbox" style="accent-color: var(--accent-cyan);"> Remember me
-                </label>
-                <a href="/forgot-password" style="color: var(--accent-purple); font-weight: 500;">Forgot Password?</a>
-            </div>
-
-            <button type="submit" class="cyber-btn btn-primary" style="width: 100%;">ACCESS ARENA</button>
-        </form>
-
-        <!-- Admin Form (Hidden by default) -->
-        <form action="/admin_login" method="POST" id="form-admin" style="display: none;">
-            <div class="form-group" style="text-align: left;">
-                <label class="form-label">Admin Username</label>
-                <input type="text" name="user" required placeholder="Admin ID" class="cyber-input">
-            </div>
-            <div class="form-group" style="text-align: left;">
-                <label class="form-label">Secret Key</label>
-                <input type="password" name="password" required placeholder="••••••••" class="cyber-input">
-            </div>
-            <button type="submit" class="cyber-btn btn-primary" style="width: 100%;">ADMIN ACCESS</button>
-        </form>
     </div>
 </div>
 
@@ -68,17 +69,13 @@
         const adminForm = document.getElementById('form-admin');
 
         if (type === 'user') {
-            userBtn.style.background = 'var(--accent-gradient)';
-            userBtn.style.color = 'white';
-            adminBtn.style.background = 'transparent';
-            adminBtn.style.color = 'var(--text-muted)';
+            userBtn.classList.add('active');
+            adminBtn.classList.remove('active');
             userForm.style.display = 'block';
             adminForm.style.display = 'none';
         } else {
-            adminBtn.style.background = 'var(--accent-gradient)';
-            adminBtn.style.color = 'white';
-            userBtn.style.background = 'transparent';
-            userBtn.style.color = 'var(--text-muted)';
+            adminBtn.classList.add('active');
+            userBtn.classList.remove('active');
             userForm.style.display = 'none';
             adminForm.style.display = 'block';
         }

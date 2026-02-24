@@ -342,12 +342,15 @@ def user_dashboard():
     
     # Rank and total score
     leaderboard = con.execute("""
-        SELECT u.email, COALESCE(SUM(s.score), 0) as total_score
+        SELECT u.name, u.email, COALESCE(SUM(s.score), 0) as total_score
         FROM users u
         LEFT JOIN submissions s ON u.email = s.user_email
         GROUP BY u.email
         ORDER BY total_score DESC
     """).fetchall()
+    
+    # Data for the global graph (top 10)
+    top_performers = [{"name": row['name'] or row['email'], "score": row['total_score']} for row in leaderboard[:10]]
     
     rank = 0
     total_score = 0
@@ -363,7 +366,9 @@ def user_dashboard():
                            user=user, 
                            submissions=submissions, 
                            rank=rank, 
-                           total_score=total_score)
+                           total_score=total_score,
+                           top_performers=top_performers)
+
 
 @app.route("/user/change-password", methods=["POST"])
 def change_password():

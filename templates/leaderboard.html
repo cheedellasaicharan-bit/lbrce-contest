@@ -6,64 +6,64 @@
 {% endblock %}
 
 {% block content %}
-<div class="container container-md">
-    <div class="leaderboard-header fade-in" style="text-align: center; margin-bottom: 4rem;">
-        <h1
-            style="font-size: 3rem; margin-bottom: 0.5rem; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-            🏆 Hall of Fame</h1>
-        <p style="color: var(--text-muted); font-size: 1.1rem;">The elite operatives of the LBRCE arena</p>
+<div class="container" style="max-width: 1200px;">
+    <div style="text-align: center; margin-bottom: 4rem;">
+        <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.5rem;">Arena
+            Leaderboard</h1>
+        <p style="color: var(--text-secondary); font-size: 1.1rem;">Recognizing the top performing students of LBRCE</p>
+        <div style="width: 80px; height: 4px; background: var(--primary); margin: 1.5rem auto; border-radius: 2px;">
+        </div>
     </div>
 
-    <!-- Leaderboard Graph -->
-    <div class="cyber-card fade-in stagger-1" style="margin-bottom: 3rem; border-color: var(--accent-purple);">
-        <h3 style="margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem; font-size: 1.25rem;">
-            <span style="color: var(--accent-purple);">📊</span> NEURAL PERFORMANCE MAP
-        </h3>
-        <div style="height: 350px; width: 100%;">
-            <canvas id="leaderboardChart"></canvas>
+    <!-- Leaderboard Chart -->
+    <div class="card" style="margin-bottom: 3rem;">
+        <h3
+            style="margin-bottom: 2rem; font-size: 1.1rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; text-align: center;">
+            Combat Performance Map</h3>
+        <div style="height: 350px;">
+            <canvas id="mainLeaderboardChart"></canvas>
         </div>
     </div>
 
     {% if data %}
-    <!-- Full Table -->
-    <div class="cyber-card fade-in stagger-2" style="padding: 0; overflow: hidden;">
-        <div style="width: 100%; overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                <thead
-                    style="background: rgba(255,255,255,0.03); color: var(--accent-cyan); font-family: var(--font-heading); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.1em;">
+    <div class="card" style="padding: 0; overflow: hidden;">
+        <div class="table-container">
+            <table>
+                <thead>
                     <tr>
-                        <th style="padding: 1.25rem 2rem; width: 100px;">Rank</th>
-                        <th style="padding: 1.25rem 2rem;">Operative</th>
-                        <th style="padding: 1.25rem 2rem;">XP Score</th>
-                        <th style="padding: 1.25rem 2rem;">Power Scale</th>
+                        <th style="padding: 1.25rem 1.5rem; width: 80px; text-align: center;">Rank</th>
+                        <th style="padding: 1.25rem 1.5rem;">Operative</th>
+                        <th style="padding: 1.25rem 1.5rem;">Score (XP)</th>
+                        <th style="padding: 1.25rem 1.5rem;">Consistency</th>
                     </tr>
                 </thead>
-                <tbody style="color: var(--text-main);">
+                <tbody>
                     {% set max_score = data[0]['score'] if data else 1 %}
                     {% for row in data %}
-                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;"
-                        onmouseover="this.style.background='rgba(0, 243, 255, 0.03)'"
-                        onmouseout="this.style.background='transparent'">
-                        <td style="padding: 1.25rem 2rem;">
-                            <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-family: var(--font-heading); 
-                                {% if loop.index == 1 %} background: #fbbf24; color: #000; box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
-                                {% elif loop.index == 2 %} background: #94a3b8; color: #000;
-                                {% elif loop.index == 3 %} background: #d97706; color: #000;
-                                {% else %} border: 1px solid var(--border-neon); color: var(--accent-cyan);
+                    <tr>
+                        <td style="padding: 1.25rem 1.5rem; text-align: center;">
+                            <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; margin: 0 auto;
+                                {% if loop.index == 1 %} background: #fbbf24; color: #92400e; box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+                                {% elif loop.index == 2 %} background: #94a3b8; color: #1e293b;
+                                {% elif loop.index == 3 %} background: #d97706; color: #fef3c7;
+                                {% else %} background: var(--bg-body); color: var(--text-secondary);
                                 {% endif %}">
                                 {{ loop.index }}
                             </div>
                         </td>
-                        <td style="padding: 1.25rem 2rem; font-weight: 700; font-family: var(--font-heading);">{{
-                            row['name'] or 'Anonymous' }}</td>
+                        <td style="padding: 1.25rem 1.5rem;">
+                            <div style="font-weight: 700; color: var(--text-primary);">{{ row['name'] or 'Anonymous' }}
+                            </div>
+                        </td>
                         <td
-                            style="padding: 1.25rem 2rem; font-weight: 800; color: var(--accent-cyan); font-family: var(--font-mono);">
-                            {{ row['score'] }} XP</td>
-                        <td style="padding: 1.25rem 2rem;">
+                            style="padding: 1.25rem 1.5rem; font-weight: 800; color: var(--primary); font-family: 'JetBrains Mono', monospace;">
+                            {{ row['score'] }}
+                        </td>
+                        <td style="padding: 1.25rem 1.5rem; width: 30%;">
                             <div
-                                style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden;">
+                                style="width: 100%; height: 8px; background: var(--bg-body); border-radius: 10px; overflow: hidden;">
                                 <div
-                                    style="height: 100%; width: {{ (row['score'] / max_score * 100) if max_score > 0 else 0 }}%; background: var(--accent-gradient); box-shadow: 0 0 10px var(--accent-glow);">
+                                    style="height: 100%; width: {{ (row['score'] / max_score * 100) if max_score > 0 else 0 }}%; background: var(--primary); border-radius: 10px;">
                                 </div>
                             </div>
                         </td>
@@ -74,19 +74,16 @@
         </div>
     </div>
     {% else %}
-    <div class="cyber-card fade-in text-center" style="padding: 4rem;">
-        <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">🏁</span>
-        <p style="color: var(--text-muted); font-size: 1.1rem; font-family: var(--font-heading);">No data transmissions
-            yet. The arena is silent.</p>
+    <div class="card" style="text-align: center; padding: 4rem;">
+        <p style="color: var(--text-muted); font-size: 1.1rem;">No participants yet. The arena is waiting for its first
+            hero.</p>
     </div>
     {% endif %}
 </div>
-{% endblock %}
 
-{% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const ctx = document.getElementById('leaderboardChart').getContext('2d');
+        const ctx = document.getElementById('mainLeaderboardChart').getContext('2d');
         const rawData = {{ data[:10] | tojson
     }};
 
@@ -98,14 +95,12 @@
         data: {
             labels: labels,
             datasets: [{
-                label: 'Combat XP',
+                label: 'Total XP',
                 data: scores,
-                backgroundColor: 'rgba(0, 243, 255, 0.2)',
-                borderColor: '#00f3ff',
+                backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                borderColor: 'rgba(79, 70, 229, 1)',
                 borderWidth: 2,
-                borderRadius: 4,
-                hoverBackgroundColor: 'rgba(188, 19, 254, 0.4)',
-                hoverBorderColor: '#bc13fe'
+                borderRadius: 4
             }]
         },
         options: {
@@ -113,26 +108,17 @@
             maintainAspectRatio: false,
             indexAxis: 'y',
             plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: '#121217',
-                    titleFont: { family: 'Outfit', size: 14, weight: 'bold' },
-                    bodyFont: { family: 'Inter', size: 13 },
-                    borderColor: '#00f3ff',
-                    borderWidth: 1,
-                    padding: 12,
-                    displayColors: false
-                }
+                legend: { display: false }
             },
             scales: {
                 x: {
                     beginAtZero: true,
-                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                    ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono' } }
+                    grid: { color: '#f1f5f9' },
+                    ticks: { font: { family: 'Inter' } }
                 },
                 y: {
                     grid: { display: false },
-                    ticks: { color: '#e2e8f0', font: { family: 'Outfit', weight: 'bold', size: 13 } }
+                    ticks: { font: { family: 'Inter', weight: 600 } }
                 }
             }
         }
