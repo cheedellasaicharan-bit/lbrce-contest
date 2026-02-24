@@ -1,106 +1,181 @@
 {% extends "base.html" %}
-{% block title %}Admin Control Center — LBRCE Arena{% endblock %}
+{% block title %}Admin Dashboard — CSE(AI&ML) Coding Contest{% endblock %}
 
 {% block content %}
 <div class="container">
-    <div class="dashboard-header fade-in"
-        style="margin-bottom: 3rem; display: flex; justify-content: space-between; align-items: flex-end;">
+    <div class="d-flex justify-between align-center mb-3 fade-in" style="flex-wrap: wrap; gap: 1rem;">
         <div>
-            <h1
-                style="font-size: 2.5rem; margin-bottom: 0.5rem; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                🛡️ Admin Control</h1>
-            <p style="color: var(--text-muted);">Platform Command & Analytics</p>
+            <h2 style="font-weight: 800; font-size: 1.75rem;">📊 Admin Dashboard</h2>
+            <p style="color: var(--text-muted);">Manage your contest from here</p>
         </div>
-        <div style="display: flex; gap: 1rem;">
-            <a href="/admin/problems" class="cyber-btn btn-outline">MANAGE PROBLEMS</a>
-            <form action="/admin/reset-contest" method="POST" onsubmit="return confirm('Reset all scores?')">
-                <button type="submit" class="cyber-btn btn-primary" style="background: var(--danger);">RESET
-                    SYSTEM</button>
-            </form>
+        <div class="admin-nav">
+            <a href="/admin/problems" class="btn btn-outline">📝 Manage Problems</a>
+            <a href="/admin/download_csv" class="btn btn-success">📥 Download CSV</a>
+            <a href="/leaderboard" class="btn btn-outline">🏆 Leaderboard</a>
         </div>
     </div>
 
-    <!-- Quick Stats -->
+    <!-- Stats -->
     <div class="stats-grid fade-in stagger-1">
-        <div class="cyber-card stat-card" style="border-color: var(--accent-cyan);">
-            <div class="stat-value" style="color: var(--accent-cyan);">{{ stats['total_users'] }}</div>
-            <div class="stat-label">Total Operatives</div>
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-value">{{ stats.total_users }}</div>
+            <div class="stat-label">Registered Users</div>
         </div>
-        <div class="cyber-card stat-card" style="border-color: var(--accent-purple);">
-            <div class="stat-value" style="color: var(--accent-purple);">{{ stats['total_submissions'] }}</div>
-            <div class="stat-label">Total Submissions</div>
+        <div class="stat-card">
+            <div class="stat-icon">📨</div>
+            <div class="stat-value">{{ stats.total_submissions }}</div>
+            <div class="stat-label">Submissions</div>
         </div>
-        <div class="cyber-card stat-card" style="border-color: var(--success);">
-            <div class="stat-value" style="color: var(--success);">{{ stats['solve_rate'] }}%</div>
-            <div class="stat-label">Success Rate</div>
+        <div class="stat-card">
+            <div class="stat-icon">📋</div>
+            <div class="stat-value">{{ stats.total_problems }}</div>
+            <div class="stat-label">Problems</div>
         </div>
     </div>
 
-    <div class="arena-grid fade-in stagger-2">
-        <!-- User Management -->
-        <div class="cyber-card" style="padding: 0; overflow: hidden;">
-            <div
-                style="padding: 1.5rem; border-bottom: 1px solid var(--border-neon); display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="font-size: 1.1rem;">👤 Active Users</h3>
-                <button class="cyber-btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;"
-                    onclick="document.getElementById('add-user-card').scrollIntoView()">+ NEW USER</button>
+    <div class="dashboard-grid">
+        <!-- Contest Settings -->
+        <div class="card fade-in stagger-2">
+            <div class="card-header">
+                <span class="card-title">⚙️ Contest Settings</span>
             </div>
-            <div style="max-height: 500px; overflow-y: auto;">
-                <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                    <thead
-                        style="background: rgba(255,255,255,0.03); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">
-                        <tr>
-                            <th style="padding: 1rem 1.5rem;">Operative</th>
-                            <th style="padding: 1rem 1.5rem;">Reg ID</th>
-                            <th style="padding: 1rem 1.5rem;">Score</th>
-                            <th style="padding: 1rem 1.5rem;">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody style="color: var(--text-main);">
-                        {% for u in users %}
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                            <td style="padding: 1rem 1.5rem;">
-                                <div style="font-weight: 700;">{{ u['name'] }}</div>
-                                <div style="font-size: 0.75rem; color: var(--text-muted);">{{ u['email'] }}</div>
-                            </td>
-                            <td style="padding: 1rem 1.5rem; font-family: var(--font-mono); color: var(--accent-cyan);">
-                                {{ u['reg_id'] }}</td>
-                            <td style="padding: 1rem 1.5rem; font-weight: 800; color: var(--accent-purple);">{{
-                                u['total_score'] }} XP</td>
-                            <td style="padding: 1rem 1.5rem;">
-                                <form action="/admin/delete-user" method="POST"
-                                    onsubmit="return confirm('Delete user?')">
-                                    <input type="hidden" name="user_id" value="{{ u['id'] }}">
-                                    <button type="submit"
-                                        style="background: transparent; border: none; color: var(--danger); cursor: pointer; font-size: 0.8rem;">[TERMINATE]</button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Add User / Settings -->
-        <div id="add-user-card" class="cyber-card">
-            <h3 style="margin-bottom: 1.5rem; font-size: 1.1rem;">➕ Register Operative</h3>
-            <form action="/admin/add-user" method="POST">
+            <form action="/admin/settings" method="POST">
                 <div class="form-group">
-                    <label class="form-label">Full Name</label>
-                    <input type="text" name="name" required class="cyber-input" placeholder="User Name">
+                    <label class="form-label">Start Time</label>
+                    <input type="text" name="start" class="form-control" value="{{ settings.get('contest_start', '') }}"
+                        placeholder="YYYY-MM-DD HH:MM:SS" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Reg ID (Login)</label>
-                    <input type="text" name="reg_id" required class="cyber-input" placeholder="e.g. 21CQ1A0501">
+                    <label class="form-label">End Time</label>
+                    <input type="text" name="end" class="form-control" value="{{ settings.get('contest_end', '') }}"
+                        placeholder="YYYY-MM-DD HH:MM:SS" required>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Initial Key (Password)</label>
-                    <input type="password" name="password" required class="cyber-input" placeholder="••••••••">
-                </div>
-                <button type="submit" class="cyber-btn btn-primary" style="width: 100%;">DEPLOY USER</button>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    💾 Update Settings
+                </button>
             </form>
         </div>
+
+        <!-- Quick Actions -->
+        <div class="card fade-in stagger-3">
+            <div class="card-header">
+                <span class="card-title">🚀 Quick Actions</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <a href="/admin/problems" class="btn btn-outline" style="justify-content: center;">
+                    ➕ Add New Problem
+                </a>
+                <a href="/admin/download_csv" class="btn btn-outline" style="justify-content: center;">
+                    📊 Export All Results
+                </a>
+                <a href="/leaderboard" class="btn btn-outline" style="justify-content: center;">
+                    🏆 View Public Leaderboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Management -->
+    <div class="card fade-in stagger-4 mt-3">
+        <div class="card-header">
+            <span class="card-title">👤 User Management</span>
+            <span style="color: var(--text-muted); font-size: 0.85rem;">Add users with Reg ID</span>
+        </div>
+
+        <form action="/admin/users" method="POST" class="mb-3"
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; padding: 1rem; background: rgba(255,255,255,0.02); border-radius: 8px;">
+            <input type="hidden" name="action" value="add">
+            <div class="form-group" style="margin-bottom: 0;">
+                <input type="text" name="name" class="form-control" placeholder="Full Name" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <input type="email" name="email" class="form-control" placeholder="Email Address" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <input type="text" name="reg_id" class="form-control" placeholder="Registration ID" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <input type="text" name="password" class="form-control" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">➕ Add User</button>
+        </form>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Reg ID</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in leaderboard %}
+                    <tr>
+                        <td style="font-weight: 600;">{{ row['name'] or 'No Name' }}</td>
+                        <td style="color: var(--text-secondary);">{{ row['email'] }}</td>
+                        <td style="font-family: monospace;">{{ row['reg_id'] or 'N/A' }}</td>
+                        <td>
+                            <form action="/admin/users" method="POST" style="display: inline;">
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="id" value="{{ row['id'] }}">
+                                <button type="submit" class="btn btn-outline"
+                                    style="padding: 0.25rem 0.5rem; font-size: 0.75rem; color: #ff4444; border-color: rgba(255,68,68,0.2);">🗑️
+                                    Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Student Performance -->
+    <div class="card fade-in stagger-4 mt-3">
+        <div class="card-header">
+            <span class="card-title">🎓 Student Performance</span>
+            <span style="color: var(--text-muted); font-size: 0.85rem;">{{ leaderboard | length }} students</span>
+        </div>
+        {% if leaderboard %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">Rank</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Total Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in leaderboard %}
+                    <tr>
+                        <td>
+                            {% if loop.index <= 3 %} <span style="font-size: 1.1rem;">{% if loop.index == 1 %}🥇{% elif
+                                loop.index == 2 %}🥈{% else %}🥉{% endif %}</span>
+                                {% else %}
+                                <span class="rank-number">{{ loop.index }}</span>
+                                {% endif %}
+                        </td>
+                        <td style="font-weight: 600;">{{ row['name'] or 'No Name' }}</td>
+                        <td style="color: var(--text-secondary);">{{ row['email'] }}</td>
+                        <td style="font-weight: 700; color: var(--accent-primary);">{{ row['total_score'] if
+                            row['total_score'] else 0 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="text-align: center; color: var(--text-muted); padding: 2rem;">No students registered yet.</p>
+        {% endif %}
     </div>
 </div>
+<<<<<<< HEAD
 {% endblock %}
+=======
+{% endblock %}
+>>>>>>> master

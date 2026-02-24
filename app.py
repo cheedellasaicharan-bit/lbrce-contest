@@ -340,34 +340,12 @@ def user_dashboard():
         ORDER BY s.timestamp DESC
     """, (email,)).fetchall()
     
-    # Rank and total score
-    leaderboard = con.execute("""
-        SELECT u.name, u.email, COALESCE(SUM(s.score), 0) as total_score
-        FROM users u
-        LEFT JOIN submissions s ON u.email = s.user_email
-        GROUP BY u.email
-        ORDER BY total_score DESC
-    """).fetchall()
-    
-    # Data for the global graph (top 10)
-    top_performers = [{"name": row['name'] or row['email'], "score": row['total_score']} for row in leaderboard[:10]]
-    
-    rank = 0
-    total_score = 0
-    for i, row in enumerate(leaderboard):
-        if row['email'] == email:
-            rank = i + 1
-            total_score = row['total_score']
-            break
-            
-    con.close()
-    
     return render_template("user_dashboard.html", 
                            user=user, 
                            submissions=submissions, 
                            rank=rank, 
-                           total_score=total_score,
-                           top_performers=top_performers)
+                           total_score=total_score)
+
 
 
 @app.route("/user/change-password", methods=["POST"])

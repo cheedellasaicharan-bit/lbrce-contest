@@ -1,228 +1,266 @@
 {% extends "base.html" %}
-{% block title %}Arena — LBRCE Coding Contest{% endblock %}
+{% block title %}Contest — CSE(AI&ML) Coding Contest{% endblock %}
 
 {% block content %}
-<div class="container" style="max-width: 1400px;">
-    <!-- Arena Header -->
-    <div
-        style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; border-bottom: 2px solid var(--primary-bg); padding-bottom: 1rem;">
+<div class="container">
+    <!-- Header -->
+    <div class="contest-header fade-in">
         <div>
-            <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--text-primary);">The Coding Arena</h2>
-            <p style="color: var(--text-secondary); font-size: 0.9rem;">Operative: <span
-                    style="color: var(--primary); font-weight: 700;">{{ user['name'] }}</span></p>
+            <h2 style="font-weight: 800; font-size: 1.5rem;">⚡ Contest Arena</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Welcome, {{ user['name'] }}</p>
         </div>
-        <div id="timer"
-            style="font-size: 1.5rem; font-weight: 800; color: var(--primary); background: var(--primary-bg); padding: 0.5rem 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--primary-light);">
-            00:00:00
+        <div id="timer" class="timer">Loading...</div>
+    </div>
+
+    <!-- Problem Tabs -->
+    <div class="problem-selector fade-in stagger-1">
+        {% for p in problems %}
+        <button class="problem-tab {% if loop.first %}active{% endif %}" data-id="{{ p['id'] }}"
+            data-desc="{{ p['description'] }}" data-score="{{ p['score'] }}" data-diff="{{ p['difficulty'] }}"
+            onclick="selectProblem(this)">
+            {{ p['title'] }}
+            <span class="pts">{{ p['score'] }}pts</span>
+        </button>
+        {% endfor %}
+    </div>
+
+    <!-- Problem Description -->
+    <div class="problem-description fade-in stagger-2">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+            <span id="problem-title" style="font-weight: 700; color: var(--text-primary); font-size: 1.05rem;">
+                {% if problems %}{{ problems[0]['title'] }}{% endif %}
+            </span>
+            <span id="problem-badge" class="badge badge-{% if problems %}{{ problems[0]['difficulty'] }}{% endif %}">
+                {% if problems %}{{ problems[0]['difficulty'] }}{% endif %}
+            </span>
+            <span id="problem-score" style="margin-left: auto; font-weight: 700; color: var(--accent-primary);">
+                {% if problems %}{{ problems[0]['score'] }} pts{% endif %}
+            </span>
+        </div>
+        <p id="problem-desc">{% if problems %}{{ problems[0]['description'] }}{% endif %}</p>
+    </div>
+
+    <div class="editor-toolbar fade-in stagger-3">
+        <div class="d-flex gap-1 align-center">
+            <label class="form-label" style="margin-bottom: 0;">Language:</label>
+            <select id="language" class="form-control" style="width: auto; min-width: 140px;"
+                onchange="updateBoilerplate()">
+                <option value="71">🐍 Python</option>
+                <option value="54">⚙️ C++</option>
+                <option value="50">🔧 C</option>
+                <option value="62">☕ Java</option>
+            </select>
+        </div>
+        <div class="d-flex gap-1">
+            <button class="btn btn-outline btn-lg" onclick="submitCode(true)" id="run-btn">
+                ▶️ Run Code
+            </button>
+            <button class="btn btn-primary btn-lg" onclick="submitCode(false)" id="submit-btn">
+                🚀 Submit Code
+            </button>
         </div>
     </div>
 
-    <div class="dashboard-main" style="grid-template-columns: 1fr 400px;">
-        <!-- Left: Problem & Editor -->
-        <div>
-            <!-- Problem Selection Tabs -->
-            <div style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem; overflow-x: auto; padding-bottom: 0.5rem;">
-                {% for p in problems %}
-                <button class="tab-btn {% if loop.first %}active{% endif %}"
-                    style="white-space: nowrap; flex: none; width: auto; padding: 0.75rem 1.25rem;"
-                    data-id="{{ p['id'] }}" data-desc="{{ p['description'] }}" data-score="{{ p['score'] }}"
-                    data-diff="{{ p['difficulty'] }}" onclick="selectProblem(this)">
-                    {{ p['title'] }}
-                    <span style="display: block; font-size: 0.7rem; opacity: 0.8;">{{ p['score'] }} XP</span>
-                </button>
-                {% endfor %}
+    <!-- Code Editor -->
+    <div class="code-editor-wrapper fade-in stagger-3">
+        <textarea id="code" class="code-editor" placeholder="// Write your solution here..."
+            spellcheck="false"></textarea>
+    </div>
+
+    <!-- Output Panel -->
+    <div class="card fade-in stagger-4">
+        <div class="card-header" style="justify-content: space-between; display: flex;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="card-title">📤 Output</span>
+                <span id="output-status" style="font-size: 0.8rem; color: var(--text-muted);">Waiting for
+                    submission...</span>
             </div>
-
-            <!-- Problem Description -->
-            <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 id="problem-title" style="font-size: 1.25rem; font-weight: 700;">{% if problems %}{{
-                        problems[0]['title'] }}{% endif %}</h3>
-                    <div style="display: flex; gap: 1rem;">
-                        <span id="problem-badge" class="badge-{{ problems[0]['difficulty'] if problems }}"
-                            style="padding: 0.25rem 0.75rem; border-radius: 50px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase;">
-                            {{ problems[0]['difficulty'] if problems }}
-                        </span>
-                        <span id="problem-score" style="font-weight: 800; color: var(--primary);">
-                            {% if problems %}+{{ problems[0]['score'] }} XP{% endif %}
-                        </span>
-                    </div>
-                </div>
-                <div id="problem-desc" style="color: var(--text-secondary); line-height: 1.7; font-size: 0.95rem;">
-                    {% if problems %}{{ problems[0]['description'] }}{% endif %}
-                </div>
-            </div>
-
-            <!-- Editor Section -->
-            <div class="card" style="padding: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <select id="language" class="form-control" style="width: auto; min-width: 180px; font-weight: 600;">
-                        <option value="71">Python 3</option>
-                        <option value="54">C++ (GCC 9)</option>
-                        <option value="50">C (GCC 9)</option>
-                        <option value="62">Java 11</option>
-                    </select>
-
-                    <div style="display: flex; gap: 1rem;">
-                        <button class="btn btn-outline" onclick="submitCode(true)" id="run-btn" style="width: auto;">Run
-                            Code</button>
-                        <button class="btn btn-primary" onclick="submitCode(false)" id="submit-btn"
-                            style="width: auto; min-width: 150px;">Submit Solution</button>
-                    </div>
-                </div>
-
-                <div
-                    style="border: 2px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; height: 500px; background: #fafafa;">
-                    <textarea id="code"
-                        style="width: 100%; height: 100%; padding: 1.5rem; font-family: 'JetBrains Mono', 'Consolas', monospace; font-size: 0.95rem; border: none; outline: none; resize: none; background: transparent; line-height: 1.6;"
-                        placeholder="// Start coding here..."></textarea>
-                </div>
-            </div>
+            <button class="btn btn-sm btn-outline"
+                onclick="document.getElementById('output').textContent='No output yet.'; document.getElementById('output-status').textContent='Cleared';"
+                style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                🧹 Clear Console
+            </button>
         </div>
-
-        <!-- Right: Console/Output -->
-        <div>
-            <div class="card"
-                style="height: 100%; display: flex; flex-direction: column; background: #1e293b; border: none;">
-                <div
-                    style="padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
-                    <span id="output-status"
-                        style="font-size: 0.75rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Console
-                        Output</span>
-                    <button onclick="clearConsole()"
-                        style="background: transparent; border: none; color: #ef4444; font-size: 0.75rem; cursor: pointer; font-weight: 600;">Clear</button>
-                </div>
-                <div id="output"
-                    style="flex: 1; padding: 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: #e2e8f0; white-space: pre-wrap; overflow-y: auto;">
-                    Ready for transmission...
-                </div>
-            </div>
-        </div>
+        <div id="output" class="output-panel">No output yet. Write your code and click Submit.</div>
     </div>
 </div>
-
-<style>
-    .badge-easy {
-        background: #d1fae5;
-        color: #065f46;
-        border: 1px solid #a7f3d0;
-    }
-
-    .badge-medium {
-        background: #fef3c7;
-        color: #92400e;
-        border: 1px solid #fde68a;
-    }
-
-    .badge-hard {
-        background: #fee2e2;
-        color: #b91c1c;
-        border: 1px solid #fecaca;
-    }
-
-    .tab-btn {
-        background: var(--bg-white);
-        border: 1px solid var(--border-color);
-        padding: 0.75rem 1.5rem;
-        border-radius: var(--radius-md);
-        font-weight: 600;
-        color: var(--text-secondary);
-        cursor: pointer;
-        transition: var(--transition);
-        text-align: left;
-    }
-
-    .tab-btn.active {
-        background: var(--primary);
-        color: var(--text-white);
-        border-color: var(--primary);
-        box-shadow: var(--shadow-md);
-    }
-</style>
 {% endblock %}
 
 {% block scripts %}
 <script>
+    // ---- Problem Selection ----
     let currentProblem = '{{ problems[0]["id"] if problems else "" }}';
 
     function selectProblem(el) {
-        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.problem-tab').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
 
         currentProblem = el.dataset.id;
         document.getElementById('problem-desc').textContent = el.dataset.desc;
-        document.getElementById('problem-title').textContent = el.childNodes[0].textContent.trim();
-        document.getElementById('problem-score').textContent = `+${el.dataset.score} XP`;
+        document.getElementById('problem-title').textContent = el.textContent.replace(/\d+pts/, '').trim();
+        document.getElementById('problem-score').textContent = el.dataset.score + ' pts';
 
         const badge = document.getElementById('problem-badge');
         badge.textContent = el.dataset.diff;
-        badge.className = `badge-${el.dataset.diff}`;
+        badge.className = 'badge badge-' + el.dataset.diff;
     }
 
-    function clearConsole() {
-        document.getElementById('output').textContent = 'Console cleared...';
-        document.getElementById('output-status').textContent = 'READY';
-    }
-
-    // Timer logic
-    {% if start_time and end_time %}
+    // ---- Timer ----
     const endTime = new Date("{{ end_time }}").getTime();
-    const timerEl = document.getElementById('timer');
+    const startTime = new Date("{{ start_time }}").getTime();
 
     function updateTimer() {
-        const now = new Date().getTime();
-        const distance = endTime - now;
+        const now = Date.now();
+        const diff = endTime - now;
+        const timerEl = document.getElementById('timer');
 
-        if (distance < 0) {
-            timerEl.textContent = "FINISHED";
-            timerEl.style.color = "var(--danger)";
+        if (now < startTime) {
+            const toStart = startTime - now;
+            const h = Math.floor(toStart / 3600000);
+            const m = Math.floor((toStart % 3600000) / 60000);
+            const s = Math.floor((toStart % 60000) / 1000);
+            timerEl.textContent = `Starts in ${h}h ${m}m ${s}s`;
+            timerEl.className = 'timer safe';
+        } else if (diff <= 0) {
+            timerEl.textContent = '⏰ Contest Ended';
+            timerEl.className = 'timer';
+            document.getElementById('submit-btn').disabled = true;
+            document.getElementById('submit-btn').textContent = 'Contest Over';
+        } else {
+            const h = Math.floor(diff / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+            timerEl.textContent = `⏱ ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            timerEl.className = diff < 600000 ? 'timer' : 'timer safe';
+        }
+    }
+    updateTimer();
+    setInterval(updateTimer, 1000);
+
+    // ---- Submit Code ----
+    function submitCode(isTest = false) {
+        const btn = isTest ? document.getElementById('run-btn') : document.getElementById('submit-btn');
+        const runBtn = document.getElementById('run-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const outputEl = document.getElementById('output');
+        const statusEl = document.getElementById('output-status');
+
+        const code = document.getElementById('code').value;
+        if (!code.trim()) {
+            outputEl.textContent = '⚠️ Please write some code first.';
+            outputEl.className = 'output-panel has-error';
             return;
         }
 
-        const h = Math.floor(distance / (1000 * 60 * 60));
-        const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((distance % (1000 * 60)) / 1000);
-
-        timerEl.textContent = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-    }
-    setInterval(updateTimer, 1000);
-    updateTimer();
-    {% endif %}
-
-    async function submitCode(isRun) {
-        const btn = isRun ? document.getElementById('run-btn') : document.getElementById('submit-btn');
-        const originalText = btn.textContent;
-        const statusEl = document.getElementById('output-status');
-        const outputEl = document.getElementById('output');
-
         btn.disabled = true;
-        btn.textContent = isRun ? "Running..." : "Submitting...";
-        statusEl.textContent = "Processing...";
-        outputEl.textContent += `\n> ${isRun ? 'Running' : 'Submitting'} code for ${currentProblem}...\n`;
+        if (!isTest) runBtn.disabled = true;
+        else submitBtn.disabled = true;
 
-        try {
-            const resp = await fetch('/submit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    problem: currentProblem,
-                    language: document.getElementById('language').value,
-                    code: document.getElementById('code').value,
-                    is_test: isRun
-                })
+        btn.textContent = isTest ? '⏳ Running...' : '⏳ Submitting...';
+        statusEl.textContent = isTest ? 'Running Test...' : 'Executing...';
+        outputEl.textContent = isTest ? 'Running your code against sample cases...' : 'Running your code against test cases...';
+        outputEl.className = 'output-panel';
+
+        fetch("/submit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                code: code,
+                language: document.getElementById("language").value,
+                problem: currentProblem,
+                is_test: isTest
+            })
+        })
+            .then(r => r.json())
+            .then(d => {
+                outputEl.textContent = d.output;
+                if (d.status === 'success') {
+                    outputEl.className = 'output-panel has-output';
+                    statusEl.textContent = '✅ All tests passed! +' + d.score + ' pts';
+                } else if (d.status === 'partial') {
+                    outputEl.className = 'output-panel has-output';
+                    statusEl.textContent = '⚠️ Partial score: +' + d.score + ' pts';
+                } else if (d.status === 'error') {
+                    outputEl.className = 'output-panel has-error';
+                    statusEl.textContent = '❌ ' + (d.output || 'System Error');
+                } else {
+                    outputEl.className = 'output-panel has-error';
+                    statusEl.textContent = '❌ ' + d.output;
+                }
+            })
+            .catch(err => {
+                outputEl.textContent = 'Network error. Please try again.';
+                outputEl.className = 'output-panel has-error';
+                statusEl.textContent = '❌ Error';
+            })
+            .finally(() => {
+                btn.disabled = false;
+                if (!isTest) runBtn.disabled = false;
+                else submitBtn.disabled = false;
+
+                runBtn.textContent = '▶️ Run Code';
+                submitBtn.textContent = '🚀 Submit Code';
             });
-            const result = await resp.json();
+    }
 
-            statusEl.textContent = result.status.toUpperCase();
-            outputEl.textContent += `\n[${result.status.toUpperCase()}]:\n${result.output}\n`;
+    // Tab key support in textarea
+    const codeArea = document.getElementById('code');
+    codeArea.addEventListener('keydown', function (e) {
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
+            this.selectionStart = this.selectionEnd = start + 4;
+        }
+    });
 
-        } catch (e) {
-            statusEl.textContent = "ERROR";
-            outputEl.textContent += `\n[ERROR]: ${e.message}\n`;
-        } finally {
-            btn.disabled = false;
-            btn.textContent = originalText;
+    // ---- Anti-Cheating Features ----
+
+    // 1. Disable Copy, Paste, Cut
+    ['copy', 'paste', 'cut'].forEach(event => {
+        codeArea.addEventListener(event, (e) => {
+            e.preventDefault();
+            // Optional: Show a subtle message
+            const statusEl = document.getElementById('output-status');
+            statusEl.textContent = '🚫 ' + event.charAt(0).toUpperCase() + event.slice(1) + ' is disabled!';
+            statusEl.style.color = 'var(--danger)';
+            setTimeout(() => {
+                statusEl.style.color = 'var(--text-muted)';
+            }, 2000);
+        });
+    });
+
+    // 2. Tab Switch detection
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            console.warn("User switched tab/window.");
+            // Auto-submit disabled to allow for screenshots and documentation.
+        }
+    });
+
+    // 3. Disable Context Menu
+    codeArea.addEventListener('contextmenu', e => e.preventDefault());
+
+    // ---- Language Boilerplate ----
+    const boilerplates = {
+        "71": "# Write your Python code here\nprint('Hello, World!')\n",
+        "50": "#include <stdio.h>\n\nint main() {\n    printf(\"Hello, World!\\n\");\n    return 0;\n}\n",
+        "54": "#include <iostream>\n\nint main() {\n    std::cout << \"Hello, World!\" << std::endl;\n    return 0;\n}\n",
+        "62": "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello, World!\");\n    }\n}\n"
+    };
+
+    function updateBoilerplate() {
+        const lang = document.getElementById('language').value;
+        if (!codeArea.value.trim()) {
+            codeArea.value = boilerplates[lang] || "";
         }
     }
+    // Initial boilerplate
+    updateBoilerplate();
 </script>
+<<<<<<< HEAD
 {% endblock %}
+=======
+{% endblock %}
+>>>>>>> master

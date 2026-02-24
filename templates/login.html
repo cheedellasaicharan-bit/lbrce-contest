@@ -1,83 +1,96 @@
 {% extends "base.html" %}
-{% block title %}Sign In — LBRCE Coding Contest{% endblock %}
-
-{% block navbar %}{% endblock %}
+{% block title %}Sign In — CSE(AI&ML) Coding Contest{% endblock %}
 
 {% block content %}
-<div class="login-wrapper">
-    <!-- Left Panel: Branding & Info -->
-    <div class="login-left">
-        <div>
-            <h1>CSE(AI&ML) Coding Contest</h1>
-            <p>Put your coding skills to the test. Solve problems, climb the leaderboard, and prove you're the best.</p>
+<div class="login-body">
+    <!-- Branding Header -->
+    <header class="branding-header">
+        <div class="container">
+            <img src="{{ url_for('static', filename='college_logo.png') }}"
+                alt="Lakireddy Bali Reddy College of Engineering">
         </div>
-    </div>
+    </header>
 
-    <!-- Right Panel: Login Form -->
-    <div class="login-right">
-        <div class="login-form-container">
-            <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 2rem; color: var(--text-primary);">Sign In</h2>
-
-            <!-- Tabs Toggle -->
-            <div class="tab-toggle">
-                <button type="button" class="tab-btn active" id="btn-user" onclick="switchLogin('user')">User</button>
-                <button type="button" class="tab-btn" id="btn-admin" onclick="switchLogin('admin')">Admin</button>
+    <main class="login-wrapper">
+        <div class="login-split-card fade-in">
+            <!-- Left Hero Component -->
+            <div class="login-hero">
+                <h1 class="login-hero-title">CSE(AI&ML) Coding Contest</h1>
+                <p class="login-hero-subtitle">
+                    Put your coding skills to the test. Solve problems, climb the leaderboard, and prove you're the
+                    best.
+                </p>
+                <div class="hero-decoration">
+                    <div class="circle-decoration"></div>
+                </div>
             </div>
 
-            <!-- User Form -->
-            <form action="/login/credentials" method="POST" id="form-user">
-                <div class="form-group">
-                    <label class="form-label">Registration ID</label>
-                    <input type="text" name="reg_id" required placeholder="Registration ID" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Password</label>
-                    <input type="password" name="password" required placeholder="••••••••" class="form-control">
-                </div>
-                <div
-                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; font-size: 0.85rem;">
-                    <label
-                        style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); cursor: pointer;">
-                        <input type="checkbox" style="accent-color: var(--primary);"> Remember me
-                    </label>
-                    <a href="/forgot-password" style="font-weight: 600;">Forgot password?</a>
-                </div>
-                <button type="submit" class="btn btn-primary">Login</button>
-            </form>
+            <!-- Right Form Component -->
+            <div class="login-form-container">
+                <h2 style="margin-bottom: 2rem; font-size: 1.8rem; font-weight: 700;">Sign In</h2>
 
-            <!-- Admin Form -->
-            <form action="/admin_login" method="POST" id="form-admin" style="display: none;">
-                <div class="form-group">
-                    <label class="form-label">Admin Username</label>
-                    <input type="text" name="user" required placeholder="Admin ID" class="form-control">
+                <div class="login-tabs">
+                    <div class="login-tab active" id="user-tab" onclick="switchTab('user')">User</div>
+                    <div class="login-tab" id="admin-tab" onclick="switchTab('admin')">Admin</div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Password</label>
-                    <input type="password" name="password" required placeholder="••••••••" class="form-control">
-                </div>
-                <button type="submit" class="btn btn-primary">Admin Access</button>
-            </form>
+
+                <!-- User Login Form -->
+                <form id="user-form" action="/login/credentials" method="POST">
+                    <div class="form-group">
+                        <label class="form-label">Registration ID</label>
+                        <div class="form-input-wrapper">
+                            <input type="text" name="reg_id" required placeholder="Registration ID" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div class="form-input-wrapper">
+                            <input type="password" name="password" required placeholder="Password" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-footer">
+                        <label class="remember-me">
+                            <input type="checkbox" name="remember"> Remember me
+                        </label>
+                        <a href="/forgot-password" class="forgot-link">Forgot password?</a>
+                    </div>
+                    <button type="submit" class="btn-login">Login</button>
+                </form>
+
+                <!-- Admin Login Form (Hidden by default) -->
+                <form id="admin-form" action="/admin_login" method="POST" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Admin Username</label>
+                        <input type="text" name="username" required placeholder="Username" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" name="password" required placeholder="Password" class="form-input">
+                    </div>
+                    <button type="submit" class="btn-login">Admin Login</button>
+                </form>
+            </div>
         </div>
-    </div>
+    </main>
 </div>
 
 <script>
-    function switchLogin(type) {
-        const userBtn = document.getElementById('btn-user');
-        const adminBtn = document.getElementById('btn-admin');
-        const userForm = document.getElementById('form-user');
-        const adminForm = document.getElementById('form-admin');
+    function switchTab(type) {
+        const userTab = document.getElementById('user-tab');
+        const adminTab = document.getElementById('admin-tab');
+        const userForm = document.getElementById('user-form');
+        const adminForm = document.getElementById('admin-form');
 
         if (type === 'user') {
-            userBtn.classList.add('active');
-            adminBtn.classList.remove('active');
+            userTab.classList.add('active');
+            adminTab.classList.remove('active');
             userForm.style.display = 'block';
             adminForm.style.display = 'none';
         } else {
-            adminBtn.classList.add('active');
-            userBtn.classList.remove('active');
-            userForm.style.display = 'none';
+            adminTab.classList.add('active');
+            userTab.classList.remove('active');
             adminForm.style.display = 'block';
+            userForm.style.display = 'none';
         }
     }
 </script>
