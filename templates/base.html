@@ -15,12 +15,12 @@
 
 <body>
     <!-- Navigation -->
-    {% block navbar %}
     <nav class="navbar">
         <div class="nav-inner">
             <a href="/" class="nav-brand">⚡ CSE(AI&ML) Contest</a>
             <div class="nav-links">
                 {% if session.get('user') %}
+                <a href="/user/dashboard" class="nav-link">My Dashboard</a>
                 <a href="/contest" class="nav-link">Contest</a>
                 <a href="/logout" class="nav-link nav-link-danger">Logout</a>
                 {% elif session.get('admin') %}
@@ -29,14 +29,11 @@
                 <a href="/leaderboard" class="nav-link">Leaderboard</a>
                 <a href="/logout" class="nav-link nav-link-danger">Logout</a>
                 {% else %}
-                {% if request.endpoint != 'login' %}
                 <a href="/" class="nav-link">Login</a>
-                {% endif %}
                 {% endif %}
             </div>
         </div>
     </nav>
-    {% endblock %}
 
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
