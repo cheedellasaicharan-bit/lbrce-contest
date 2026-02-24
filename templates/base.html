@@ -4,58 +4,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LBRCE Coding Contest{% endblock %}</title>
+
+    <!-- SEO & Favicon -->
     <meta name="description"
-        content="CSE(AI&ML) Coding Contest — Test your coding skills in a live competitive environment.">
-    <title>{% block title %}CSE(AI&ML) Coding Contest{% endblock %}</title>
+        content="Official LBRCE CSM Coding Contest Platform. Join the arena and prove your skills.">
+
+    <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+
     {% block head %}{% endblock %}
 </head>
 
-<body>
-    <!-- Navigation -->
+<body class="{% block body_class %}{% endblock %}">
+
+    <!-- Cyber Grid Background (Optional CSS effect) -->
+    <div class="cyber-grid"></div>
+
+    <!-- Floating Navigation -->
     {% block navbar %}
-    <nav class="navbar">
+    <nav class="navbar fade-in">
         <div class="nav-inner">
-            <a href="/" class="nav-brand">⚡ CSE(AI&ML) Contest</a>
+            <a href="/" class="nav-brand">⚡ LBRCE Arena</a>
+
             <div class="nav-links">
                 {% if session.get('user') %}
-                <a href="/contest" class="nav-link">Contest</a>
-                <a href="/logout" class="nav-link nav-link-danger">Logout</a>
+                <a href="{{ url_for('user_dashboard') }}"
+                    class="nav-link {% if request.endpoint == 'user_dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="{{ url_for('contest') }}"
+                    class="nav-link {% if request.endpoint == 'contest' %}active{% endif %}">Contest</a>
+                <a href="{{ url_for('leaderboard') }}"
+                    class="nav-link {% if request.endpoint == 'leaderboard' %}active{% endif %}">Leaderboard</a>
+                <a href="{{ url_for('logout') }}" class="nav-link nav-link-danger">Logout</a>
                 {% elif session.get('admin') %}
-                <a href="/admin/dashboard" class="nav-link">Dashboard</a>
-                <a href="/admin/problems" class="nav-link">Problems</a>
-                <a href="/leaderboard" class="nav-link">Leaderboard</a>
-                <a href="/logout" class="nav-link nav-link-danger">Logout</a>
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-link">Admin Panel</a>
+                <a href="{{ url_for('logout') }}" class="nav-link nav-link-danger">Logout</a>
                 {% else %}
-                {% if request.endpoint != 'login' %}
-                <a href="/" class="nav-link">Login</a>
-                {% endif %}
+                <a href="{{ url_for('login') }}" class="nav-link">Login</a>
                 {% endif %}
             </div>
         </div>
     </nav>
     {% endblock %}
 
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <div class="flash-container">
-        {% for category, message in messages %}
-        <div class="flash-msg flash-{{ category }}">{{ message }}</div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    {% endwith %}
-
     <!-- Main Content -->
-    {% block content %}{% endblock %}
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="cyber-card fade-in"
+            style="margin-bottom: 2rem; border-color: {% if category == 'error' %}var(--danger){% else %}var(--success){% endif %}; padding: 1rem 1.5rem;">
+            <span style="color: {% if category == 'error' %}#ff0055{% else %}#00ffaa{% endif %}; font-weight: 600;">{{
+                message }}</span>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
 
-    <!-- Footer -->
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Futuristic Footer -->
     {% block footer %}
-    <footer class="footer">
-        <p>© 2026 CSE(AI&ML) Coding Contest · Built with ❤️</p>
+    <footer class="footer fade-in">
+        <div style="margin-bottom: 1rem;">
+            <span
+                style="background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">LBRCE
+                CSM</span>
+        </div>
+        <p>&copy; 2024 Coding Contest Platform. Designed for Excellence.</p>
     </footer>
     {% endblock %}
 
