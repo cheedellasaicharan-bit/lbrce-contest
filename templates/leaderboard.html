@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard — CSE(AI&ML) Coding Contest{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container container-md">
+    <div class="leaderboard-header fade-in">
+        <h1>🏆 Leaderboard</h1>
+        <p style="color: var(--text-secondary);">Top performers in the contest</p>
+    </div>
+
+    <!-- Leaderboard Graph -->
+    <div class="card fade-in stagger-1" style="margin-bottom: 2rem; padding: 1.5rem;">
+        <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            📊 Performance Visualization
+        </h3>
+        <div style="height: 300px; width: 100%;">
+            <canvas id="leaderboardChart"></canvas>
+        </div>
+    </div>
+
+    {% if data | length >= 3 %}
+    <!-- Podium -->
+    <div class="podium fade-in stagger-1">
+        <!-- Silver (2nd) -->
+        <div class="podium-card silver">
+            <div class="podium-medal">🥈</div>
+            <div class="podium-name">{{ data[1]['name'] or 'Anonymous' }}</div>
+            <div class="podium-score">{{ data[1]['score'] }}</div>
+        </div>
+        <!-- Gold (1st) -->
+        <div class="podium-card gold">
+            <div class="podium-medal">🥇</div>
+            <div class="podium-name">{{ data[0]['name'] or 'Anonymous' }}</div>
+            <div class="podium-score">{{ data[0]['score'] }}</div>
+        </div>
+        <!-- Bronze (3rd) -->
+        <div class="podium-card bronze">
+            <div class="podium-medal">🥉</div>
+            <div class="podium-name">{{ data[2]['name'] or 'Anonymous' }}</div>
+            <div class="podium-score">{{ data[2]['score'] }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Full Table -->
+    {% if data %}
+    {% set max_score = data[0]['score'] if data else 1 %}
+    <div class="card fade-in stagger-2">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">Rank</th>
+                        <th>Name</th>
+                        <th>Score</th>
+                        <th style="width: 120px;">Progress</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data %}
+                    <tr>
+                        <td>
+                            <div class="rank-cell">
+                                {% if loop.index == 1 %}
+                                <span style="font-size: 1.2rem;">🥇</span>
+                                {% elif loop.index == 2 %}
+                                <span style="font-size: 1.2rem;">🥈</span>
+                                {% elif loop.index == 3 %}
+                                <span style="font-size: 1.2rem;">🥉</span>
+                                {% else %}
+                                <span class="rank-number">{{ loop.index }}</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td style="font-weight: 600;">{{ row['name'] or 'Anonymous' }}</td>
+                        <td style="font-weight: 700; color: var(--accent-primary);">{{ row['score'] }}</td>
+                        <td>
+                            <div class="score-bar-bg">
+                                <div class="score-bar-fill"
+                                    style="width: {{ (row['score'] / max_score * 100) if max_score > 0 else 0 }}%">
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="card fade-in text-center" style="padding: 3rem;">
+        <p style="font-size: 2rem; margin-bottom: 0.5rem;">🏁</p>
+        <p style="color: var(--text-secondary);">No submissions yet. Be the first to compete!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('leaderboardChart').getContext('2d');
+        const rawData = {{ data[:10] | tojson
+    }};
+
+    const labels = rawData.map(item => item.name || 'Anonymous');
+    const scores = rawData.map(item => item.score);
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Score',
+                data: scores,
+                backgroundColor: 'rgba(52, 152, 219, 0.6)',
+                borderColor: 'rgba(52, 152, 219, 1)',
+                borderWidth: 1,
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: true,
+                    backgroundColor: '#1a1a2e',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: '#3498db',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.05)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.6)'
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.8)',
+                        font: {
+                            weight: 'bold'
+                        }
+                    }
+                }
+            }
+        }
+    });
+    });
+</script>
+{% endblock %}
