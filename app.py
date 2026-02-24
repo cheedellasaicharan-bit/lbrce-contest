@@ -307,24 +307,18 @@ def contest():
     if "user" not in session:
         return redirect(url_for("login"))
 
-    try:
-        con = get_db()
-        problems = con.execute("SELECT * FROM problems").fetchall()
-        con.close()
+    con = get_db()
+    problems = con.execute("SELECT * FROM problems").fetchall()
+    con.close()
 
-        start_time = get_setting("contest_start")
-        end_time = get_setting("contest_end")
+    start_time = get_setting("contest_start")
+    end_time = get_setting("contest_end")
 
-        return render_template("contest.html",
-                               user=session["user"],
-                               problems=problems,
-                               start_time=start_time,
-                               end_time=end_time)
-    except Exception as e:
-        import traceback
-        error_details = traceback.format_exc()
-        print(f"ERROR in /contest: {error_details}")
-        return f"<h1>Internal Server Error</h1><pre>{error_details}</pre>", 500
+    return render_template("contest.html",
+                           user=session["user"],
+                           problems=problems,
+                           start_time=start_time,
+                           end_time=end_time)
 
 @app.route("/user/dashboard")
 def user_dashboard():
