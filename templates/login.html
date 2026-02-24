@@ -1,97 +1,144 @@
 {% extends "base.html" %}
-{% block title %}Sign In — CSE(AI&ML) Coding Contest{% endblock %}
+{% block title %}CSE(AI&ML) Coding Contest{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block navbar %}
+<div class="login-header-banner">
+    <img src="{{ url_for('static', filename='college_logo.png') }}" alt="College Logo" class="banner-img">
+</div>
+{% endblock %}
 
 {% block content %}
-<div class="login-body">
-    <!-- Branding Header -->
-    <header class="branding-header">
-        <div class="container">
-            <img src="{{ url_for('static', filename='college_logo.png') }}"
-                alt="Lakireddy Bali Reddy College of Engineering">
-        </div>
-    </header>
+<div class="login-wrapper">
+    <div class="login-split">
+        <!-- Left Side: Purple BG with Abstract Shapes -->
+        <div class="login-left">
+            <!-- decorative elements -->
+            <div class="deco-shape circle1"></div>
+            <div class="deco-shape circle2"></div>
+            <div class="deco-shape cross1">+</div>
+            <div class="deco-shape cross2">+</div>
+            <div class="deco-dots"></div>
 
-    <main class="login-wrapper">
-        <div class="login-split-card fade-in">
-            <!-- Left Hero Component -->
-            <div class="login-hero">
-                <h1 class="login-hero-title">CSE(AI&ML) Coding Contest</h1>
-                <p class="login-hero-subtitle">
+            <div class="login-left-content">
+                <h1 class="login-heading">CSE(AI&ML) Coding<br>Contest</h1>
+                <p class="login-text">
                     Put your coding skills to the test. Solve problems, climb the leaderboard, and prove you're the
                     best.
                 </p>
-                <div class="hero-decoration">
-                    <div class="circle-decoration"></div>
-                </div>
             </div>
 
-            <!-- Right Form Component -->
-            <div class="login-form-container">
-                <h2 style="margin-bottom: 2rem; font-size: 1.8rem; font-weight: 700;">Sign In</h2>
-
-                <div class="login-tabs">
-                    <div class="login-tab active" id="user-tab" onclick="switchTab('user')">User</div>
-                    <div class="login-tab" id="admin-tab" onclick="switchTab('admin')">Admin</div>
-                </div>
-
-                <!-- User Login Form -->
-                <form id="user-form" action="/login/credentials" method="POST">
-                    <div class="form-group">
-                        <label class="form-label">Registration ID</label>
-                        <div class="form-input-wrapper">
-                            <input type="text" name="reg_id" required placeholder="Registration ID" class="form-input">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Password</label>
-                        <div class="form-input-wrapper">
-                            <input type="password" name="password" required placeholder="Password" class="form-input">
-                        </div>
-                    </div>
-                    <div class="form-footer">
-                        <label class="remember-me">
-                            <input type="checkbox" name="remember"> Remember me
-                        </label>
-                        <a href="/forgot-password" class="forgot-link">Forgot password?</a>
-                    </div>
-                    <button type="submit" class="btn-login">Login</button>
-                </form>
-
-                <!-- Admin Login Form (Hidden by default) -->
-                <form id="admin-form" action="/admin_login" method="POST" style="display: none;">
-                    <div class="form-group">
-                        <label class="form-label">Admin Username</label>
-                        <input type="text" name="username" required placeholder="Username" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Password</label>
-                        <input type="password" name="password" required placeholder="Password" class="form-input">
-                    </div>
-                    <button type="submit" class="btn-login">Admin Login</button>
-                </form>
-            </div>
+            <!-- SVG top line layer -->
+            <svg class="topo-line topo-tl" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <path fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"
+                    d="M10,0 C10,30 30,50 50,20 C80,-10 100,20 120,40 C140,60 160,30 200,50" />
+                <path fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"
+                    d="M0,20 C20,50 40,70 60,40 C90,10 110,40 130,60 C150,80 170,50 200,70" />
+                <path fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"
+                    d="M-10,40 C10,70 30,90 50,60 C80,30 100,60 120,80 C140,100 160,70 200,90" />
+            </svg>
+            <svg class="topo-line topo-br" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <path fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"
+                    d="M0,150 C30,120 50,140 80,180 C110,220 140,190 160,160 C180,130 190,140 200,120" />
+                <path fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"
+                    d="M0,130 C30,100 50,120 80,160 C110,200 140,170 160,140 C180,110 190,120 200,100" />
+            </svg>
         </div>
-    </main>
+
+        <!-- Right Side: White Form -->
+        <div class="login-right">
+            <h2 class="login-right-title">Sign In</h2>
+
+            <!-- Custom Toggle -->
+            <div class="login-toggle-container">
+                <div class="login-toggle-bg"></div>
+                <button type="button" class="toggle-btn active" id="btn-user"
+                    onclick="switchLogin('user')">User</button>
+                <button type="button" class="toggle-btn" id="btn-admin" onclick="switchLogin('admin')">Admin</button>
+            </div>
+
+            <!-- User Login Form -->
+            <form action="/login/credentials" method="POST" class="login-form" id="form-user">
+
+                <div class="input-pill-wrapper">
+                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <input type="text" name="reg_id" required placeholder="Registration ID" class="input-pill">
+                </div>
+
+                <div class="input-pill-wrapper">
+                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7z" />
+                    </svg>
+                    <input type="password" name="password" required placeholder="Password" class="input-pill">
+                </div>
+
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember" class="checkbox-custom"> Remember me
+                    </label>
+                    <a href="/forgot-password" class="forgot-pwd">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn-pill-submit">Login</button>
+            </form>
+
+            <form action="/admin_login" method="POST" class="login-form" id="form-admin" style="display: none;">
+
+                <div class="input-pill-wrapper">
+                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <input type="text" name="user" required placeholder="Admin Username" class="input-pill">
+                </div>
+
+                <div class="input-pill-wrapper">
+                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7z" />
+                    </svg>
+                    <input type="password" name="pass" required placeholder="Admin Password" class="input-pill">
+                </div>
+
+                <button type="submit" class="btn-pill-submit" style="margin-top: 1rem;">Admin Login</button>
+            </form>
+
+        </div>
+    </div>
 </div>
 
 <script>
-    function switchTab(type) {
-        const userTab = document.getElementById('user-tab');
-        const adminTab = document.getElementById('admin-tab');
-        const userForm = document.getElementById('user-form');
-        const adminForm = document.getElementById('admin-form');
+    function switchLogin(type) {
+        const btnUser = document.getElementById('btn-user');
+        const btnAdmin = document.getElementById('btn-admin');
+        const formUser = document.getElementById('form-user');
+        const formAdmin = document.getElementById('form-admin');
+        const toggleBg = document.querySelector('.login-toggle-bg');
 
         if (type === 'user') {
-            userTab.classList.add('active');
-            adminTab.classList.remove('active');
-            userForm.style.display = 'block';
-            adminForm.style.display = 'none';
+            btnUser.classList.add('active');
+            btnAdmin.classList.remove('active');
+            formUser.style.display = 'flex';
+            formAdmin.style.display = 'none';
+            toggleBg.style.transform = 'translateX(0)';
         } else {
-            adminTab.classList.add('active');
-            userTab.classList.remove('active');
-            adminForm.style.display = 'block';
-            userForm.style.display = 'none';
+            btnAdmin.classList.add('active');
+            btnUser.classList.remove('active');
+            formAdmin.style.display = 'flex';
+            formUser.style.display = 'none';
+            toggleBg.style.transform = 'translateX(100%)';
         }
     }
 </script>
+</div>
+</div>
 {% endblock %}
