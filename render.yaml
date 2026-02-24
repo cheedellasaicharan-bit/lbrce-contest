@@ -8,4 +8,4 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: PORT
-        value: 5000
+        value: 10000

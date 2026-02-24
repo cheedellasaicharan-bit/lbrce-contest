@@ -1,5 +1,11 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash, Response
 import sqlite3, requests, json, os, csv, io, base64
+try:
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    HAS_POSTGRES = True
+except ImportError:
+    HAS_POSTGRES = False
 from datetime import datetime
 
 from dotenv import load_dotenv
@@ -17,22 +23,65 @@ JUDGE0_API_KEY = os.getenv("JUDGE0_API_KEY", "")
 
 # ---------------- DATABASE ----------------
 DB_PATH = "database.db"
+IS_PG = os.getenv("DATABASE_URL") is not None
+
+class DbWrapper:
+    def __init__(self, conn, is_pg):
+        self.conn = conn
+        self.is_pg = is_pg
+        self.pl = "%s" if is_pg else "?"
+
+    def execute(self, query, params=None):
+        # Handle parameter mismatch between SQLite (?) and PG (%s)
+        # Note: This is a simple replacement. If queries use literal '?', 
+        # more advanced parsing would be needed.
+        query = query.replace("?", self.pl)
+        if self.is_pg:
+            cur = self.conn.cursor()
+            cur.execute(query, params or ())
+            return cur
+        else:
+            return self.conn.execute(query, params or ())
+
+    def cursor(self):
+        return self.conn.cursor()
+
+    def commit(self):
+        return self.conn.commit()
+
+    def close(self):
+        return self.conn.close()
+    
+    def fetchall(self):
+        # Only used if the wrapper itself is treated like a cursor
+        pass
 
 def get_db():
-    print(f"DEBUG: Connecting to DB at {os.path.abspath(DB_PATH)}")
-    print(f"DEBUG: Current working directory: {os.getcwd()}")
-    con = sqlite3.connect(DB_PATH)
-    con.row_factory = sqlite3.Row
-    return con
+    db_url = os.getenv("DATABASE_URL")
+    if db_url:
+        print("DEBUG: Connecting to PostgreSQL")
+        conn = psycopg2.connect(db_url, sslmode='require', cursor_factory=RealDictCursor)
+        return DbWrapper(conn, True)
+    else:
+        print(f"DEBUG: Connecting to SQLite DB at {os.path.abspath(DB_PATH)}")
+        con = sqlite3.connect(DB_PATH)
+        con.row_factory = sqlite3.Row
+        return DbWrapper(con, False)
 
 # ---------------- AUTO INIT DB ----------------
 def init_db():
     con = get_db()
     cur = con.cursor()
+    
+    # Check if we are using PostgreSQL
+    is_pg = os.getenv("DATABASE_URL") is not None
+    
+    id_type = "SERIAL PRIMARY KEY" if is_pg else "INTEGER PRIMARY KEY AUTOINCREMENT"
+    ignore_clause = "ON CONFLICT DO NOTHING" if is_pg else "OR IGNORE"
 
-    cur.execute("""
+    cur.execute(f"""
         CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id {id_type},
             name TEXT,
             email TEXT UNIQUE,
             roll TEXT,
@@ -42,9 +91,9 @@ def init_db():
         )
     """)
 
-    cur.execute("""
+    cur.execute(f"""
         CREATE TABLE IF NOT EXISTS submissions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id {id_type},
             user_email TEXT,
             problem_id TEXT,
             score INTEGER,
@@ -55,7 +104,7 @@ def init_db():
         )
     """)
 
-    cur.execute("""
+    cur.execute(f"""
         CREATE TABLE IF NOT EXISTS problems (
             id TEXT PRIMARY KEY,
             title TEXT,
@@ -65,9 +114,9 @@ def init_db():
         )
     """)
 
-    cur.execute("""
+    cur.execute(f"""
         CREATE TABLE IF NOT EXISTS test_cases (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id {id_type},
             problem_id TEXT,
             input TEXT,
             expected_output TEXT,
@@ -75,7 +124,7 @@ def init_db():
         )
     """)
 
-    cur.execute("""
+    cur.execute(f"""
         CREATE TABLE IF NOT EXISTS settings (
             key TEXT PRIMARY KEY,
             value TEXT
@@ -83,19 +132,29 @@ def init_db():
     """)
 
     # Seed defaults
-    cur.execute("INSERT OR IGNORE INTO settings VALUES (?, ?)", ("contest_start", "2026-01-01 00:00:00"))
-    cur.execute("INSERT OR IGNORE INTO settings VALUES (?, ?)", ("contest_end", "2027-01-01 00:00:00"))
+    if is_pg:
+        cur.execute("INSERT INTO settings VALUES (%s, %s) ON CONFLICT (key) DO NOTHING", ("contest_start", "2026-01-01 00:00:00"))
+        cur.execute("INSERT INTO settings VALUES (%s, %s) ON CONFLICT (key) DO NOTHING", ("contest_end", "2027-01-01 00:00:00"))
+    else:
+        cur.execute("INSERT OR IGNORE INTO settings VALUES (?, ?)", ("contest_start", "2026-01-01 00:00:00"))
+        cur.execute("INSERT OR IGNORE INTO settings VALUES (?, ?)", ("contest_end", "2027-01-01 00:00:00"))
     
     # Update if already exists to ensure it's active
-    cur.execute("UPDATE settings SET value=? WHERE key='contest_start'", ("2026-01-01 00:00:00",))
-    cur.execute("UPDATE settings SET value=? WHERE key='contest_end'", ("2027-01-01 00:00:00",))
+    param_char = "%s" if is_pg else "?"
+    cur.execute(f"UPDATE settings SET value={param_char} WHERE key='contest_start'", ("2026-01-01 00:00:00",))
+    cur.execute(f"UPDATE settings SET value={param_char} WHERE key='contest_end'", ("2027-01-01 00:00:00",))
 
     problems = [
         ("easy1", "Sum of Two Numbers", "Write a program that reads two integers from stdin (one per line) and prints their sum.", "easy", 10),
         ("medium1", "Factorial", "Write a program that reads an integer N from stdin and prints N! (factorial of N).", "medium", 20),
         ("hard1", "Shortest Path", "Given an adjacency matrix of a graph, find the shortest path between node 0 and node N-1 using BFS. Input: first line is N (nodes), next N lines are the adjacency matrix rows.", "hard", 30)
     ]
-    cur.executemany("INSERT OR IGNORE INTO problems VALUES (?,?,?,?,?)", problems)
+    
+    for p in problems:
+        if is_pg:
+            cur.execute("INSERT INTO problems VALUES (%s,%s,%s,%s,%s) ON CONFLICT (id) DO NOTHING", p)
+        else:
+            cur.execute("INSERT OR IGNORE INTO problems VALUES (?,?,?,?,?)", p)
 
     # Seed test cases
     test_cases = [
@@ -107,9 +166,15 @@ def init_db():
         ("medium1", "10", "3628800"),
     ]
     for tc in test_cases:
-        existing = cur.execute("SELECT id FROM test_cases WHERE problem_id=? AND input=?", (tc[0], tc[1])).fetchone()
-        if not existing:
-            cur.execute("INSERT INTO test_cases (problem_id, input, expected_output) VALUES (?,?,?)", tc)
+        if is_pg:
+            cur.execute("SELECT id FROM test_cases WHERE problem_id=%s AND input=%s", (tc[0], tc[1]))
+            existing = cur.fetchone()
+            if not existing:
+                cur.execute("INSERT INTO test_cases (problem_id, input, expected_output) VALUES (%s,%s,%s)", tc)
+        else:
+            existing = cur.execute("SELECT id FROM test_cases WHERE problem_id=? AND input=?", (tc[0], tc[1])).fetchone()
+            if not existing:
+                cur.execute("INSERT INTO test_cases (problem_id, input, expected_output) VALUES (?,?,?)", tc)
 
     con.commit()
     con.close()
@@ -140,10 +205,8 @@ def get_setting(key):
     return res['value'] if res else None
 
 def is_contest_active():
-    start_str = get_setting("contest_start")
-    end_str = get_setting("contest_end")
-    if not start_str or not end_str:
-        return False
+    start_str = get_setting("contest_start") or "2026-01-01 00:00:00"
+    end_str = get_setting("contest_end") or "2027-01-01 00:00:00"
     now = datetime.now()
     start = datetime.strptime(start_str, "%Y-%m-%d %H:%M:%S")
     end = datetime.strptime(end_str, "%Y-%m-%d %H:%M:%S")
@@ -253,6 +316,71 @@ def contest():
                            problems=problems,
                            start_time=start_time,
                            end_time=end_time)
+
+@app.route("/user/dashboard")
+def user_dashboard():
+    if "user" not in session:
+        return redirect(url_for("login"))
+    
+    email = session.get("email")
+    con = get_db()
+    
+    # User info
+    user = con.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+    
+    # Submissions
+    submissions = con.execute("""
+        SELECT s.*, p.title as problem_title 
+        FROM submissions s
+        JOIN problems p ON s.problem_id = p.id
+        WHERE s.user_email = ? 
+        ORDER BY s.timestamp DESC
+    """, (email,)).fetchall()
+    
+    # Rank and total score
+    leaderboard = con.execute("""
+        SELECT u.email, COALESCE(SUM(s.score), 0) as total_score
+        FROM users u
+        LEFT JOIN submissions s ON u.email = s.user_email
+        GROUP BY u.email
+        ORDER BY total_score DESC
+    """).fetchall()
+    
+    rank = 0
+    total_score = 0
+    for i, row in enumerate(leaderboard):
+        if row['email'] == email:
+            rank = i + 1
+            total_score = row['total_score']
+            break
+            
+    con.close()
+    
+    return render_template("user_dashboard.html", 
+                           user=user, 
+                           submissions=submissions, 
+                           rank=rank, 
+                           total_score=total_score)
+
+@app.route("/user/change-password", methods=["POST"])
+def change_password():
+    if "user" not in session:
+        return jsonify({"status": "error", "message": "Not logged in"})
+    
+    email = session.get("email")
+    new_password = request.form.get("new_password")
+    
+    if not new_password or len(new_password) < 4:
+        flash("Password must be at least 4 characters long.", "error")
+        return redirect(url_for("user_dashboard"))
+        
+    con = get_db()
+    con.execute("UPDATE users SET password=? WHERE email=?", (new_password, email))
+    con.commit()
+    con.close()
+    
+    flash("Password updated successfully!", "success")
+    return redirect(url_for("user_dashboard"))
 
 @app.route("/submit", methods=["POST"])
 def submit():
@@ -539,17 +667,15 @@ def admin_download_csv():
 # ---------------- LEADERBOARD (PUBLIC) ----------------
 @app.route("/leaderboard")
 def leaderboard():
-    if not session.get("admin"):
-        flash("Only administrative users can access the leaderboard.", "error")
-        return redirect(url_for("login"))
     con = get_db()
-    data = con.execute("""
+    rows = con.execute("""
         SELECT u.name, COALESCE(SUM(s.score), 0) as score 
         FROM users u
         LEFT JOIN submissions s ON u.email = s.user_email
         GROUP BY u.email 
         ORDER BY score DESC
     """).fetchall()
+    data = [dict(r) for r in rows]
     con.close()
     return render_template("leaderboard.html", data=data)
 
