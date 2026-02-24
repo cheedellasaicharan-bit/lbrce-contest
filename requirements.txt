@@ -1,5 +1,13 @@
+<<<<<<< HEAD
 flask
 requests
 gunicorn
 python-dotenv
 psycopg2-binary
+=======
+flask
+requests
+gunicorn
+python-dotenv
+psycopg2-binary
+>>>>>>> master

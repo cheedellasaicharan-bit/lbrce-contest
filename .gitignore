@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Python
 __pycache__/
 *.py[cod]
@@ -12,3 +13,19 @@ database.db
 # OS
 .DS_Store
 Thumbs.db
+=======
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+vwen/
+env/
+.env
+
+# Database
+database.db
+
+# OS
+.DS_Store
+Thumbs.db
+>>>>>>> master
