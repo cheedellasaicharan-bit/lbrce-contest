@@ -725,10 +725,11 @@ def diagnostic_check():
     results = {"init_error": INIT_ERROR}
     try:
         con = get_db()
-        count = con.execute("SELECT COUNT(*) FROM problems").fetchone()
+        row = con.execute("SELECT COUNT(*) as c FROM problems").fetchone()
         results["db_connectivity"] = "OK"
-        # Handle tuple vs dict return
-        results["problem_count"] = count[0] if isinstance(count, (tuple, list)) else count.get('count') or count.get('c') or list(count.values())[0]
+        # Convert to dict for uniform access
+        d = dict(row)
+        results["problem_count"] = d.get('c') or d.get('count') or list(d.values())[0]
         con.close()
     except Exception as e:
         results["db_error"] = str(e)
