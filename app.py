@@ -212,9 +212,12 @@ def is_contest_active():
     start_val = get_setting("contest_start") or "2026-01-01 00:00:00"
     end_val = get_setting("contest_end") or "2027-01-01 00:00:00"
     
-    # In some DBs like Postgres, these might already be datetime objects
-    start = start_val if isinstance(start_val, datetime) else datetime.strptime(start_val, "%Y-%m-%d %H:%M:%S")
-    end = end_val if isinstance(end_val, datetime) else datetime.strptime(end_val, "%Y-%m-%d %H:%M:%S")
+    try:
+        # In some DBs like Postgres, these might already be datetime objects
+        start = start_val if isinstance(start_val, datetime) else datetime.strptime(start_val, "%Y-%m-%d %H:%M:%S")
+        end = end_val if isinstance(end_val, datetime) else datetime.strptime(end_val, "%Y-%m-%d %H:%M:%S")
+    except (ValueError, TypeError):
+        return True # Default to active if settings are corrupted
     
     now = datetime.now()
     return start <= now <= end
