@@ -209,11 +209,14 @@ def get_setting(key):
     return res['value'] if res else None
 
 def is_contest_active():
-    start_str = get_setting("contest_start") or "2026-01-01 00:00:00"
-    end_str = get_setting("contest_end") or "2027-01-01 00:00:00"
+    start_val = get_setting("contest_start") or "2026-01-01 00:00:00"
+    end_val = get_setting("contest_end") or "2027-01-01 00:00:00"
+    
+    # In some DBs like Postgres, these might already be datetime objects
+    start = start_val if isinstance(start_val, datetime) else datetime.strptime(start_val, "%Y-%m-%d %H:%M:%S")
+    end = end_val if isinstance(end_val, datetime) else datetime.strptime(end_val, "%Y-%m-%d %H:%M:%S")
+    
     now = datetime.now()
-    start = datetime.strptime(start_str, "%Y-%m-%d %H:%M:%S")
-    end = datetime.strptime(end_str, "%Y-%m-%d %H:%M:%S")
     return start <= now <= end
 
 def get_stats():
@@ -536,7 +539,7 @@ def admin_dashboard():
         SELECT u.id, u.name, u.email, u.reg_id, COALESCE(SUM(s.score), 0) as total_score
         FROM users u
         LEFT JOIN submissions s ON u.email = s.user_email
-        GROUP BY u.email
+        GROUP BY u.id, u.name, u.email, u.reg_id
         ORDER BY total_score DESC
     """).fetchall()
 
@@ -682,7 +685,7 @@ def leaderboard():
         SELECT u.name, COALESCE(SUM(s.score), 0) as score 
         FROM users u
         LEFT JOIN submissions s ON u.email = s.user_email
-        GROUP BY u.email 
+        GROUP BY u.email, u.name
         ORDER BY score DESC
     """).fetchall()
     data = [dict(r) for r in rows]
