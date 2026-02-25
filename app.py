@@ -315,7 +315,8 @@ def contest():
         return redirect(url_for("login"))
 
     con = get_db()
-    problems = con.execute("SELECT * FROM problems").fetchall()
+    rows = con.execute("SELECT * FROM problems").fetchall()
+    problems = [dict(r) for r in rows]
     con.close()
 
     start_time = get_setting("contest_start")
@@ -339,13 +340,20 @@ def user_dashboard():
     user = con.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
     
     # Submissions
-    submissions = con.execute("""
+    rows = con.execute("""
         SELECT s.*, p.title as problem_title 
         FROM submissions s
         JOIN problems p ON s.problem_id = p.id
         WHERE s.user_email = ? 
         ORDER BY s.timestamp DESC
     """, (email,)).fetchall()
+    
+    submissions = []
+    for r in rows:
+        d = dict(r)
+        if isinstance(d['timestamp'], datetime):
+            d['timestamp'] = d['timestamp'].strftime("%Y-%m-%d %H:%M:%S")
+        submissions.append(d)
     
     total_score = sum(s['score'] for s in submissions) if submissions else 0
 
