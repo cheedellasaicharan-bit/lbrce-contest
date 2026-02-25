@@ -180,11 +180,6 @@ def init_db():
     con.commit()
     con.close()
 
-# Run on startup
-try:
-    init_db()
-except Exception as e:
-    print(f"CRITICAL: Database initialization failed: {e}")
 
 # ---------------- HELPERS ----------------
 def b64e(s):
