@@ -700,32 +700,6 @@ def inject_now():
 # Start database initialization
 init_db()
 
-@app.errorhandler(500)
-def internal_error(error):
-    import traceback
-    return f"<h1>Diagnostic Traceback</h1><pre>{traceback.format_exc()}</pre>", 500
-
-@app.route("/diagnostic-check")
-def diagnostic_check():
-    results = {}
-    try:
-        con = get_db()
-        # Use a simple count to verify DB
-        count = con.execute("SELECT COUNT(*) FROM problems").fetchone()[0]
-        results["db_connectivity"] = "OK"
-        results["problem_count"] = count
-        con.close()
-    except Exception as e:
-        results["db_error"] = str(e)
-        import traceback
-        results["db_trace"] = traceback.format_exc()
-    
-    results["env_vars"] = {
-        "DATABASE_URL_SET": os.getenv("DATABASE_URL") is not None,
-        "JUDGE0_KEY_SET": os.getenv("JUDGE0_API_KEY") is not None,
-        "SECRET_KEY_SET": os.getenv("SECRET_KEY") is not None
-    }
-    return jsonify(results)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
