@@ -77,6 +77,7 @@ def init_db():
     is_pg = os.getenv("DATABASE_URL") is not None
     
     id_type = "SERIAL PRIMARY KEY" if is_pg else "INTEGER PRIMARY KEY AUTOINCREMENT"
+    ts_type = "TIMESTAMP" if is_pg else "DATETIME"
     ignore_clause = "ON CONFLICT DO NOTHING" if is_pg else "OR IGNORE"
 
     cur.execute(f"""
@@ -100,7 +101,7 @@ def init_db():
             code TEXT,
             language TEXT,
             status TEXT DEFAULT 'submitted',
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            timestamp {ts_type} DEFAULT CURRENT_TIMESTAMP
         )
     """)
 
