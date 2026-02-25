@@ -738,8 +738,9 @@ def diagnostic_check():
     
     results["env_vars"] = {
         "DATABASE_URL_SET": os.getenv("DATABASE_URL") is not None,
+        "HAS_POSTGRES_DRIVER": HAS_POSTGRES,
+        "DB_TYPE": "PostgreSQL" if os.getenv("DATABASE_URL") and HAS_POSTGRES else "SQLite",
         "JUDGE0_KEY_SET": os.getenv("JUDGE0_API_KEY") is not None,
-        "SECRET_KEY_SET": os.getenv("SECRET_KEY") is not None,
         "PORT": os.getenv("PORT")
     }
     return jsonify(results)
