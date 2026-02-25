@@ -58,7 +58,7 @@ class DbWrapper:
 
 def get_db():
     db_url = os.getenv("DATABASE_URL")
-    if db_url:
+    if db_url and HAS_POSTGRES:
         print("DEBUG: Connecting to PostgreSQL")
         conn = psycopg2.connect(db_url, sslmode='require', cursor_factory=RealDictCursor)
         return DbWrapper(conn, True)
