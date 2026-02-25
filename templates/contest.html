@@ -5,15 +5,15 @@
 <div class="container container-lg">
     <!-- Header -->
     <div class="contest-header fade-in"
-        style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border);">
+        style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);">
         <div>
             <h2 style="font-weight: 900; font-size: 2rem; letter-spacing: -0.02em;">⚡ Contest Arena</h2>
             <p style="color: var(--text-secondary); font-size: 1rem;">Solving: <span id="header-problem-title"
                     style="color: var(--accent-purple); font-weight: 700;">{% if problems %}{{ problems[0]['title'] }}{%
                     endif %}</span></p>
         </div>
-        <div id="timer" class="timer glow"
-            style="font-family: monospace; font-weight: 800; font-size: 1.5rem; padding: 0.6rem 1.2rem; border-radius: 12px; background: rgba(15, 23, 42, 0.5); border: 1px solid var(--glass-border); color: var(--accent-primary);">
+        <div id="timer" class="timer"
+            style="font-family: monospace; font-weight: 800; font-size: 1.5rem; padding: 0.6rem 1.2rem; border-radius: 12px; background: var(--accent-purple); border: none; color: #fff;">
             Loading...
         </div>
     </div>
@@ -28,7 +28,7 @@
                 style="margin-bottom: 1.2rem; font-weight: 800; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.1em; color: var(--text-muted);">
                 Available Problems</h4>
             <div class="problem-selector card"
-                style="display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem; background: rgba(15, 23, 42, 0.3);">
+                style="display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem; background: #f8fafc;">
                 {% for p in problems %}
                 <button class="problem-tab {% if loop.first %}active{% endif %}" data-id="{{ p['id'] }}"
                     data-desc="{{ p['description'] }}" data-score="{{ p['score'] }}" data-diff="{{ p['difficulty'] }}"
@@ -49,33 +49,33 @@
         <div class="editor-col">
             <!-- Problem Description -->
             <div class="problem-description card fade-in stagger-2"
-                style="background: var(--grad-dark); margin-bottom: 2rem; padding: 2rem; border: 1px solid var(--glass-border);">
+                style="background: var(--grad-purple); margin-bottom: 2rem; padding: 2rem; border: none;">
                 <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem;">
-                    <h3 id="problem-title" style="font-weight: 900; font-size: 1.4rem; color: #fff;">
+                    <h3 id="problem-title" style="font-weight: 900; font-size: 1.4rem; color: white;">
                         {% if problems %}{{ problems[0]['title'] }}{% endif %}
                     </h3>
                     <span id="problem-badge" class="badge"
-                        style="background: rgba(129, 140, 248, 0.2); color: var(--accent-primary); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">
+                        style="background: rgba(255,255,255,0.2); color: #fff; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">
                         {% if problems %}{{ problems[0]['difficulty'] }}{% endif %}
                     </span>
                     <span id="problem-score"
-                        style="margin-left: auto; font-weight: 800; color: var(--accent-purple); font-size: 1.2rem;">
+                        style="margin-left: auto; font-weight: 800; color: #fff; font-size: 1.2rem;">
                         {% if problems %}{{ problems[0]['score'] }} pts{% endif %}
                     </span>
                 </div>
-                <div id="problem-desc" style="line-height: 1.7; color: var(--text-secondary); font-size: 1.05rem;">
+                <div id="problem-desc" style="line-height: 1.7; color: rgba(255,255,255,0.9); font-size: 1.05rem;">
                     {% if problems %}{{ problems[0]['description'] }}{% endif %}
                 </div>
             </div>
 
             <div class="editor-section fade-in stagger-3">
                 <div class="editor-toolbar"
-                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.75rem 1.5rem; background: rgba(15, 23, 42, 0.5); border-radius: 12px; border: 1px solid var(--glass-border);">
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.75rem 1.5rem; background: #f1f5f9; border-radius: 12px; border: 1px solid var(--border-color);">
                     <div style="display: flex; align-items: center; gap: 1rem;">
                         <span
                             style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Language</span>
                         <select id="language" class="form-control"
-                            style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: #fff; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600;"
+                            style="background: #fff; border: 1px solid var(--border-color); color: var(--text-main); padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600;"
                             onchange="updateBoilerplate()">
                             <option value="71">🐍 Python 3</option>
                             <option value="54">⚙️ C++ 17</option>
@@ -99,7 +99,7 @@
 
                 <!-- Code Editor -->
                 <div class="code-editor-wrapper"
-                    style="border-radius: 16px; overflow: hidden; border: 1px solid var(--glass-border); box-shadow: var(--shadow-xl); margin-bottom: 2rem;">
+                    style="border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: var(--shadow-lg); margin-bottom: 2rem;">
                     <textarea id="code" class="code-editor"
                         style="width: 100%; height: 450px; background: #0f172a; color: #e2e8f0; font-family: 'Fira Code', 'Consolas', monospace; font-size: 1rem; padding: 1.5rem; border: none; outline: none; resize: none; line-height: 1.6;"
                         placeholder="# Write your magnificent solution here..." spellcheck="false"></textarea>
@@ -107,9 +107,9 @@
 
                 <!-- Output Panel -->
                 <div class="output-panel-container card fade-in stagger-4"
-                    style="padding: 0; overflow: hidden; background: rgba(15, 23, 42, 0.8); border: 1px solid var(--glass-border);">
+                    style="padding: 0; overflow: hidden; background: #1e293b; border: 1px solid var(--border-color);">
                     <div
-                        style="padding: 1rem 1.5rem; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;">
+                        style="padding: 1rem 1.5rem; background: #0f172a; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center;">
                         <div style="display: flex; align-items: center; gap: 0.75rem;">
                             <span
                                 style="font-weight: 800; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted);">Console

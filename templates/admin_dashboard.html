@@ -78,15 +78,15 @@
 
     <!-- User Management -->
     <div class="card fade-in stagger-4 mt-3"
-        style="background: var(--card-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(12px);">
-        <div class="card-header" style="border-bottom: 1px solid var(--glass-border);">
+        style="background: var(--card-bg); border: 1px solid var(--border-color); backdrop-filter: blur(12px);">
+        <div class="card-header" style="border-bottom: 1px solid var(--border-color);">
             <span class="card-title">👤 User Management</span>
             <span style="color: var(--text-muted); font-size: 0.85rem;">Provision student accounts</span>
         </div>
 
         <div style="padding: 1.5rem;">
             <form action="/admin/users" method="POST" class="mb-3"
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; padding: 1.25rem; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid var(--glass-border);">
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; padding: 1.25rem; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid var(--border-color);">
                 <input type="hidden" name="action" value="add">
                 <div class="form-group" style="margin-bottom: 0;">
                     <input type="text" name="name" class="form-input" placeholder="Full Name" required>

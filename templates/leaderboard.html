@@ -14,7 +14,7 @@
 
     <!-- Leaderboard Graph -->
     <div class="card fade-in stagger-1"
-        style="margin-bottom: 3rem; padding: 2rem; background: var(--grad-dark); border: 1px solid var(--glass-border);">
+        style="margin-bottom: 3rem; padding: 2rem; border: 1px solid var(--border-color);">
         <h3 style="margin-bottom: 2rem; font-weight: 800; display: flex; align-items: center; gap: 0.75rem;">
             <span style="color: var(--accent-purple);">📊</span> Performance Visualization
         </h3>
@@ -65,7 +65,7 @@
     <!-- Full Table -->
     {% if data %}
     {% set max_score = data[0]['score'] if data else 1 %}
-    <div class="card fade-in stagger-2" style="padding: 0; overflow: hidden; border: 1px solid var(--glass-border);">
+    <div class="card fade-in stagger-2" style="padding: 0; overflow: hidden; border: 1px solid var(--border-color);">
         <div class="table-container">
             <table class="leaderboard-table">
                 <thead>
