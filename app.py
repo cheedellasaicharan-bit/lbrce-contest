@@ -698,8 +698,44 @@ def inject_now():
 
 
 # Start database initialization
-init_db()
+try:
+    print("DEBUG: Calling init_db()")
+    init_db()
+    print("DEBUG: init_db() successful")
+except Exception as e:
+    print(f"ERROR: init_db() failed: {e}")
+    # We don't raise here to allow the app to start and show us the diagnostic page
+    INIT_ERROR = str(e)
+else:
+    INIT_ERROR = None
 
+@app.errorhandler(500)
+def internal_error(error):
+    import traceback
+    return f"<h1>Diagnostic Traceback</h1><p><b>Init Error:</b> {INIT_ERROR}</p><pre>{traceback.format_exc()}</pre>", 500
+
+@app.route("/diagnostic-check")
+def diagnostic_check():
+    results = {"init_error": INIT_ERROR}
+    try:
+        con = get_db()
+        count = con.execute("SELECT COUNT(*) FROM problems").fetchone()
+        results["db_connectivity"] = "OK"
+        # Handle tuple vs dict return
+        results["problem_count"] = count[0] if isinstance(count, (tuple, list)) else count.get('count') or count.get('c') or list(count.values())[0]
+        con.close()
+    except Exception as e:
+        results["db_error"] = str(e)
+        import traceback
+        results["db_trace"] = traceback.format_exc()
+    
+    results["env_vars"] = {
+        "DATABASE_URL_SET": os.getenv("DATABASE_URL") is not None,
+        "JUDGE0_KEY_SET": os.getenv("JUDGE0_API_KEY") is not None,
+        "SECRET_KEY_SET": os.getenv("SECRET_KEY") is not None,
+        "PORT": os.getenv("PORT")
+    }
+    return jsonify(results)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
