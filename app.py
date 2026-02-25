@@ -700,6 +700,22 @@ def inject_now():
 # Start database initialization
 init_db()
 
+@app.errorhandler(500)
+def internal_error(error):
+    import traceback
+    return f"<h1>Internal Server Error</h1><pre>{traceback.format_exc()}</pre>", 500
+
+@app.route("/test-db")
+def test_db():
+    try:
+        con = get_db()
+        problems = con.execute("SELECT * FROM problems").fetchall()
+        con.close()
+        return jsonify({"status": "success", "problem_count": len(problems)})
+    except Exception as e:
+        import traceback
+        return jsonify({"status": "error", "message": str(e), "trace": traceback.format_exc()})
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=False, host='0.0.0.0', port=port)
