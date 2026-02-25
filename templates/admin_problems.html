@@ -12,128 +12,153 @@
     </div>
 
     <!-- Add Problem Form -->
-    <div class="card fade-in stagger-1 mb-3">
-        <div class="card-header">
-            <span class="card-title">➕ Add New Problem</span>
+    <div class="card fade-in stagger-1 mb-3"
+        style="background: var(--card-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(12px);">
+        <div class="card-header" style="border-bottom: 1px solid var(--glass-border);">
+            <span class="card-title">➕ Create New Challenge</span>
         </div>
-        <form method="POST">
-            <input type="hidden" name="action" value="add">
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Problem ID</label>
-                    <input type="text" name="id" class="form-control" placeholder="e.g., easy2" required>
+        <div style="padding: 1.5rem;">
+            <form method="POST">
+                <input type="hidden" name="action" value="add">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Problem ID (slug)</label>
+                        <input type="text" name="id" class="form-input" placeholder="e.g. string-rev-1" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Title</label>
+                        <input type="text" name="title" class="form-input" placeholder="Challenge Title" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Difficulty</label>
+                        <select name="diff" class="form-input" style="background: var(--bg-dark);">
+                            <option value="easy">🟢 Easy</option>
+                            <option value="medium">🟡 Medium</option>
+                            <option value="hard">🔴 Hard</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Score Points</label>
+                        <input type="number" name="score" class="form-input" placeholder="e.g. 50" required>
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Title</label>
-                    <input type="text" name="title" class="form-control" placeholder="Problem title" required>
+                    <label class="form-label">Brief Description</label>
+                    <textarea name="desc" class="form-input" rows="3"
+                        placeholder="Describe the challenge rules and expected behavior..." required></textarea>
                 </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Difficulty</label>
-                    <select name="diff" class="form-control">
-                        <option value="easy">🟢 Easy</option>
-                        <option value="medium">🟡 Medium</option>
-                        <option value="hard">🔴 Hard</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Score</label>
-                    <input type="number" name="score" class="form-control" placeholder="Points" required>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Description</label>
-                <textarea name="desc" class="form-control" rows="3" placeholder="Write the problem statement..."
-                    required></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">
-                ✅ Add Problem
-            </button>
-        </form>
+                <button type="submit" class="btn btn-primary"
+                    style="width: 100%; justify-content: center; margin-top: 1rem;">
+                    ✅ Publish Problem
+                </button>
+            </form>
+        </div>
     </div>
 
     <!-- Existing Problems -->
-    <div class="card fade-in stagger-2">
-        <div class="card-header">
-            <span class="card-title">📋 Existing Problems</span>
-            <span style="color: var(--text-muted); font-size: 0.85rem;">{{ problems | length }} problems</span>
+    <div class="card fade-in stagger-2" style="background: var(--card-bg); border: 1px solid var(--glass-border);">
+        <div class="card-header" style="border-bottom: 1px solid var(--glass-border);">
+            <span class="card-title">📋 Challenge Library</span>
+            <span style="color: var(--text-muted); font-size: 0.85rem;">{{ problems | length }} total challenges</span>
         </div>
 
-        {% if problems %}
-        {% for p in problems %}
-        <div
-            style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1rem; background: var(--bg-secondary);">
-            <!-- Problem Header -->
-            <div class="d-flex justify-between align-center mb-1" style="flex-wrap: wrap; gap: 0.5rem;">
-                <div class="d-flex align-center gap-1">
-                    <span style="font-weight: 700; font-size: 1.05rem;">{{ p['title'] }}</span>
-                    <span class="badge badge-{{ p['difficulty'] }}">{{ p['difficulty'] }}</span>
-                    <span style="color: var(--accent-primary); font-weight: 600;">{{ p['score'] }} pts</span>
-                </div>
-                <div class="d-flex gap-1">
-                    <form method="POST" style="margin: 0;">
-                        <input type="hidden" name="action" value="delete">
-                        <input type="hidden" name="id" value="{{ p['id'] }}">
-                        <button type="submit" class="btn btn-danger btn-sm"
-                            onclick="return confirm('Delete this problem and its test cases?')">🗑 Delete</button>
-                    </form>
-                </div>
-            </div>
-            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.75rem;">
-                <strong>ID:</strong> {{ p['id'] }} · {{ p['description'] }}
-            </p>
+        <div style="padding: 1.5rem;">
+            {% if problems %}
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                {% for p in problems %}
+                <div class="fade-in"
+                    style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1.5rem; transition: var(--transition);">
+                    <!-- Header -->
+                    <div class="d-flex justify-between align-center mb-1" style="flex-wrap: wrap; gap: 1rem;">
+                        <div class="d-flex align-center gap-1">
+                            <span style="font-weight: 800; font-size: 1.2rem; color: var(--text-main);">{{ p['title']
+                                }}</span>
+                            <span class="badge badge-{{ p['difficulty'] }}"
+                                style="font-size: 0.7rem; padding: 0.2rem 0.6rem;">{{ p['difficulty'] | upper }}</span>
+                            <span
+                                style="background: var(--grad-purple); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; font-size: 0.9rem;">{{
+                                p['score'] }} PTS</span>
+                        </div>
+                        <form method="POST" style="margin: 0;">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="id" value="{{ p['id'] }}">
+                            <button type="submit" class="btn btn-outline"
+                                style="color: var(--accent-danger); border-color: rgba(251, 113, 133, 0.2); padding: 0.4rem 0.8rem; font-size: 0.8rem;"
+                                onclick="return confirm('Permanently delete this problem?')">🗑 Delete</button>
+                        </form>
+                    </div>
 
-            <!-- Test Cases -->
-            <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color);">
-                <p style="font-weight: 600; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
-                    🧪 Test Cases ({{ test_cases.get(p['id'], []) | length }})
-                </p>
+                    <p
+                        style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.5rem; font-size: 0.95rem;">
+                        <code
+                            style="font-family: 'JetBrains Mono', monospace; background: var(--bg-dark); padding: 0.1rem 0.4rem; border-radius: 4px; color: var(--accent-primary); font-size: 0.8rem; margin-right: 0.5rem;">{{ p['id'] }}</code>
+                        {{ p['description'] }}
+                    </p>
 
-                {% for tc in test_cases.get(p['id'], []) %}
-                <div class="d-flex align-center gap-1 mb-1"
-                    style="font-size: 0.85rem; font-family: 'JetBrains Mono', monospace;">
-                    <span
-                        style="background: var(--bg-card); padding: 0.25rem 0.5rem; border-radius: 4px; border: 1px solid var(--border-color);">
-                        In: <strong>{{ tc['input'][:30] }}{% if tc['input']|length > 30 %}...{% endif %}</strong>
-                    </span>
-                    <span>→</span>
-                    <span
-                        style="background: var(--success-bg); padding: 0.25rem 0.5rem; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.2); color: var(--success);">
-                        Out: <strong>{{ tc['expected_output'][:30] }}{% if tc['expected_output']|length > 30 %}...{%
-                            endif %}</strong>
-                    </span>
-                    <form method="POST" style="margin: 0;">
-                        <input type="hidden" name="action" value="delete_test">
-                        <input type="hidden" name="tc_id" value="{{ tc['id'] }}">
-                        <button type="submit" class="btn btn-danger btn-sm"
-                            style="padding: 0.2rem 0.4rem; font-size: 0.7rem;">✕</button>
-                    </form>
+                    <!-- Test Cases Section -->
+                    <div style="background: rgba(0,0,0,0.2); border-radius: 10px; padding: 1.25rem;">
+                        <h4
+                            style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 1rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 0.5rem;">
+                            🧪 Test Suites ({{ test_cases.get(p['id'], []) | length }})
+                        </h4>
+
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            {% for tc in test_cases.get(p['id'], []) %}
+                            <div class="d-flex align-center justify-between"
+                                style="background: var(--bg-dark); border: 1px solid var(--glass-border); padding: 0.6rem 1rem; border-radius: 8px;">
+                                <div class="d-flex align-center gap-1"
+                                    style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; overflow: hidden;">
+                                    <div style="flex-shrink: 0;">
+                                        <span style="color: var(--text-muted);">IN:</span>
+                                        <span style="color: var(--text-main); font-weight: 700;">{{ tc['input'][:40]
+                                            }}{% if tc['input']|length > 40 %}...{% endif %}</span>
+                                    </div>
+                                    <div style="color: var(--text-muted);">|</div>
+                                    <div>
+                                        <span style="color: var(--text-muted);">OUT:</span>
+                                        <span style="color: var(--accent-secondary); font-weight: 700;">{{
+                                            tc['expected_output'][:40] }}{% if tc['expected_output']|length > 40 %}...{%
+                                            endif %}</span>
+                                    </div>
+                                </div>
+                                <form method="POST" style="margin: 0; flex-shrink: 0;">
+                                    <input type="hidden" name="action" value="delete_test">
+                                    <input type="hidden" name="tc_id" value="{{ tc['id'] }}">
+                                    <button type="submit" class="btn"
+                                        style="background: rgba(251, 113, 133, 0.1); color: var(--accent-danger); width: 24px; height: 24px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 4px;">✕</button>
+                                </form>
+                            </div>
+                            {% endfor %}
+
+                            <!-- Add TC Inline -->
+                            <form method="POST" class="d-flex gap-1 mt-1">
+                                <input type="hidden" name="action" value="add_test">
+                                <input type="hidden" name="problem_id" value="{{ p['id'] }}">
+                                <input type="text" name="tc_input" class="form-input" placeholder="Input string"
+                                    style="flex: 2; padding: 0.4rem 0.8rem; font-size: 0.85rem;" required>
+                                <input type="text" name="tc_output" class="form-input" placeholder="Expected output"
+                                    style="flex: 2; padding: 0.4rem 0.8rem; font-size: 0.85rem;" required>
+                                <button type="submit" class="btn btn-success"
+                                    style="padding: 0.4rem 1rem; font-size: 0.8rem;">+ Save TC</button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
                 {% endfor %}
-
-                <!-- Add Test Case -->
-                <form method="POST" class="d-flex align-center gap-1 mt-1" style="flex-wrap: wrap;">
-                    <input type="hidden" name="action" value="add_test">
-                    <input type="hidden" name="problem_id" value="{{ p['id'] }}">
-                    <input type="text" name="tc_input" class="form-control" placeholder="Input"
-                        style="width: auto; flex: 1; min-width: 120px; padding: 0.4rem 0.6rem; font-size: 0.85rem;"
-                        required>
-                    <input type="text" name="tc_output" class="form-control" placeholder="Expected Output"
-                        style="width: auto; flex: 1; min-width: 120px; padding: 0.4rem 0.6rem; font-size: 0.85rem;"
-                        required>
-                    <button type="submit" class="btn btn-success btn-sm">+ Add</button>
-                </form>
             </div>
+            {% else %}
+            <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                <p style="font-size: 3rem; margin-bottom: 1rem;">📦</p>
+                <p>No challenges found. Create your first problem to start the contest!</p>
+            </div>
+            {% endif %}
         </div>
-        {% endfor %}
-        {% else %}
-        <p style="text-align: center; color: var(--text-muted); padding: 2rem;">No problems yet. Add one above!</p>
-        {% endif %}
     </div>
+    {% else %}
+    <p style="text-align: center; color: var(--text-muted); padding: 2rem;">No problems yet. Add one above!</p>
+    {% endif %}
 </div>
-<<<<<<< HEAD
+</div>
 {% endblock %}
-=======
-{% endblock %}
->>>>>>> master

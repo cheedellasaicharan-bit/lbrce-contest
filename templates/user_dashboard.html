@@ -1,99 +1,121 @@
 {% extends "base.html" %}
 {% block title %}My Dashboard — CSE(AI&ML) Coding Contest{% endblock %}
 
+{% block head %}
+<!-- Chart.js for performance visualization -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="container container-md">
-    <div class="dashboard-header fade-in">
-        <h1>📊 My Dashboard</h1>
-        <p style="color: var(--text-secondary);">Welcome back, {{ user['name'] }}!</p>
+    <div class="dashboard-header fade-in" style="margin-bottom: 3rem;">
+        <h1 style="font-size: 2.5rem; font-weight: 900; letter-spacing: -0.02em;">📊 My Dashboard</h1>
+        <p style="color: var(--text-secondary); font-size: 1.1rem;">Welcome back, <span
+                style="color: var(--accent-purple); font-weight: 700;">{{ user['name'] }}</span>!</p>
     </div>
 
     <!-- Stats Grid -->
     <div class="stats-grid fade-in stagger-1"
-        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-        <div class="stat-card card text-center" style="padding: 1.5rem;">
-            <div class="stat-value" style="font-size: 2.5rem; font-weight: 800; color: var(--accent-primary);">#{{ rank
-                }}</div>
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+        <div class="stat-card card stat-card-premium text-center" style="padding: 2rem;">
+            <div class="stat-value" style="font-size: 3rem; font-weight: 900; color: white;">#{{ rank }}</div>
             <div class="stat-label"
-                style="text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.1em; color: var(--text-secondary);">
+                style="text-transform: uppercase; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.2em; color: var(--text-secondary); margin-top: 0.5rem;">
                 Global Rank</div>
         </div>
-        <div class="stat-card card text-center" style="padding: 1.5rem;">
-            <div class="stat-value" style="font-size: 2.5rem; font-weight: 800; color: var(--accent-secondary);">{{
-                total_score }}</div>
+        <div class="stat-card card stat-card-premium text-center" style="padding: 2rem;">
+            <div class="stat-value" style="font-size: 3rem; font-weight: 900; color: white;">{{ total_score }}</div>
             <div class="stat-label"
-                style="text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.1em; color: var(--text-secondary);">
+                style="text-transform: uppercase; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.2em; color: var(--text-secondary); margin-top: 0.5rem;">
                 Total Points</div>
         </div>
-        <div class="stat-card card text-center" style="padding: 1.5rem;">
-            <div class="stat-value" style="font-size: 2.5rem; font-weight: 800; color: var(--accent-primary);">{{
-                submissions | length }}</div>
+        <div class="stat-card card stat-card-premium text-center" style="padding: 2rem;">
+            <div class="stat-value" style="font-size: 3rem; font-weight: 900; color: white;">{{ submissions | length }}
+            </div>
             <div class="stat-label"
-                style="text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.1em; color: var(--text-secondary);">
+                style="text-transform: uppercase; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.2em; color: var(--text-secondary); margin-top: 0.5rem;">
                 Submissions</div>
         </div>
     </div>
 
-    <div class="dashboard-main fade-in stagger-2" style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;">
-        <!-- Recent Submissions -->
-        <div class="submissions-section">
-            <h3 style="margin-bottom: 1rem;">🕒 Recent Performance</h3>
-            <div class="card" style="padding: 0;">
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Problem</th>
-                                <th>Score</th>
-                                <th>Status</th>
-                                <th>Time</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for sub in submissions %}
-                            <tr>
-                                <td style="font-weight: 600;">{{ sub['problem_title'] }}</td>
-                                <td style="font-weight: 700; color: var(--accent-primary);">{{ sub['score'] }}</td>
-                                <td><span class="status-badge">{{ sub['status'] }}</span></td>
-                                <td style="font-size: 0.85rem; color: var(--text-secondary);">{{ sub['timestamp'] }}
-                                </td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="4" class="text-center"
-                                    style="padding: 2rem; color: var(--text-secondary);">No submissions yet. Go solve
-                                    some problems!</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+    <div class="dashboard-main fade-in stagger-2" style="display: grid; grid-template-columns: 1fr 320px; gap: 2.5rem;">
+        <div class="left-col">
+            <!-- Performance Graph -->
+            <div class="graph-section" style="margin-bottom: 3rem;">
+                <h3 style="margin-bottom: 1.5rem; font-weight: 800;">📈 Performance Graph</h3>
+                <div class="card" style="padding: 1.5rem; background: var(--grad-dark);">
+                    <canvas id="performanceChart" height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- Recent Submissions -->
+            <div class="submissions-section">
+                <h3 style="margin-bottom: 1.5rem; font-weight: 800;">🕒 Recent Activity</h3>
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Problem</th>
+                                    <th>Score</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-right">Applied On</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sub in submissions %}
+                                <tr>
+                                    <td style="font-weight: 600; color: var(--text-main);">{{ sub['problem_title'] }}
+                                    </td>
+                                    <td style="font-weight: 800; color: var(--accent-purple);">{{ sub['score'] }}</td>
+                                    <td class="text-center"><span class="status-badge">{{ sub['status'] }}</span></td>
+                                    <td class="text-right" style="font-size: 0.85rem; color: var(--text-secondary);">{{
+                                        sub['timestamp'] }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center"
+                                        style="padding: 3rem; color: var(--text-secondary);">No submissions yet. Go
+                                        solve
+                                        some problems!</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Account Settings -->
-        <div class="settings-section">
-            <h3 style="margin-bottom: 1rem;">⚙️ Account Settings</h3>
-            <div class="card" style="padding: 1.5rem;">
-                <div class="profile-summary"
-                    style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);">
-                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.2rem;">Roll Number
+        <!-- Right Side: Account & Settings -->
+        <div class="right-col">
+            <h3 style="margin-bottom: 1.5rem; font-weight: 800;">👤 Account Info</h3>
+            <div class="card float-animation" style="padding: 2rem; border-top: 4px solid var(--accent-purple);">
+                <div class="profile-details" style="margin-bottom: 2.5rem;">
+                    <div class="detail-item" style="margin-bottom: 1.5rem;">
+                        <span
+                            style="display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 0.4rem;">Roll
+                            Number</span>
+                        <span style="font-weight: 700; font-size: 1.1rem;">{{ user['roll'] or 'LBRCE_STU_2026' }}</span>
                     </div>
-                    <div style="font-weight: 600;">{{ user['roll'] or 'N/A' }}</div>
-                    <div
-                        style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.8rem; margin-bottom: 0.2rem;">
-                        Registration ID</div>
-                    <div style="font-weight: 600;">{{ user['reg_id'] or 'N/A' }}</div>
+                    <div class="detail-item">
+                        <span
+                            style="display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 0.4rem;">Registration
+                            ID</span>
+                        <span style="font-weight: 700; font-size: 1.1rem; color: var(--accent-purple);">{{
+                            user['reg_id'] }}</span>
+                    </div>
                 </div>
 
-                <form action="/user/change-password" method="POST">
-                    <label for="new_password"
-                        style="display: block; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-secondary);">Change
-                        Password</label>
-                    <input type="password" id="new_password" name="new_password" placeholder="New Password" required
-                        style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); margin-bottom: 1rem;">
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">Update Password</button>
-                </form>
+                <div style="padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                    <h4 style="margin-bottom: 1.2rem; font-size: 0.9rem; color: var(--text-main);">Security</h4>
+                    <form action="/user/change-password" method="POST">
+                        <input type="password" name="new_password" placeholder="New Password" required
+                            style="width: 100%; padding: 0.9rem; border-radius: 12px; border: 1px solid var(--border-color); background: rgba(15, 23, 42, 0.5); color: white; margin-bottom: 1rem; font-size: 0.9rem;">
+                        <button type="submit" class="btn btn-primary btn-glow"
+                            style="width: 100%; border-radius: 12px;">Update Password</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -101,12 +123,80 @@
 
 <style>
     .status-badge {
-        padding: 0.3rem 0.6rem;
-        border-radius: 6px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        background: rgba(var(--accent-primary-rgb), 0.1);
+        display: inline-block;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        background: rgba(129, 140, 248, 0.15);
         color: var(--accent-primary);
+        border: 1px solid rgba(129, 140, 248, 0.3);
+    }
+
+    .text-right {
+        text-align: right;
+    }
+
+    .btn-glow {
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+    }
+
+    .btn-glow:hover {
+        box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
     }
 </style>
+
+<script>
+    // Initialize Performance Chart
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+
+        // Extract data from submissions
+        const labels = [{% for sub in submissions | reverse %}"{{ sub['timestamp'][:10] }}", {% endfor %}];
+    const scores = [{% for sub in submissions | reverse %}{ { sub['score'] } }, {% endfor %}];
+
+    // If no data, show dummy zero
+    if (labels.length === 0) {
+        labels.push("New User");
+        scores.push(0);
+    }
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Score per Submission',
+                data: scores,
+                borderColor: '#c084fc',
+                backgroundColor: 'rgba(192, 132, 252, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#fff',
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: { color: '#94a3b8' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#94a3b8' }
+                }
+            }
+        }
+    });
+    });
+</script>
 {% endblock %}

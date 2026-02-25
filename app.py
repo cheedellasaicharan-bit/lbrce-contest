@@ -340,6 +340,24 @@ def user_dashboard():
         ORDER BY s.timestamp DESC
     """, (email,)).fetchall()
     
+    total_score = sum(s['score'] for s in submissions) if submissions else 0
+
+    # Calculate Rank
+    leaderboard = con.execute("""
+        SELECT u.email, COALESCE(SUM(s.score), 0) as total_score
+        FROM users u
+        LEFT JOIN submissions s ON u.email = s.user_email
+        GROUP BY u.email
+        ORDER BY total_score DESC
+    """).fetchall()
+    
+    rank = "N/A"
+    for i, entry in enumerate(leaderboard):
+        if entry['email'] == email:
+            rank = i + 1
+            break
+    
+    con.close()
     return render_template("user_dashboard.html", 
                            user=user, 
                            submissions=submissions, 
@@ -494,7 +512,11 @@ def submit():
 @app.route("/admin_login", methods=["GET", "POST"])
 def admin_login():
     if request.method == "POST":
-        if request.form.get("user") == ADMIN_USER and request.form.get("pass") == ADMIN_PASS:
+        # Check for both possible field names (from direct login vs contest tab)
+        user = request.form.get("username") or request.form.get("user")
+        pwd = request.form.get("password") or request.form.get("pass")
+        
+        if user == ADMIN_USER and pwd == ADMIN_PASS:
             session["admin"] = True
             flash("Welcome, Admin!", "success")
             return redirect(url_for("admin_dashboard"))
@@ -653,6 +675,9 @@ def admin_download_csv():
 # ---------------- LEADERBOARD (PUBLIC) ----------------
 @app.route("/leaderboard")
 def leaderboard():
+    if "user" not in session and not session.get("admin"):
+        flash("Please login to view the leaderboard.", "info")
+        return redirect(url_for("login"))
     con = get_db()
     rows = con.execute("""
         SELECT u.name, COALESCE(SUM(s.score), 0) as score 
@@ -664,6 +689,10 @@ def leaderboard():
     data = [dict(r) for r in rows]
     con.close()
     return render_template("leaderboard.html", data=data)
+
+@app.context_processor
+def inject_now():
+    return {'now': datetime.now()}
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
