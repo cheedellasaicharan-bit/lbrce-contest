@@ -707,43 +707,12 @@ def inject_now():
 try:
     print("DEBUG: Calling init_db()")
     init_db()
-    print("DEBUG: init_db() successful")
+# Startup logic
+try:
+    with app.app_context():
+        init_db()
 except Exception as e:
-    print(f"ERROR: init_db() failed: {e}")
-    # We don't raise here to allow the app to start and show us the diagnostic page
-    INIT_ERROR = str(e)
-else:
-    INIT_ERROR = None
-
-@app.errorhandler(500)
-def internal_error(error):
-    import traceback
-    return f"<h1>Diagnostic Traceback</h1><p><b>Init Error:</b> {INIT_ERROR}</p><pre>{traceback.format_exc()}</pre>", 500
-
-@app.route("/diagnostic-check")
-def diagnostic_check():
-    results = {"init_error": INIT_ERROR}
-    try:
-        con = get_db()
-        row = con.execute("SELECT COUNT(*) as c FROM problems").fetchone()
-        results["db_connectivity"] = "OK"
-        # Convert to dict for uniform access
-        d = dict(row)
-        results["problem_count"] = d.get('c') or d.get('count') or list(d.values())[0]
-        con.close()
-    except Exception as e:
-        results["db_error"] = str(e)
-        import traceback
-        results["db_trace"] = traceback.format_exc()
-    
-    results["env_vars"] = {
-        "DATABASE_URL_SET": os.getenv("DATABASE_URL") is not None,
-        "HAS_POSTGRES_DRIVER": HAS_POSTGRES,
-        "DB_TYPE": "PostgreSQL" if os.getenv("DATABASE_URL") and HAS_POSTGRES else "SQLite",
-        "JUDGE0_KEY_SET": os.getenv("JUDGE0_API_KEY") is not None,
-        "PORT": os.getenv("PORT")
-    }
-    return jsonify(results)
+    print(f"CRITICAL: init_db() failed: {e}")
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
