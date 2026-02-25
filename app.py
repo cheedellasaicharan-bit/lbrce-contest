@@ -420,7 +420,6 @@ def submit():
             if JUDGE0_API_KEY:
                 headers["X-Auth-Token"] = JUDGE0_API_KEY
 
-            print(f"DEBUG: Judge0 request for single execution...")
             response = requests.post(
                 "https://ce.judge0.com/submissions?base64_encoded=true&wait=true",
                 json={
@@ -431,7 +430,6 @@ def submit():
                 headers=headers,
                 timeout=60
             ).json()
-            print(f"DEBUG: Judge0 response: {json.dumps(response, indent=2)}")
 
             stdout = b64d(response.get("stdout"))
             stderr = b64d(response.get("stderr"))
