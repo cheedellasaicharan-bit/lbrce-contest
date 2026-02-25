@@ -1,3 +1,8 @@
+databases:
+  - name: contest_db
+    databaseName: contestdb
+    user: admin
+
 services:
   - type: web
     name: lbrce-csm-contest
@@ -5,7 +10,17 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: contest_db
+          property: connectionString
       - key: SECRET_KEY
         generateValue: true
       - key: PORT
         value: 10000
+      - key: JUDGE0_API_KEY
+        sync: false
+      - key: ADMIN_USER
+        value: admin
+      - key: ADMIN_PASS
+        value: csm123
