@@ -30,7 +30,7 @@
                 <a href="{{ url_for('contest') }}" class="nav-link"
                     style="font-weight: 600; color: var(--text-main); text-decoration: none; font-size: 0.9rem;">Arena</a>
                 {% if 'user' in session %}
-                <a href="{{ url_for('dashboard') }}" class="nav-link"
+                <a href="{{ url_for('user_dashboard') }}" class="nav-link"
                     style="font-weight: 600; color: var(--text-main); text-decoration: none; font-size: 0.9rem;">Dashboard</a>
                 <a href="{{ url_for('logout') }}" class="btn btn-outline"
                     style="font-size: 0.8rem; padding: 0.4rem 1rem;">Logout</a>
