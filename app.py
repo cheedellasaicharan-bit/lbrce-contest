@@ -703,10 +703,6 @@ def inject_now():
     return {'now': datetime.now()}
 
 
-# Start database initialization
-try:
-    print("DEBUG: Calling init_db()")
-    init_db()
 # Startup logic
 try:
     with app.app_context():
