@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash, Response
-import sqlite3, requests, json, os, csv, io, base64
+# Production Hardened Version 1.0.0
+import os
+import sqlite3, requests, json, csv, io, base64
 try:
     import psycopg2
     from psycopg2.extras import RealDictCursor
@@ -59,11 +61,9 @@ class DbWrapper:
 def get_db():
     db_url = os.getenv("DATABASE_URL")
     if db_url and HAS_POSTGRES:
-        print("DEBUG: Connecting to PostgreSQL")
         conn = psycopg2.connect(db_url, sslmode='require', cursor_factory=RealDictCursor)
         return DbWrapper(conn, True)
     else:
-        print(f"DEBUG: Connecting to SQLite DB at {os.path.abspath(DB_PATH)}")
         con = sqlite3.connect(DB_PATH)
         con.row_factory = sqlite3.Row
         return DbWrapper(con, False)
@@ -704,11 +704,40 @@ def inject_now():
 
 
 # Startup logic
+INIT_ERROR = None
 try:
     with app.app_context():
         init_db()
 except Exception as e:
+    INIT_ERROR = str(e)
     print(f"CRITICAL: init_db() failed: {e}")
+
+@app.errorhandler(500)
+def internal_error(error):
+    import traceback
+    return f"<h1>Debug Traceback</h1><p><b>Init Error:</b> {INIT_ERROR}</p><pre>{traceback.format_exc()}</pre>", 500
+
+@app.route("/diagnostic-check")
+def diagnostic_check():
+    results = {"init_error": INIT_ERROR}
+    try:
+        con = get_db()
+        row = con.execute("SELECT COUNT(*) as c FROM problems").fetchone()
+        results["db_connectivity"] = "OK"
+        d = dict(row)
+        results["problem_count"] = d.get('c') or d.get('count') or list(d.values())[0]
+        con.close()
+    except Exception as e:
+        results["db_error"] = str(e)
+        import traceback
+        results["db_trace"] = traceback.format_exc()
+    
+    results["env_vars"] = {
+        "DATABASE_URL_SET": os.getenv("DATABASE_URL") is not None,
+        "HAS_POSTGRES_DRIVER": HAS_POSTGRES,
+        "DB_TYPE": "PostgreSQL" if os.getenv("DATABASE_URL") and HAS_POSTGRES else "SQLite",
+    }
+    return jsonify(results)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))

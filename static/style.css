@@ -159,9 +159,10 @@
 .form-input {
     width: 100%;
     padding: 0.8rem 1rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--glass-border);
     border-radius: 10px;
-    background: #fcfcfd;
+    background: rgba(15, 23, 42, 0.4);
+    color: var(--text-main);
     font-size: 0.95rem;
     transition: var(--transition);
 }
