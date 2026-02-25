@@ -712,6 +712,9 @@ def test_db():
         import traceback
         return jsonify({"status": "error", "message": str(e), "trace": traceback.format_exc()})
 
+# Start database initialization
+init_db()
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=False, host='0.0.0.0', port=port)
