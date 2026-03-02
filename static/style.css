@@ -219,9 +219,9 @@ body {
 }
 
 .q-step.active {
-    background: #1a56db;
+    background: #1d4ed8;
     color: #fff;
-    border-color: #1a56db;
+    border-color: #1d4ed8;
 }
 
 .q-step.solved {
