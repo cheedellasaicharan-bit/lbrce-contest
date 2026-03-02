@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Assessments — CSE(AI&ML) Coding Contest{% endblock %}
+{% block title %}Contest Arena — CSE(AI&ML) Coding Contest{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
@@ -172,37 +172,37 @@
 {% block content %}
 <!-- Hero Banner -->
 <div
-    style="background:linear-gradient(135deg,#1a56db 0%,#1e3a8a 100%);border-radius:16px;padding:28px 36px;margin-bottom:24px;overflow:hidden;position:relative;">
-    <div
-        style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,0.06);pointer-events:none;">
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;">
-        <div>
-            <div
-                style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border-radius:100px;padding:4px 14px;margin-bottom:10px;">
-                <span
-                    style="width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;box-shadow:0 0 6px #4ade80;animation:pulse 1.4s infinite;"></span>
-                <span style="font-size:12px;font-weight:700;color:#fff;letter-spacing:.06em;">LIVE CONTEST</span>
-            </div>
-            <h1 style="font-size:24px;font-weight:900;color:#fff;margin-bottom:4px;">CSE(AI&ML) Coding Contest</h1>
-            <p style="font-size:13px;color:rgba(255,255,255,.7);">LBRCE · Department of CSE(AI&ML)</p>
+    style="background:var(--blue-card);border-radius:18px;padding:32px 40px;margin-bottom:32px;overflow:hidden;position:relative;display:flex;justify-content:space-between;align-items:center;color:#fff;box-shadow:var(--shadow-lg);">
+    <div style="position:relative;z-index:1;">
+        <div
+            style="display:inline-flex;align-items:center;padding:5px 12px;background:rgba(255,255,255,0.1);border-radius:100px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.15);">
+            <span
+                style="width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;margin-right:8px;box-shadow:0 0 10px rgba(74,222,128,0.5);"></span>
+            <span style="font-size:10px;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;">LIVE
+                CONTEST</span>
         </div>
-        <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
-            <div
-                style="background:rgba(255,255,255,.12);border-radius:12px;padding:14px 22px;text-align:center;border:1px solid rgba(255,255,255,.18);">
-                <div id="timer-display"
-                    style="font-family:monospace;font-size:22px;font-weight:800;color:#fff;letter-spacing:.05em;">
-                    --:--:--</div>
-                <div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:2px;text-transform:uppercase;">Time
-                    Remaining</div>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:8px;">
-                <div style="color:rgba(255,255,255,.75);font-size:13px;">📋 <b style="color:#fff;">{{ problems|length
-                        }}</b> Problems</div>
-                <div style="color:rgba(255,255,255,.75);font-size:13px;">🏆 <b style="color:#facc15;">{{
-                        problems|sum(attribute='score') }}</b> max pts</div>
-                <div style="color:rgba(255,255,255,.75);font-size:13px;">💻 C · C++ · Java · Python</div>
-            </div>
+        <h1 style="font-size:32px;font-weight:800;margin:0 0 6px;letter-spacing:-0.025em;">CSE(AI&ML) Coding Contest
+        </h1>
+        <p style="font-size:14px;color:rgba(255,255,255,0.7);font-weight:500;">LBRCE · Department of CSE(AI&ML)</p>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:32px;position:relative;z-index:1;">
+        <div
+            style="background:rgba(0,0,0,0.1);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:18px 28px;text-align:center;min-width:160px;">
+            <div id="timer-display"
+                style="font-family:monospace;font-size:28px;font-weight:800;letter-spacing:2px;margin-bottom:2px;">
+                --:--:--</div>
+            <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;opacity:0.6;">TIME
+                REMAINING</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;text-align:left;">
+            <div style="font-size:12px;font-weight:700;display:flex;align-items:center;gap:10px;"><span
+                    style="font-size:15px;opacity:0.8;">📄</span> {{ problems|length }} Problems</div>
+            <div style="font-size:12px;font-weight:700;display:flex;align-items:center;gap:10px;"><span
+                    style="font-size:15px;opacity:0.8;">🏆</span> <b style="color:#fcd34d;">{{
+                    problems|sum(attribute='score') }}</b> max pts</div>
+            <div style="font-size:12px;font-weight:700;display:flex;align-items:center;gap:10px;"><span
+                    style="font-size:15px;opacity:0.8;">⚡</span> C · C++ · Java · Python</div>
         </div>
     </div>
 </div>
@@ -235,31 +235,32 @@
         </thead>
         <tbody>
             {% for p in problems %}
-            <tr style="border-top:1px solid #f3f4f6;cursor:pointer;transition:background .15s;"
-                onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background=''">
-                <td style="padding:14px 24px;font-size:13px;color:#9ca3af;font-weight:600;">{{ loop.index }}</td>
-                <td style="padding:14px 16px;">
-                    <div style="font-size:14px;font-weight:700;color:#111827;">{{ p['title'] }}</div>
+            <tr style="border-top:1px solid #f1f5f9;cursor:pointer;transition:background .1s;"
+                onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+                <td style="padding:16px 24px;font-size:13px;color:#94a3b8;font-weight:600;">{{ loop.index }}
+                </td>
+                <td style="padding:16px 16px;">
+                    <div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:2px;">{{ p['title'] }}</div>
                     <div
-                        style="font-size:12px;color:#9ca3af;margin-top:2px;max-width:380px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                        style="font-size:12px;color:#64748b;max-width:450px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
                         {{ p['description'] }}</div>
                 </td>
-                <td style="padding:14px 16px;text-align:center;">
+                <td style="padding:16px 16px;text-align:center;">
                     {% if p['difficulty']=='easy' %}<span
-                        style="background:#dcfce7;color:#15803d;font-size:12px;font-weight:700;padding:3px 10px;border-radius:100px;">Easy</span>
+                        style="background:#f0fdf4;color:#166534;font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px;">Easy</span>
                     {% elif p['difficulty']=='medium' %}<span
-                        style="background:#fef9c3;color:#b45309;font-size:12px;font-weight:700;padding:3px 10px;border-radius:100px;">Medium</span>
+                        style="background:#fffbeb;color:#92400e;font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px;">Medium</span>
                     {% else %}<span
-                        style="background:#fee2e2;color:#b91c1c;font-size:12px;font-weight:700;padding:3px 10px;border-radius:100px;">Hard</span>{%
+                        style="background:#fef2f2;color:#991b1b;font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px;">Hard</span>{%
                     endif %}
                 </td>
-                <td style="padding:14px 16px;text-align:center;"><span
-                        style="font-size:14px;font-weight:800;color:#1a56db;">{{ p['score'] }}</span><span
-                        style="font-size:11px;color:#9ca3af;">pts</span></td>
-                <td style="padding:14px 24px;text-align:right;">
+                <td style="padding:16px 16px;text-align:center;">
+                    <span style="font-size:14px;font-weight:700;color:var(--blue);">{{ p['score'] }}</span><span
+                        style="font-size:10px;color:#94a3b8;font-weight:750;margin-left:1px;text-transform:lowercase;">pts</span>
+                </td>
+                <td style="padding:16px 24px;text-align:right;">
                     <button type="button" class="solve-btn-arena" data-idx="{{ loop.index0 }}"
-                        style="background:var(--blue);color:#fff;border:none;padding:7px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:0.2s;"
-                        onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Solve
+                        style="background:var(--blue);color:#fff;border:none;padding:8px 20px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;transition:0.15s;box-shadow:var(--shadow-sm);">Solve
                         →</button>
                 </td>
             </tr>

@@ -1,24 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 /* ============================
-   SKILL GRAPH DESIGN SYSTEM
-   White + Blue + Dark Accents
+   LBRCE CONTEST DESIGN SYSTEM
+   Official CSE(AI&ML) Theme
    ============================ */
 :root {
     --bg: #ffffff;
-    --bg-light: #f5f7fa;
-    --bg-gray: #f0f2f5;
+    --bg-light: #f8fafc;
+    --bg-gray: #f1f5f9;
     --card-bg: #ffffff;
     --border: #e5e7eb;
     --border-dark: #d1d5db;
 
-    /* Blue Palette (matching Skill Graph) */
-    --blue: #1a56db;
-    --blue-dark: #1344b0;
+    /* Blue Palette (matching screenshot) */
+    --blue: #1d4ed8;
+    --blue-dark: #1e40af;
     --blue-light: #3b82f6;
     --blue-bg: #eff6ff;
-    --blue-card: linear-gradient(135deg, #1e4ed8 0%, #2563eb 50%, #1d4ed8 100%);
-    --blue-card2: linear-gradient(135deg, #1e3a8a 0%, #1e4ed8 100%);
+    --blue-card: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
 
     /* Accent colors */
     --green: #0e9f6e;
@@ -101,7 +100,7 @@
     box-shadow: 0 30px 60px var(--glass-shadow) !important;
 }
 
-.intelligence-gradient {
+.contest-gradient {
     background: radial-gradient(circle at top right, rgba(26, 86, 219, 0.05), transparent),
         radial-gradient(circle at bottom left, rgba(63, 185, 80, 0.05), transparent) !important;
 }
