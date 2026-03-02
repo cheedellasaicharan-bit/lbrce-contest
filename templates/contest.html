@@ -303,15 +303,26 @@
     let disqualified = false;
 
     // Anti-cheat: Detect tab switch or window minimize
-    document.addEventListener("visibilitychange", () => {
-        if (document.hidden && document.getElementById('assessment-view').style.display !== 'none' && !disqualified) {
+    function enforceAntiCheat() {
+        if (document.getElementById('assessment-view').style.display !== 'none' && !disqualified) {
             disqualified = true;
+            // Aggressive immediate DOM takeover to prevent further interaction
+            document.body.innerHTML = '<div style="display:flex;flex-direction:column;height:100vh;align-items:center;justify-content:center;background:#111;color:#ff4444;font-size:28px;font-weight:900;text-align:center;padding:40px;font-family:sans-serif;">🚫 CHEATING DETECTED<br><br><span style="font-size:16px;color:#ccc;font-weight:normal;">You switched tabs, clicked outside, or minimized the window.<br>Your exam has been automatically submitted with a 0 score and locked.</span></div>';
+
+            // Guaranteed delivery using beacon, with fetch fallback
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon('/disqualify');
+            }
             fetch('/disqualify', { method: 'POST' }).finally(() => {
-                alert("CHEATING DETECTED: You have switched tabs or minimized the window. Your exam has been automatically submitted and locked.");
-                window.location.href = "/user/dashboard";
+                setTimeout(() => { window.location.href = "/user/dashboard"; }, 2500);
             });
         }
+    }
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) enforceAntiCheat();
     });
+    window.addEventListener("blur", enforceAntiCheat);
 
     function initEditor() {
         if (!editorInstance) {
