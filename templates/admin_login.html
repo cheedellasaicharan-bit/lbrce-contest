@@ -1,48 +1,52 @@
 {% extends "base.html" %}
 {% block title %}Admin Login — CSE(AI&ML) Coding Contest{% endblock %}
 
-{% block footer %}{% endblock %}
-
 {% block content %}
-<div class="login-wrapper">
-    <div class="login-split-card fade-in" style="max-width: 800px;">
-        <!-- Left Hero -->
-        <div class="login-hero" style="background: var(--grad-purple); border-right: 1px solid var(--border-color);">
-            <div style="font-size: 4rem; margin-bottom: 1.5rem; filter: drop-shadow(0 0 20px var(--accent-primary));">🔒
+<div
+    style="min-height:90vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at top right, rgba(26, 86, 219, 0.05), transparent), radial-gradient(circle at bottom left, rgba(63, 185, 80, 0.05), transparent);">
+    <div class="card glass-card fade-in"
+        style="width:100%;max-width:440px;padding:48px;background:var(--card-bg);backdrop-filter:blur(20px);border-radius:32px;box-shadow:0 30px 70px rgba(0,0,0,0.1);border:1px solid var(--border);">
+        <div style="text-align:center;margin-bottom:40px;">
+            <div
+                style="width:64px;height:64px;background:var(--text);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:var(--shadow-md);">
+                <span style="color:var(--bg);font-weight:900;font-size:24px;">LB</span>
             </div>
-            <h1 class="login-hero-title">Admin Access</h1>
-            <p class="login-hero-subtitle">
-                Authorized Personnel Only. Please verify your credentials to access the command center.
+            <h2 style="font-size:24px;font-weight:900;color:var(--text);margin:0;letter-spacing:-0.02em;">Command Center
+            </h2>
+            <p style="font-size:14px;color:var(--text-3);margin-top:8px;font-weight:600;">System Administrative
+                Authentication
             </p>
         </div>
 
-        <!-- Right Form -->
-        <div class="login-form-container" style="padding: 4rem 3rem;">
-            <h2 style="margin-bottom: 2rem; font-weight: 800;">Secure Sign In</h2>
-            <form method="POST" action="/admin_login">
-                <div class="form-group">
-                    <label class="form-label">Admin Username</label>
-                    <div class="form-input-wrapper">
-                        <input type="text" name="username" class="form-input" placeholder="Username" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Password</label>
-                    <div class="form-input-wrapper">
-                        <input type="password" name="password" class="form-input" placeholder="••••••••" required>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary"
-                    style="width: 100%; margin-top: 1.5rem; justify-content: center; padding: 1rem; font-weight: 800;">
-                    🔓 Unlock Dashboard
-                </button>
-            </form>
-            <div style="margin-top: 2.5rem; text-align: center;">
-                <a href="/"
-                    style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 600;">
-                    ← Back to User Login
-                </a>
+        <form method="POST" action="/admin_login" style="display:flex;flex-direction:column;gap:20px;">
+            <div>
+                <label
+                    style="font-size:11px;font-weight:900;color:var(--text-3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;display:block;">Identification
+                    Vector</label>
+                <input type="text" name="username" required placeholder="Administrator Username" autofocus
+                    style="width:100%;padding:14px 18px;border-radius:14px;border:1px solid var(--border);font-size:15px;font-weight:600;outline:none;background:var(--bg-gray);color:var(--text);transition:0.2s;box-sizing:border-box;">
             </div>
+            <div>
+                <label
+                    style="font-size:11px;font-weight:900;color:var(--text-3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;display:block;">Access
+                    Token</label>
+                <input type="password" name="password" required placeholder="••••••••••••"
+                    style="width:100%;padding:14px 18px;border-radius:14px;border:1px solid var(--border);font-size:15px;font-weight:600;outline:none;background:var(--bg-gray);color:var(--text);transition:0.2s;box-sizing:border-box;">
+            </div>
+            <button type="submit" class="btn"
+                style="width:100%;background:var(--text);color:var(--bg);padding:16px;border-radius:16px;font-weight:900;font-size:14px;border:none;cursor:pointer;transition:0.3s;margin-top:10px;box-shadow:var(--shadow-md);"
+                onmouseover="this.style.transform='translateY(-2px)';"
+                onmouseout="this.style.transform='translateY(0)';">
+                Authorize Session →
+            </button>
+        </form>
+
+        <div style="text-align:center;margin-top:32px;">
+            <a href="{{ url_for('login') }}"
+                style="font-size:13px;color:var(--text-4);text-decoration:none;font-weight:700;transition:0.2s;"
+                onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--text-4)'">← Relocate to
+                Student
+                Gateway</a>
         </div>
     </div>
 </div>

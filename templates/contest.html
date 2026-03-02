@@ -1,129 +1,478 @@
 {% extends "base.html" %}
-{% block title %}Contest — CSE(AI&ML) Coding Contest{% endblock %}
+{% block title %}Assessments — CSE(AI&ML) Coding Contest{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
+<script id="problem-data" type="application/json">{{ problems_json | safe }}</script>
+<style>
+    /* Glassmorphism & Modern UI */
+    .glass-header {
+        background: var(--card-bg) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border) !important;
+    }
+
+    .zen-mode .left-panel,
+    .zen-mode .glass-header {
+        display: none !important;
+    }
+
+    .zen-mode .main-content {
+        width: 100% !important;
+    }
+
+    /* CodeMirror & Editor */
+    #cm-wrap {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .CodeMirror {
+        font-family: 'Fira Code', 'Consolas', monospace !important;
+        font-size: 14px !important;
+        line-height: 1.75 !important;
+    }
+
+    .CodeMirror-gutters {
+        background: var(--bg-gray) !important;
+        border-right: 1px solid var(--border) !important;
+    }
+
+    /* Breadcrumb Nav */
+    .q-breadcrumb {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+    }
+
+    .q-step {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid var(--border);
+        color: var(--text-3);
+        background: var(--card-bg);
+    }
+
+    .q-step.active {
+        background: #1a56db;
+        color: #fff;
+        border-color: #1a56db;
+        box-shadow: 0 0 12px rgba(26, 86, 219, 0.4);
+        animation: active-pulse 2s infinite;
+    }
+
+    @keyframes active-pulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(26, 86, 219, 0.4);
+        }
+
+        50% {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px 5px rgba(26, 86, 219, 0.2);
+        }
+
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(26, 86, 219, 0.4);
+        }
+    }
+
+    .q-step.solved {
+        border-color: var(--green);
+        background: var(--green-bg);
+        color: var(--green);
+    }
+
+    /* Output tabs */
+    .out-tab {
+        padding: 7px 18px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        color: #8b949e;
+        border-bottom: 2px solid transparent;
+        font-family: inherit;
+        transition: all .15s;
+    }
+
+    .out-tab.active {
+        color: #1a56db;
+        border-bottom-color: #1a56db;
+    }
+
+    /* Stats Mini Ring */
+    .mini-ring {
+        position: relative;
+        width: 34px;
+        height: 34px;
+    }
+
+    .mini-ring svg {
+        transform: rotate(-90deg);
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            opacity: 1
+        }
+
+        50% {
+            opacity: .4
+        }
+    }
+
+    .zen-toggle {
+        background: #21262d;
+        border: 1px solid #30363d;
+        color: #c9d1d9;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .zen-toggle:hover {
+        background: #30363d;
+        border-color: #8b949e;
+    }
+
+    .zen-toggle.active {
+        background: #1a56db;
+        color: #fff;
+        border-color: #1a56db;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container container-lg">
-    <!-- Header -->
-    <div class="contest-header fade-in"
-        style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);">
+<!-- Hero Banner -->
+<div
+    style="background:linear-gradient(135deg,#1a56db 0%,#1e3a8a 100%);border-radius:16px;padding:28px 36px;margin-bottom:24px;overflow:hidden;position:relative;">
+    <div
+        style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,0.06);pointer-events:none;">
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;">
         <div>
-            <h2 style="font-weight: 900; font-size: 2rem; letter-spacing: -0.02em;">⚡ Contest Arena</h2>
-            <p style="color: var(--text-secondary); font-size: 1rem;">Solving: <span id="header-problem-title"
-                    style="color: var(--accent-purple); font-weight: 700;">{% if problems %}{{ problems[0]['title'] }}{%
-                    endif %}</span></p>
+            <div
+                style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border-radius:100px;padding:4px 14px;margin-bottom:10px;">
+                <span
+                    style="width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;box-shadow:0 0 6px #4ade80;animation:pulse 1.4s infinite;"></span>
+                <span style="font-size:12px;font-weight:700;color:#fff;letter-spacing:.06em;">LIVE CONTEST</span>
+            </div>
+            <h1 style="font-size:24px;font-weight:900;color:#fff;margin-bottom:4px;">CSE(AI&ML) Coding Contest</h1>
+            <p style="font-size:13px;color:rgba(255,255,255,.7);">LBRCE · Department of CSE(AI&ML)</p>
         </div>
-        <div id="timer" class="timer"
-            style="font-family: monospace; font-weight: 800; font-size: 1.5rem; padding: 0.6rem 1.2rem; border-radius: 12px; background: var(--accent-purple); border: none; color: #fff;">
-            Loading...
+        <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
+            <div
+                style="background:rgba(255,255,255,.12);border-radius:12px;padding:14px 22px;text-align:center;border:1px solid rgba(255,255,255,.18);">
+                <div id="timer-display"
+                    style="font-family:monospace;font-size:22px;font-weight:800;color:#fff;letter-spacing:.05em;">
+                    --:--:--</div>
+                <div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:2px;text-transform:uppercase;">Time
+                    Remaining</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="color:rgba(255,255,255,.75);font-size:13px;">📋 <b style="color:#fff;">{{ problems|length
+                        }}</b> Problems</div>
+                <div style="color:rgba(255,255,255,.75);font-size:13px;">🏆 <b style="color:#facc15;">{{
+                        problems|sum(attribute='score') }}</b> max pts</div>
+                <div style="color:rgba(255,255,255,.75);font-size:13px;">💻 C · C++ · Java · Python</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Problems Table -->
+<div class="card" style="border-radius:14px;overflow:hidden;padding:0;margin-bottom:20px;">
+    <div
+        style="padding:14px 24px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
+        <h2 style="font-size:15px;font-weight:700;color:#111827;">📋 Problems</h2>
+        <span style="font-size:13px;color:#6b7280;">Click to start coding</span>
+    </div>
+    {% if problems %}
+    <table style="width:100%;border-collapse:collapse;">
+        <thead>
+            <tr style="background:#f9fafb;">
+                <th
+                    style="padding:10px 24px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">
+                    #</th>
+                <th
+                    style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">
+                    Problem</th>
+                <th
+                    style="padding:10px 16px;text-align:center;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">
+                    Difficulty</th>
+                <th
+                    style="padding:10px 16px;text-align:center;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">
+                    Points</th>
+                <th style="padding:10px 24px;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in problems %}
+            <tr style="border-top:1px solid #f3f4f6;cursor:pointer;transition:background .15s;"
+                onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background=''">
+                <td style="padding:14px 24px;font-size:13px;color:#9ca3af;font-weight:600;">{{ loop.index }}</td>
+                <td style="padding:14px 16px;">
+                    <div style="font-size:14px;font-weight:700;color:#111827;">{{ p['title'] }}</div>
+                    <div
+                        style="font-size:12px;color:#9ca3af;margin-top:2px;max-width:380px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                        {{ p['description'] }}</div>
+                </td>
+                <td style="padding:14px 16px;text-align:center;">
+                    {% if p['difficulty']=='easy' %}<span
+                        style="background:#dcfce7;color:#15803d;font-size:12px;font-weight:700;padding:3px 10px;border-radius:100px;">Easy</span>
+                    {% elif p['difficulty']=='medium' %}<span
+                        style="background:#fef9c3;color:#b45309;font-size:12px;font-weight:700;padding:3px 10px;border-radius:100px;">Medium</span>
+                    {% else %}<span
+                        style="background:#fee2e2;color:#b91c1c;font-size:12px;font-weight:700;padding:3px 10px;border-radius:100px;">Hard</span>{%
+                    endif %}
+                </td>
+                <td style="padding:14px 16px;text-align:center;"><span
+                        style="font-size:14px;font-weight:800;color:#1a56db;">{{ p['score'] }}</span><span
+                        style="font-size:11px;color:#9ca3af;">pts</span></td>
+                <td style="padding:14px 24px;text-align:right;">
+                    <button type="button" class="solve-btn-arena" data-idx="{{ loop.index0 }}"
+                        style="background:var(--blue);color:#fff;border:none;padding:7px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:0.2s;"
+                        onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Solve
+                        →</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="padding:60px;text-align:center;color:#9ca3af;">
+        <div style="font-size:2.5rem;margin-bottom:12px;">🏗️</div>
+        <p>No problems added yet</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Rules + Languages -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="card" style="border-radius:12px;padding:20px;">
+        <h3 style="font-size:14px;font-weight:700;color:#111827;margin-bottom:14px;">📜 Contest Rules</h3>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;">
+            <li style="font-size:13px;color:#374151;display:flex;gap:8px;"><span
+                    style="color:#1a56db;font-weight:700;">1.</span>Each problem can be attempted multiple times.</li>
+            <li style="font-size:13px;color:#374151;display:flex;gap:8px;"><span
+                    style="color:#1a56db;font-weight:700;">2.</span>Only your highest score per problem counts.</li>
+            <li style="font-size:13px;color:#374151;display:flex;gap:8px;"><span
+                    style="color:#1a56db;font-weight:700;">3.</span>Code is auto-submitted when timer reaches zero.</li>
+            <li style="font-size:13px;color:#374151;display:flex;gap:8px;"><span
+                    style="color:#1a56db;font-weight:700;">4.</span>Plagiarism will result in disqualification.</li>
+        </ul>
+    </div>
+    <div class="card" style="border-radius:12px;padding:20px;">
+        <h3 style="font-size:14px;font-weight:700;color:#111827;margin-bottom:14px;">💻 Supported Languages</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            {% for lang,icon in [('Python 3','🐍'),('C','⚡'),('C++','🔧'),('Java','☕')] %}
+            <div
+                style="display:flex;align-items:center;gap:10px;background:#f9fafb;border-radius:8px;padding:10px 14px;">
+                <span style="font-size:18px;">{{ icon }}</span><span
+                    style="font-size:13px;font-weight:600;color:#374151;">{{ lang }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block overlay %}
+<!-- 3-PANEL ASSESSMENT VIEW -->
+<div id="assessment-view" class="arena-view"
+    style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;flex-direction:column;">
+
+    <!-- Top Bar -->
+    <div class="arena-header"
+        style="height:60px;display:flex;align-items:center;padding:0 20px;gap:20px;flex-shrink:0;">
+        <!-- Left: Q Picker -->
+        <div class="q-breadcrumb" id="header-q-picker"></div>
+
+        <div style="width:1px;height:24px;background:rgba(255,255,255,0.1);"></div>
+
+        <!-- Center-ish: Title & Status -->
+        <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+            <div id="top-problem-title"
+                style="font-size:14px;font-weight:800;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+            </div>
+            <div id="output-status"
+                style="font-size:10px;color:#3fb950;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">
+                Ready</div>
+        </div>
+
+        <!-- Right: Stats & Actions -->
+        <div style="display:flex;align-items:center;gap:14px;">
+            <!-- Timer Box -->
+            <div id="assess-timer"
+                style="font-family:monospace;font-size:14px;font-weight:800;color:#fff;background:rgba(255,255,255,0.1);padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);">
+                00:00:00</div>
+
+            <!-- Mini Accuracy -->
+            <div
+                style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.05);padding:4px 10px;border-radius:100px;border:1px solid rgba(255,255,255,0.1);">
+                <div class="mini-ring">
+                    <svg width="34" height="34" viewBox="0 0 34 34">
+                        <circle cx="17" cy="17" r="14" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="3" />
+                        <circle id="mini-ring-prog" cx="17" cy="17" r="14" fill="none" stroke="#1a56db" stroke-width="3"
+                            stroke-dasharray="88" stroke-dashoffset="88" stroke-linecap="round"
+                            style="transition:stroke-dashoffset .5s;" />
+                    </svg>
+                </div>
+                <div style="text-align:left;">
+                    <div id="mini-ring-pct" style="font-size:11px;font-weight:800;color:#fff;line-height:1;">0%</div>
+                    <div id="mini-score" style="font-size:9px;font-weight:700;color:#8b949e;margin-top:1px;">0 pts</div>
+                </div>
+            </div>
+
+            <div style="width:1px;height:24px;background:rgba(255,255,255,0.1);"></div>
+
+            <button class="zen-toggle" id="zen-btn" onclick="toggleZen()"
+                title="Zen Mode (Maximize Editor)">Zen</button>
+
+            <select id="language" onchange="updateBoilerplate()"
+                style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:4px 10px;border-radius:8px;font-size:13px;height:32px;cursor:pointer;font-family:inherit;font-weight:700;outline:none;">
+                <option value="50">C</option>
+                <option value="54">C++</option>
+                <option value="62">Java</option>
+                <option value="71" selected>Python</option>
+            </select>
+
+            <div style="display:flex;gap:8px;">
+                <button id="run-btn" onclick="submitCode(true)"
+                    style="background:#238636;color:#fff;border:none;padding:0 16px;height:32px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;">
+                    <span style="font-size:10px;">▶</span> Run
+                </button>
+                <button id="submit-btn" onclick="submitCode(false)"
+                    style="background:#1a56db;color:#fff;border:none;padding:0 16px;height:32px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(26, 86, 219, 0.3);">
+                    <span style="font-size:12px;">🚀</span> Submit
+                </button>
+            </div>
+
+            <button onclick="closeAssessment()"
+                style="background:rgba(255,255,255,0.05);border:none;color:#8b949e;font-size:18px;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:0.2s;"
+                onmouseover="this.style.background='rgba(239, 68, 68, 0.1)';this.style.color='#ef4444'"
+                onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.color='#8b949e'">✕</button>
         </div>
     </div>
 
-    <!-- Main Grid: Problems (Left) + Editor (Right) -->
-    <div class="contest-grid fade-in stagger-1"
-        style="display: grid; grid-template-columns: 320px 1fr; gap: 2rem; align-items: start;">
+    <!-- 2-Column Body -->
+    <div id="arena-body" style="display:flex;flex:1;overflow:hidden;min-height:0;">
 
-        <!-- Left Sidebar: Problem List -->
-        <aside class="problem-list-col">
-            <h4
-                style="margin-bottom: 1.2rem; font-weight: 800; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.1em; color: var(--text-muted);">
-                Available Problems</h4>
-            <div class="problem-selector card"
-                style="display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem; background: #f8fafc;">
-                {% for p in problems %}
-                <button class="problem-tab {% if loop.first %}active{% endif %}" data-id="{{ p['id'] }}"
-                    data-desc="{{ p['description'] }}" data-score="{{ p['score'] }}" data-diff="{{ p['difficulty'] }}"
-                    onclick="selectProblem(this)"
-                    style="text-align: left; padding: 1rem; border-radius: 10px; border: 1px solid transparent; background: transparent; color: var(--text-main); cursor: pointer; transition: var(--transition);">
-                    <div style="font-weight: 700; margin-bottom: 0.2rem;">{{ p['title'] }}</div>
-                    <div
-                        style="font-size: 0.75rem; color: var(--text-secondary); display: flex; justify-content: space-between;">
-                        <span>{{ p['difficulty'] }}</span>
-                        <span style="color: var(--accent-purple);">{{ p['score'] }} pts</span>
-                    </div>
-                </button>
-                {% endfor %}
-            </div>
-        </aside>
-
-        <!-- Right Side: Description & Editor -->
-        <div class="editor-col">
-            <!-- Problem Description -->
-            <div class="problem-description card fade-in stagger-2"
-                style="background: var(--grad-purple); margin-bottom: 2rem; padding: 2rem; border: none;">
-                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem;">
-                    <h3 id="problem-title" style="font-weight: 900; font-size: 1.4rem; color: white;">
-                        {% if problems %}{{ problems[0]['title'] }}{% endif %}
-                    </h3>
-                    <span id="problem-badge" class="badge"
-                        style="background: rgba(255,255,255,0.2); color: #fff; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">
-                        {% if problems %}{{ problems[0]['difficulty'] }}{% endif %}
-                    </span>
-                    <span id="problem-score"
-                        style="margin-left: auto; font-weight: 800; color: #fff; font-size: 1.2rem;">
-                        {% if problems %}{{ problems[0]['score'] }} pts{% endif %}
-                    </span>
-                </div>
-                <div id="problem-desc" style="line-height: 1.7; color: rgba(255,255,255,0.9); font-size: 1.05rem;">
-                    {% if problems %}{{ problems[0]['description'] }}{% endif %}
-                </div>
+        <!-- LEFT: Problem Info (340px) -->
+        <div class="left-panel"
+            style="width:340px;background:#0d1117;border-right:1px solid #30363d;overflow-y:auto;padding:24px 20px 80px;flex-shrink:0;">
+            <h2 id="left-title" style="font-size:18px;font-weight:900;color:#fff;margin-bottom:8px;line-height:1.3;">
+            </h2>
+            <div id="left-badges" style="margin-bottom:20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
             </div>
 
-            <div class="editor-section fade-in stagger-3">
-                <div class="editor-toolbar"
-                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.75rem 1.5rem; background: #f1f5f9; border-radius: 12px; border: 1px solid var(--border-color);">
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <span
-                            style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Language</span>
-                        <select id="language" class="form-control"
-                            style="background: #fff; border: 1px solid var(--border-color); color: var(--text-main); padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600;"
-                            onchange="updateBoilerplate()">
-                            <option value="71">🐍 Python 3</option>
-                            <option value="54">⚙️ C++ 17</option>
-                            <option value="50">🔧 C 11</option>
-                            <option value="62">☕ Java 11</option>
-                        </select>
-                    </div>
-                    <div style="display: flex; gap: 0.75rem;">
-                        <button class="btn btn-outline"
-                            style="border-radius: 10px; padding: 0.6rem 1.2rem; font-weight: 700;"
-                            onclick="submitCode(true)" id="run-btn">
-                            ▶️ Run
-                        </button>
-                        <button class="btn btn-primary btn-glow"
-                            style="border-radius: 10px; padding: 0.6rem 1.5rem; font-weight: 800;"
-                            onclick="submitCode(false)" id="submit-btn">
-                            🚀 Submit
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Code Editor -->
-                <div class="code-editor-wrapper"
-                    style="border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: var(--shadow-lg); margin-bottom: 2rem;">
-                    <textarea id="code" class="code-editor"
-                        style="width: 100%; height: 450px; background: #0f172a; color: #e2e8f0; font-family: 'Fira Code', 'Consolas', monospace; font-size: 1rem; padding: 1.5rem; border: none; outline: none; resize: none; line-height: 1.6;"
-                        placeholder="# Write your magnificent solution here..." spellcheck="false"></textarea>
-                </div>
-
-                <!-- Output Panel -->
-                <div class="output-panel-container card fade-in stagger-4"
-                    style="padding: 0; overflow: hidden; background: #1e293b; border: 1px solid var(--border-color);">
+            <div style="display:flex;flex-direction:column;gap:24px;">
+                <section>
                     <div
-                        style="padding: 1rem 1.5rem; background: #0f172a; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display: flex; align-items: center; gap: 0.75rem;">
-                            <span
-                                style="font-weight: 800; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted);">Console
-                                Output</span>
-                            <span id="output-status"
-                                style="font-size: 0.75rem; font-weight: 600; color: var(--accent-primary);">Idle</span>
-                        </div>
-                        <button class="btn btn-sm btn-outline" onclick="clearOutput()"
-                            style="padding: 0.2rem 0.6rem; font-size: 0.7rem;">Clear</button>
+                        style="font-size:11px;font-weight:800;text-transform:uppercase;color:#484f58;margin-bottom:8px;letter-spacing:.1em;display:flex;align-items:center;gap:6px;">
+                        <span style="width:6px;height:6px;background:#1a56db;border-radius:50%;"></span> Description
                     </div>
-                    <div id="output" class="output-panel"
-                        style="padding: 1.5rem; font-family: monospace; font-size: 0.95rem; color: #94a3b8; min-height: 120px; white-space: pre-wrap;">
-                        No output yet. Run your code to see results here.</div>
+                    <p id="left-desc" style="font-size:14px;color:#c9d1d9;line-height:1.8;white-space:pre-wrap;"></p>
+                </section>
+
+                <section>
+                    <div
+                        style="font-size:11px;font-weight:800;text-transform:uppercase;color:#484f58;margin-bottom:8px;letter-spacing:.1em;display:flex;align-items:center;gap:6px;">
+                        <span style="width:6px;height:6px;background:#facc15;border-radius:50%;"></span> Constraints
+                    </div>
+                    <p id="left-constraints"
+                        style="font-size:14px;color:#c9d1d9;line-height:1.6;font-family:'Fira Code', monospace;background:rgba(255,255,255,0.03);padding:8px 12px;border-radius:8px;">
+                        NA</p>
+                </section>
+
+                <section>
+                    <div
+                        style="font-size:11px;font-weight:800;text-transform:uppercase;color:#484f58;margin-bottom:12px;letter-spacing:.1em;display:flex;align-items:center;gap:6px;">
+                        <span style="width:6px;height:6px;background:#3fb950;border-radius:50%;"></span> Examples
+                    </div>
+                    <div id="left-testcases" style="display:flex;flex-direction:column;gap:16px;"></div>
+                </section>
+            </div>
+        </div>
+
+        <!-- RIGHT: Workspace (Flex-1) -->
+        <div class="main-content"
+            style="flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;background:#0d1117;">
+            <!-- Editor -->
+            <div style="flex:1;display:flex;flex-direction:column;min-height:0;position:relative;">
+                <textarea id="code-editor" oninput="this.style.height=''"
+                    style="flex:1;width:100%;background:#0d1117;color:#e6edf3;font-family:'Fira Code','Consolas','Courier New',monospace;font-size:15px;line-height:1.8;padding:24px;border:none;outline:none;resize:none;tab-size:4;box-sizing:border-box;caret-color:#58a6ff;overflow-y:auto;"
+                    placeholder="Write your code here..." spellcheck="false" autocomplete="off" autocorrect="off"
+                    autocapitalize="off"></textarea>
+
+                <!-- Floating Nav for editor -->
+                <div style="position:absolute;bottom:16px;right:24px;display:flex;gap:10px;z-index:10;">
+                    <button onclick="prevProblem()" title="Previous Problem"
+                        style="background:#21262d;border:1px solid #30363d;color:#8b949e;width:34px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:0.2s;"
+                        onmouseover="this.style.borderColor='#1a56db';this.style.color='#fff'"
+                        onmouseout="this.style.borderColor='#30363d';this.style.color='#8b949e'">←</button>
+                    <button onclick="nextProblem()" title="Next Problem"
+                        style="background:#1a56db;border:none;color:#fff;width:34px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:0.2s;box-shadow:0 4px 12px rgba(26, 86, 219, 0.2);"
+                        onmouseover="this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.transform='translateY(0)'">→</button>
                 </div>
+            </div>
+
+            <!-- Console -->
+            <div
+                style="height:210px;border-top:1px solid #30363d;display:flex;flex-direction:column;flex-shrink:0;background:#161b22;">
+                <div
+                    style="display:flex;align-items:center;border-bottom:1px solid #30363d;background:#0d1117;padding:0 12px;height:40px;">
+                    <div style="display:flex;gap:4px;">
+                        <button class="out-tab active" id="tab-output" onclick="switchTab('output')">Console</button>
+                        <button class="out-tab" id="tab-stdin" onclick="switchTab('stdin')">Test Input</button>
+                    </div>
+                    <button onclick="clearOutput()"
+                        style="margin-left:auto;background:transparent;border:none;color:#8b949e;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;font-family:inherit;transition:0.2s;"
+                        onmouseover="this.style.color='#fff';this.style.background='rgba(255,255,255,0.05)'"
+                        onmouseout="this.style.color='#8b949e';this.style.background='transparent'">Clear</button>
+                </div>
+                <div id="panel-output"
+                    style="flex:1;padding:16px;font-family:'Fira Code',monospace;font-size:13px;color:#c9d1d9;white-space:pre-wrap;overflow-y:auto;line-height:1.6;background:#0d1117;">
+                    Run your code to see results here...</div>
+                <div id="panel-stdin" style="display:none;flex:1;padding:0;background:#0d1117;">
+                    <textarea id="stdin" placeholder="Type your input here..."
+                        style="width:100%;height:100%;background:transparent;color:#c9d1d9;font-family:'Fira Code',monospace;font-size:13px;border:none;padding:16px;resize:none;outline:none;box-sizing:border-box;"></textarea>
+                </div>
+            </div>
+
+            <!-- Bottom Status Bar -->
+            <div
+                style="height:28px;background:#161b22;border-top:1px solid #30363d;display:flex;align-items:center;padding:0 16px;justify-content:space-between;">
+                <div style="font-size:10px;color:#8b949e;font-weight:600;">ESC to exit arena • Ctrl+/ to comment</div>
+                <div style="font-size:10px;color:#8b949e;font-weight:600;">Connected to Cloud Judge</div>
             </div>
         </div>
     </div>
@@ -132,175 +481,247 @@
 
 {% block scripts %}
 <script>
-    // ---- Problem Selection ----
-    let currentProblem = '{{ problems[0]["id"] if problems else "" }}';
-
-    function selectProblem(el) {
-        document.querySelectorAll('.problem-tab').forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
-
-        currentProblem = el.dataset.id;
-        document.getElementById('problem-desc').textContent = el.dataset.desc;
-        document.getElementById('problem-title').textContent = el.textContent.replace(/\d+pts/, '').trim();
-        document.getElementById('problem-score').textContent = el.dataset.score + ' pts';
-
-        const badge = document.getElementById('problem-badge');
-        badge.textContent = el.dataset.diff;
-        badge.className = 'badge badge-' + el.dataset.diff;
-    }
-
-    // ---- Timer ----
+    const allProblems = JSON.parse(document.getElementById('problem-data').textContent);
     const endTime = new Date("{{ end_time }}").getTime();
     const startTime = new Date("{{ start_time }}").getTime();
+    let currentIdx = 0;
+    let currentProblem = allProblems.length ? allProblems[0].id : '';
+    let isZen = false;
 
-    function updateTimer() {
-        const now = Date.now();
-        const diff = endTime - now;
-        const timerEl = document.getElementById('timer');
+    // Resolve Assessment triggers
+    document.querySelectorAll('.solve-btn-arena').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.getAttribute('data-idx'));
+            openAssessment(idx);
+        });
+    });
 
-        if (now < startTime) {
-            const toStart = startTime - now;
-            const h = Math.floor(toStart / 3600000);
-            const m = Math.floor((toStart % 3600000) / 60000);
-            const s = Math.floor((toStart % 60000) / 1000);
-            timerEl.textContent = `Starts in ${h}h ${m}m ${s}s`;
-            timerEl.className = 'timer safe';
-        } else if (diff <= 0) {
-            timerEl.textContent = '⏰ Contest Ended';
-            timerEl.className = 'timer';
-            document.getElementById('submit-btn').disabled = true;
-            document.getElementById('submit-btn').textContent = 'Contest Over';
+    /* Stats Initialization */
+    let stats = { correct: 0, wrong: 0, score: 0 };
+    const solvedProblems = new Set();
+
+    function updateStats(ok, earned, probId) {
+        if (ok) {
+            stats.correct++;
+            solvedProblems.add(probId);
         } else {
-            const h = Math.floor(diff / 3600000);
-            const m = Math.floor((diff % 3600000) / 60000);
-            const s = Math.floor((diff % 60000) / 1000);
-            timerEl.textContent = `⏱ ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-            timerEl.className = diff < 600000 ? 'timer' : 'timer safe';
+            stats.wrong++;
+        }
+        stats.score += earned;
+
+        // Update Mini UI
+        const pct = allProblems.length ? Math.round(stats.correct / allProblems.length * 100) : 0;
+        const miniRing = document.getElementById('mini-ring-prog');
+        const miniPct = document.getElementById('mini-ring-pct');
+        const miniScore = document.getElementById('mini-score');
+
+        if (miniRing) miniRing.style.strokeDashoffset = 88 - (88 * pct / 100);
+        if (miniPct) miniPct.textContent = pct + '%';
+        if (miniScore) miniScore.textContent = stats.score + ' pts';
+
+        // Color coding for progress
+        if (miniRing) miniRing.style.stroke = pct >= 80 ? '#3fb950' : pct >= 50 ? '#e3b341' : '#1a56db';
+
+        buildDots(); // Refresh solved status colors in dots
+    }
+
+    /* Zen Mode */
+    function toggleZen() {
+        isZen = !isZen;
+        const view = document.getElementById('assessment-view');
+        const btn = document.getElementById('zen-btn');
+        if (isZen) {
+            view.classList.add('zen-mode');
+            btn.classList.add('active');
+            btn.textContent = 'Exit Zen';
+        } else {
+            view.classList.remove('zen-mode');
+            btn.classList.remove('active');
+            btn.textContent = 'Zen';
         }
     }
-    updateTimer();
-    setInterval(updateTimer, 1000);
 
-    // ---- Submit Code ----
+    /* Editor helpers */
+    const getTA = () => document.getElementById('code-editor');
+    const getCode = () => getTA() ? getTA().value : '';
+    const setCode = v => { const ta = getTA(); if (ta) { ta.value = v || ''; ta.focus(); } };
+
+    function updateBoilerplate() {
+        const v = document.getElementById('language').value;
+        const bp = {
+            "71": "# Python 3\n\n",
+            "50": "#include <stdio.h>\nint main() {\n    int a, b;\n    // Write your code here\n    return 0;\n}\n",
+            "54": "#include <iostream>\nusing namespace std;\nint main() {\n    int a, b;\n    // Write your code here\n    return 0;\n}\n",
+            "62": "public class Main {\n    public static void main(String[] args) {\n        // Write your code here\n    }\n}\n"
+        };
+        if (!getCode().trim()) setCode(bp[v] || '');
+    }
+
+    // Tab key inserts 4 spaces
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Tab' && document.activeElement === getTA()) {
+            e.preventDefault();
+            const ta = getTA(), s = ta.selectionStart, en = ta.selectionEnd;
+            ta.value = ta.value.substring(0, s) + '    ' + ta.value.substring(en);
+            ta.selectionStart = ta.selectionEnd = s + 4;
+        }
+    });
+
+    /* Output tabs */
+    function switchTab(n) {
+        document.querySelectorAll('.out-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + n).classList.add('active');
+        document.getElementById('panel-output').style.display = n === 'output' ? 'block' : 'none';
+        document.getElementById('panel-stdin').style.display = n === 'stdin' ? 'block' : 'none';
+    }
+
+    /* Problem Nav Dots in Header */
+    function buildDots() {
+        const c = document.getElementById('header-q-picker');
+        if (!c) return;
+        c.innerHTML = '';
+        allProblems.forEach((p, i) => {
+            const b = document.createElement('div');
+            b.className = 'q-step' + (i === currentIdx ? ' active' : '') + (solvedProblems.has(p.id) ? ' solved' : '');
+            b.textContent = i + 1;
+            b.onclick = () => loadProblem(i);
+            c.appendChild(b);
+        });
+    }
+
+    function loadProblem(idx) {
+        if (idx < 0 || idx >= allProblems.length) return;
+        currentIdx = idx;
+        const p = allProblems[idx];
+        currentProblem = p.id;
+
+        document.getElementById('top-problem-title').textContent = p.title;
+        document.getElementById('left-title').textContent = p.title;
+        document.getElementById('left-desc').textContent = p.desc || p.description || '';
+        document.getElementById('left-constraints').textContent = 'NA';
+        document.getElementById('left-testcases').innerHTML = '';
+
+        const dc = { easy: ['#1a4731', '#3fb950'], medium: ['#3d2b00', '#e3b341'], hard: ['#3d0000', '#f85149'] };
+        const [bg, fg] = dc[p.diff] || ['#21262d', '#c9d1d9'];
+        document.getElementById('left-badges').innerHTML =
+            `<span style="background:${bg};color:${fg};font-size:11px;font-weight:700;padding:3px 12px;border-radius:100px;">${(p.diff || '').toUpperCase()}</span>` +
+            `<span style="font-size:13px;color:#e3b341;font-weight:800;">✨ ${p.score} Points</span>`;
+
+        buildDots();
+        clearOutput();
+        if (!getCode().trim()) updateBoilerplate();
+    }
+
+    function nextProblem() { if (currentIdx < allProblems.length - 1) loadProblem(currentIdx + 1); }
+    function prevProblem() { if (currentIdx > 0) loadProblem(currentIdx - 1); }
+
+    function openAssessment(idx) {
+        const view = document.getElementById('assessment-view');
+        view.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        buildDots();
+        loadProblem(typeof idx === 'number' ? idx : 0);
+        setTimeout(() => getTA()?.focus(), 100);
+    }
+
+    function closeAssessment() {
+        document.getElementById('assessment-view').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    /* Timer & Auto-Submit */
+    let timerInterval, autoSubmitDone = false;
+    function updateTimer() {
+        const now = Date.now(), diff = endTime - now;
+        const tEl = document.getElementById('assess-timer');
+        const fmt = ms => `${String(Math.floor(ms / 3600000)).padStart(2, '0')}:${String(Math.floor(ms % 3600000 / 60000)).padStart(2, '0')}:${String(Math.floor(ms % 60000 / 1000)).padStart(2, '0')}`;
+
+        if (diff <= 0) {
+            if (tEl) { tEl.textContent = 'TIME OVER'; tEl.style.color = '#ff4444'; }
+            if (!autoSubmitDone) {
+                autoSubmitDone = true;
+                clearInterval(timerInterval);
+                autoSubmitAll();
+            }
+        } else {
+            if (tEl) { tEl.textContent = fmt(diff); if (diff < 60000) tEl.style.color = '#ff4444'; }
+        }
+    }
+
+    function autoSubmitAll() {
+        const code = getCode(), lang = document.getElementById('language')?.value || '71';
+        const ov = document.createElement('div');
+        ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;';
+        ov.innerHTML = `
+            <div style="background:#161b22;border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:48px;text-align:center;max-width:400px;box-shadow:0 20px 50px rgba(0,0,0,0.5);">
+                <div style="font-size:4rem;margin-bottom:20px;">⏰</div>
+                <h2 style="color:#fff;font-size:24px;font-weight:900;margin-bottom:12px;">Contest Finished!</h2>
+                <p style="color:#8b949e;font-size:15px;margin-bottom:24px;">Time is up. We are auto-submitting your progress...</p>
+                <div id="auto-sub-status" style="color:#1a56db;font-size:14px;font-weight:700;">Submitting...</div>
+            </div>
+        `;
+        document.body.appendChild(ov);
+        if (!code.trim() || !currentProblem) {
+            setTimeout(() => window.location.href = '/user/dashboard', 2000);
+            return;
+        }
+        fetch('/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code, language: lang, problem: currentProblem, is_test: false }) })
+            .finally(() => { setTimeout(() => window.location.href = '/user/dashboard', 2500); });
+    }
+
+    timerInterval = setInterval(updateTimer, 1000);
+    updateTimer();
+
+    /* Submit / Run */
     function submitCode(isTest = false) {
         const btn = isTest ? document.getElementById('run-btn') : document.getElementById('submit-btn');
-        const runBtn = document.getElementById('run-btn');
-        const submitBtn = document.getElementById('submit-btn');
-        const outputEl = document.getElementById('output');
-        const statusEl = document.getElementById('output-status');
+        const code = getCode(), statusEl = document.getElementById('output-status');
 
-        const code = document.getElementById('code').value;
         if (!code.trim()) {
-            outputEl.textContent = '⚠️ Please write some code first.';
-            outputEl.className = 'output-panel has-error';
+            document.getElementById('panel-output').textContent = '⚠️ Please write some code first.';
+            switchTab('output');
             return;
         }
 
         btn.disabled = true;
-        if (!isTest) runBtn.disabled = true;
-        else submitBtn.disabled = true;
+        statusEl.textContent = isTest ? 'Running...' : 'Submitting...';
+        statusEl.style.color = '#e3b341';
+        document.getElementById('panel-output').textContent = '⏳ Executing on Cloud Judge...';
+        switchTab('output');
 
-        btn.textContent = isTest ? '⏳ Running...' : '⏳ Submitting...';
-        statusEl.textContent = isTest ? 'Running Test...' : 'Executing...';
-        outputEl.textContent = isTest ? 'Running your code against sample cases...' : 'Running your code against test cases...';
-        outputEl.className = 'output-panel';
-
-        fetch("/submit", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                code: code,
-                language: document.getElementById("language").value,
-                problem: currentProblem,
-                is_test: isTest
-            })
+        fetch('/submit', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code, language: document.getElementById('language').value, problem: currentProblem, is_test: isTest })
         })
-            .then(r => r.json())
-            .then(d => {
-                outputEl.textContent = d.output;
+            .then(r => r.json()).then(d => {
+                document.getElementById('panel-output').textContent = d.output;
                 if (d.status === 'success') {
-                    outputEl.className = 'output-panel has-output';
-                    statusEl.textContent = '✅ All tests passed! +' + d.score + ' pts';
-                } else if (d.status === 'partial') {
-                    outputEl.className = 'output-panel has-output';
-                    statusEl.textContent = '⚠️ Partial score: +' + d.score + ' pts';
-                } else if (d.status === 'error') {
-                    outputEl.className = 'output-panel has-error';
-                    statusEl.textContent = '❌ ' + (d.output || 'System Error');
+                    statusEl.textContent = 'ACCEPTED'; statusEl.style.color = '#3fb950';
                 } else {
-                    outputEl.className = 'output-panel has-error';
-                    statusEl.textContent = '❌ ' + d.output;
+                    statusEl.textContent = d.status.toUpperCase(); statusEl.style.color = d.status === 'partial' ? '#e3b341' : '#f85149';
+                }
+
+                if (!isTest && (d.status === 'success' || d.status === 'partial')) {
+                    updateStats(d.status === 'success', d.score || 0, currentProblem);
                 }
             })
-            .catch(err => {
-                outputEl.textContent = 'Network error. Please try again.';
-                outputEl.className = 'output-panel has-error';
-                statusEl.textContent = '❌ Error';
+            .catch(() => {
+                document.getElementById('panel-output').textContent = '❌ Network error. Check your connection.';
+                statusEl.textContent = 'ERROR'; statusEl.style.color = '#f85149';
             })
             .finally(() => {
                 btn.disabled = false;
-                if (!isTest) runBtn.disabled = false;
-                else submitBtn.disabled = false;
-
-                runBtn.textContent = '▶️ Run Code';
-                submitBtn.textContent = '🚀 Submit Code';
             });
     }
 
-    // Tab key support in textarea
-    const codeArea = document.getElementById('code');
-    codeArea.addEventListener('keydown', function (e) {
-        if (e.key === 'Tab') {
-            e.preventDefault();
-            const start = this.selectionStart;
-            const end = this.selectionEnd;
-            this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
-            this.selectionStart = this.selectionEnd = start + 4;
-        }
-    });
-
-    // ---- Anti-Cheating Features ----
-
-    // 1. Disable Copy, Paste, Cut
-    ['copy', 'paste', 'cut'].forEach(event => {
-        codeArea.addEventListener(event, (e) => {
-            e.preventDefault();
-            // Optional: Show a subtle message
-            const statusEl = document.getElementById('output-status');
-            statusEl.textContent = '🚫 ' + event.charAt(0).toUpperCase() + event.slice(1) + ' is disabled!';
-            statusEl.style.color = 'var(--danger)';
-            setTimeout(() => {
-                statusEl.style.color = 'var(--text-muted)';
-            }, 2000);
-        });
-    });
-
-    // 2. Tab Switch detection
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') {
-            console.warn("User switched tab/window.");
-            // Auto-submit disabled to allow for screenshots and documentation.
-        }
-    });
-
-    // 3. Disable Context Menu
-    codeArea.addEventListener('contextmenu', e => e.preventDefault());
-
-    // ---- Language Boilerplate ----
-    const boilerplates = {
-        "71": "# Write your Python code here\nprint('Hello, World!')\n",
-        "50": "#include <stdio.h>\n\nint main() {\n    printf(\"Hello, World!\\n\");\n    return 0;\n}\n",
-        "54": "#include <iostream>\n\nint main() {\n    std::cout << \"Hello, World!\" << std::endl;\n    return 0;\n}\n",
-        "62": "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello, World!\");\n    }\n}\n"
-    };
-
-    function updateBoilerplate() {
-        const lang = document.getElementById('language').value;
-        if (!codeArea.value.trim()) {
-            codeArea.value = boilerplates[lang] || "";
-        }
+    function clearOutput() {
+        document.getElementById('panel-output').textContent = 'Run your code to see results here...';
+        document.getElementById('output-status').textContent = 'Ready';
+        document.getElementById('output-status').style.color = '#3fb950';
     }
-    // Initial boilerplate
-    updateBoilerplate();
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeAssessment();
+    });
 </script>
 {% endblock %}

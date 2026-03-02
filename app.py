@@ -309,19 +309,48 @@ def contest():
     if "user" not in session:
         return redirect(url_for("login"))
 
+    # ── Time gating ─────────────────────────────────────────
+    start_val = get_setting("contest_start") or "2026-01-01 00:00:00"
+    end_val   = get_setting("contest_end")   or "2027-01-01 00:00:00"
+
+    try:
+        start_dt = start_val if isinstance(start_val, datetime) else datetime.strptime(str(start_val)[:19], "%Y-%m-%d %H:%M:%S")
+        end_dt   = end_val   if isinstance(end_val,   datetime) else datetime.strptime(str(end_val)[:19],   "%Y-%m-%d %H:%M:%S")
+    except (ValueError, TypeError):
+        start_dt = datetime(2026, 1, 1)
+        end_dt   = datetime(2027, 1, 1)
+
+    now = datetime.now()
+
+    if now < start_dt:
+        # Contest hasn't started yet
+        flash(f"⏳ Contest has not started yet. It begins on {start_dt.strftime('%d %b %Y at %I:%M %p')}.", "info")
+        return redirect(url_for("user_dashboard"))
+
+    if now > end_dt:
+        # Contest has ended
+        flash("🔒 The contest has ended. You can no longer access the arena.", "error")
+        return redirect(url_for("user_dashboard"))
+    # ─────────────────────────────────────────────────────────
+
     con = get_db()
     rows = con.execute("SELECT * FROM problems").fetchall()
     problems = [dict(r) for r in rows]
     con.close()
 
-    start_time = get_setting("contest_start")
-    end_time = get_setting("contest_end")
-
     return render_template("contest.html",
                            user=session["user"],
                            problems=problems,
-                           start_time=start_time,
-                           end_time=end_time)
+                           problems_json=json.dumps([
+                               {"id": str(p["id"]), "title": p["title"],
+                                "desc": p.get("description",""), "description": p.get("description",""),
+                                "diff": p.get("difficulty","easy"), "score": p.get("score",0)}
+                               for p in problems
+                           ]),
+                           start_time=start_val,
+                           end_time=end_val)
+
+
 
 @app.route("/user/dashboard")
 def user_dashboard():
@@ -438,7 +467,7 @@ def submit():
                     "stdin": b64e("")
                 },
                 headers=headers,
-                timeout=60
+                timeout=10
             ).json()
 
             stdout = b64d(response.get("stdout"))
@@ -461,19 +490,16 @@ def submit():
             con.close()
             return jsonify({"output": f"Execution error: {str(e)}", "status": "error"})
     else:
-        # Run against test cases
-        passed = 0
-        total = len(test_cases)
-        results = []
+        # Run all test cases in PARALLEL for speed
+        from concurrent.futures import ThreadPoolExecutor, as_completed
 
-        for tc in test_cases:
+        def run_tc(idx_tc):
+            idx, tc = idx_tc
             try:
                 headers = {}
                 if JUDGE0_API_KEY:
                     headers["X-Auth-Token"] = JUDGE0_API_KEY
-
-                print(f"DEBUG: Judge0 request for test case {tc['id']}...")
-                response = requests.post(
+                resp = requests.post(
                     "https://ce.judge0.com/submissions?base64_encoded=true&wait=true",
                     json={
                         "source_code": b64e(code),
@@ -482,25 +508,37 @@ def submit():
                         "expected_output": b64e(tc['expected_output'])
                     },
                     headers=headers,
-                    timeout=60
+                    timeout=10
                 ).json()
-                print(f"DEBUG: Judge0 response: {json.dumps(response, indent=2)}")
-
-                status_desc = response.get("status", {}).get("description", response.get("message", "Unknown"))
-                actual_out = b64d(response.get("stdout"))
-                err = b64d(response.get("stderr")) or b64d(response.get("compile_output"))
-                
-                if status_desc == "Accepted":
-                    passed += 1
-                    results.append(f"Test {len(results)+1}: ✅ Passed")
-                else:
-                    results.append(f"Test {len(results)+1}: ❌ {status_desc}")
-                    if actual_out:
-                        results.append(f"   [Output]: {actual_out.strip()}")
-                    if err:
-                        results.append(f"   [Error]: {err.strip()}")
+                status_desc = resp.get("status", {}).get("description", "Unknown")
+                actual_out  = b64d(resp.get("stdout"))
+                err = b64d(resp.get("stderr")) or b64d(resp.get("compile_output"))
+                return idx, status_desc, actual_out, err
             except Exception as e:
-                results.append(f"Test {len(results)+1}: ⚠️ System Error: {str(e)}")
+                return idx, "Error", "", str(e)
+
+        passed = 0
+        total  = len(test_cases)
+        results_map = {}
+
+        with ThreadPoolExecutor(max_workers=min(len(test_cases), 5)) as pool:
+            futures = {pool.submit(run_tc, (i, tc)): i for i, tc in enumerate(test_cases)}
+            for future in as_completed(futures):
+                idx, status_desc, actual_out, err = future.result()
+                results_map[idx] = (status_desc, actual_out, err)
+
+        results = []
+        for i in range(total):
+            status_desc, actual_out, err = results_map.get(i, ("Error", "", "No result"))
+            if status_desc == "Accepted":
+                passed += 1
+                results.append(f"Test {i+1}: ✅ Passed")
+            else:
+                results.append(f"Test {i+1}: ❌ {status_desc}")
+                if actual_out:
+                    results.append(f"   [Output]: {actual_out.strip()}")
+                if err:
+                    results.append(f"   [Error]: {err.strip()}")
 
         # Calculate partial score
         earned_score = int((passed / total) * prob['score']) if total > 0 else 0

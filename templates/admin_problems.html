@@ -2,159 +2,226 @@
 {% block title %}Manage Problems — CSE(AI&ML) Coding Contest{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="d-flex justify-between align-center mb-3 fade-in" style="flex-wrap: wrap; gap: 1rem;">
+<div style="max-width:1200px;margin:0 auto;padding-bottom:100px;">
+
+    <!-- Modern Header -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:40px;padding:0 10px;"
+        class="fade-in">
         <div>
-            <h2 style="font-weight: 800; font-size: 1.75rem;">📝 Problem Manager</h2>
-            <p style="color: var(--text-muted);">Add, edit, and manage contest problems</p>
+            <div
+                style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:0.2em;color:var(--blue);margin-bottom:8px;">
+                Contest Administration</div>
+            <h1 style="font-size:32px;font-weight:900;color:var(--text);margin:0;letter-spacing:-0.02em;">📝 Problem
+                Architect</h1>
+            <p style="font-size:15px;color:var(--text-3);margin-top:6px;">Design, test, and deploy engineering
+                challenges</p>
         </div>
-        <a href="/admin/dashboard" class="btn btn-outline">← Back to Dashboard</a>
+        <a href="/admin/dashboard" class="btn"
+            style="background:var(--bg-gray);color:var(--text-2);border:1px solid var(--border);padding:10px 20px;border-radius:12px;font-weight:800;font-size:13px;display:flex;align-items:center;gap:8px;transition:0.2s;text-decoration:none;">
+            <span>←</span> Dashboard Overview
+        </a>
     </div>
 
-    <!-- Add Problem Form -->
-    <div class="card fade-in stagger-1 mb-3"
-        style="background: var(--card-bg); border: 1px solid var(--border-color); backdrop-filter: blur(12px);">
-        <div class="card-header" style="border-bottom: 1px solid var(--border-color);">
-            <span class="card-title">➕ Create New Challenge</span>
+    <!-- Create New Problem Section -->
+    <div class="card glass-card fade-in stagger-1"
+        style="border-radius:24px;border:1px solid var(--border);padding:0;overflow:hidden;margin-bottom:48px;background:var(--card-bg);">
+        <div
+            style="padding:20px 32px;background:var(--bg-gray);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;">
+            <div
+                style="width:32px;height:32px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;">
+                <span style="font-size:18px;">+</span>
+            </div>
+            <h3 style="font-size:16px;font-weight:900;color:var(--text);margin:0;">Draft New Challenge</h3>
         </div>
-        <div style="padding: 1.5rem;">
+        <div style="padding:32px;">
             <form method="POST">
                 <input type="hidden" name="action" value="add">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Problem ID (slug)</label>
-                        <input type="text" name="id" class="form-input" placeholder="e.g. string-rev-1" required>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-bottom:24px;">
+                    <div>
+                        <label
+                            style="font-size:12px;font-weight:900;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;display:block;">Problem
+                            ID (slug)</label>
+                        <input type="text" name="id" placeholder="e.g. sum-two-nums" required
+                            style="width:100%;padding:14px 18px;border-radius:14px;border:1px solid var(--border);font-size:15px;font-weight:600;outline:none;background:var(--bg-gray);color:var(--text);transition:0.2s;">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Title</label>
-                        <input type="text" name="title" class="form-input" placeholder="Challenge Title" required>
+                    <div>
+                        <label
+                            style="font-size:12px;font-weight:900;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;display:block;">Display
+                            Title</label>
+                        <input type="text" name="title" placeholder="e.g. Sum of Two Numbers" required
+                            style="width:100%;padding:14px 18px;border-radius:14px;border:1px solid var(--border);font-size:15px;font-weight:600;outline:none;background:var(--bg-gray);color:var(--text);transition:0.2s;">
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                        <div>
+                            <label
+                                style="font-size:12px;font-weight:900;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;display:block;">Difficulty</label>
+                            <select name="diff"
+                                style="width:100%;padding:14px 18px;border-radius:14px;border:1px solid var(--border);font-size:14px;font-weight:800;color:var(--text);outline:none;background:var(--card-bg);cursor:pointer;">
+                                <option value="easy">Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label
+                                style="font-size:12px;font-weight:900;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;display:block;">Score</label>
+                            <input type="number" name="score" placeholder="20" required
+                                style="width:100%;padding:14px 18px;border-radius:14px;border:1px solid var(--border);font-size:15px;font-weight:800;outline:none;background:var(--bg-gray);color:var(--text);">
+                        </div>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Difficulty</label>
-                        <select name="diff" class="form-input" style="background: #f1f5f9;">
-                            <option value="easy">🟢 Easy</option>
-                            <option value="medium">🟡 Medium</option>
-                            <option value="hard">🔴 Hard</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Score Points</label>
-                        <input type="number" name="score" class="form-input" placeholder="e.g. 50" required>
-                    </div>
+                <div>
+                    <label
+                        style="font-size:12px;font-weight:900;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;display:block;">Technical
+                        Briefing (Description)</label>
+                    <textarea name="desc" rows="4"
+                        placeholder="Detail the problem, constraints, and success criteria..." required
+                        style="width:100%;padding:18px;border-radius:16px;border:1px solid var(--border);font-size:15px;font-weight:500;line-height:1.6;outline:none;resize:vertical;font-family:inherit;background:var(--bg-gray);color:var(--text);"></textarea>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Brief Description</label>
-                    <textarea name="desc" class="form-input" rows="3"
-                        placeholder="Describe the challenge rules and expected behavior..." required></textarea>
+                <div style="margin-top:24px;display:flex;justify-content:flex-end;">
+                    <button type="submit" class="btn"
+                        style="background:#1a56db;color:#fff;padding:14px 32px;border-radius:14px;font-weight:900;font-size:15px;box-shadow:0 10px 25px rgba(26, 86, 219, 0.3);border:none;cursor:pointer;transition:0.2s;"
+                        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 15px 30px rgba(26, 86, 219, 0.4)'"
+                        onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 10px 25px rgba(26, 86, 219, 0.3)'">🚀
+                        Deploy Challenge</button>
                 </div>
-                <button type="submit" class="btn btn-primary"
-                    style="width: 100%; justify-content: center; margin-top: 1rem;">
-                    ✅ Publish Problem
-                </button>
             </form>
         </div>
     </div>
 
-    <!-- Existing Problems -->
-    <div class="card fade-in stagger-2" style="background: var(--card-bg); border: 1px solid var(--border-color);">
-        <div class="card-header" style="border-bottom: 1px solid var(--border-color);">
-            <span class="card-title">📋 Challenge Library</span>
-            <span style="color: var(--text-muted); font-size: 0.85rem;">{{ problems | length }} total challenges</span>
+    <!-- Inventory / Problem Library -->
+    <div style="margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;">
+        <h2 style="font-size:20px;font-weight:900;color:var(--text);margin:0;">Challenge Repository</h2>
+        <div
+            style="font-size:13px;padding:6px 16px;background:var(--bg-gray);border-radius:100px;color:var(--text-3);font-weight:800;border:1px solid var(--border);">
+            {{ problems | length }} Systems Active
         </div>
+    </div>
 
-        <div style="padding: 1.5rem;">
-            {% if problems %}
-            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                {% for p in problems %}
-                <div class="fade-in"
-                    style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; transition: var(--transition);">
-                    <!-- Header -->
-                    <div class="d-flex justify-between align-center mb-1" style="flex-wrap: wrap; gap: 1rem;">
-                        <div class="d-flex align-center gap-1">
-                            <span style="font-weight: 800; font-size: 1.2rem; color: var(--text-main);">{{ p['title']
-                                }}</span>
-                            <span class="badge badge-{{ p['difficulty'] }}"
-                                style="font-size: 0.7rem; padding: 0.2rem 0.6rem;">{{ p['difficulty'] | upper }}</span>
-                            <span
-                                style="background: var(--grad-purple); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; font-size: 0.9rem;">{{
-                                p['score'] }} PTS</span>
+    <div style="display:grid;grid-template-columns:1fr;gap:32px;">
+        {% if problems %}
+        {% for p in problems %}
+        <div class="card glass-card fade-in"
+            style="border-radius:24px;border:1px solid var(--border);background:var(--card-bg);padding:0;overflow:hidden;transition:0.3s;">
+            <div style="padding:28px 32px;">
+                <!-- Header -->
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div
+                            style="width:40px;height:40px;background:var(--bg-gray);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--blue);font-weight:900;font-size:18px;">
+                            {{ loop.index }}
                         </div>
-                        <form method="POST" style="margin: 0;">
-                            <input type="hidden" name="action" value="delete">
-                            <input type="hidden" name="id" value="{{ p['id'] }}">
-                            <button type="submit" class="btn btn-outline"
-                                style="color: var(--accent-danger); border-color: rgba(251, 113, 133, 0.2); padding: 0.4rem 0.8rem; font-size: 0.8rem;"
-                                onclick="return confirm('Permanently delete this problem?')">🗑 Delete</button>
-                        </form>
+                        <div>
+                            <h3 style="font-size:20px;font-weight:900;color:var(--text);margin:0;">{{ p['title'] }}</h3>
+                            <div style="display:flex;gap:10px;margin-top:6px;align-items:center;">
+                                <span
+                                    style="font-size:10px;font-weight:900;text-transform:uppercase;background:var(--blue-bg);color:var(--blue);padding:2px 10px;border-radius:100px;">{{
+                                    p['difficulty'].upper() }}</span>
+                                <span style="font-size:12px;font-weight:800;color:var(--yellow, #f59e0b);">✨ {{
+                                    p['score'] }}
+                                    Points</span>
+                                <code
+                                    style="font-size:11px;color:var(--text-3);background:var(--bg-gray);padding:2px 8px;border-radius:6px;border:1px solid var(--border);">{{ p['id'] }}</code>
+                            </div>
+                        </div>
+                    </div>
+                    <form method="POST" onsubmit="return confirm('Abort this system? This cannot be undone.');">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="id" value="{{ p['id'] }}">
+                        <button type="submit"
+                            style="background:#fee2e2;color:#ef4444;border:none;width:36px;height:36px;border-radius:10px;cursor:pointer;font-weight:900;display:flex;align-items:center;justify-content:center;transition:0.2s;"
+                            onmouseover="this.style.background='#fecaca'"
+                            onmouseout="this.style.background='#fee2e2'">✕</button>
+                    </form>
+                </div>
+
+                <p style="font-size:15px;color:var(--text-2);line-height:1.7;margin-bottom:28px;">
+                    {{ p['description'] }}
+                </p>
+
+                <!-- Test Cases Lab -->
+                <div style="background:var(--bg-gray);border-radius:20px;padding:24px;border:1px solid var(--border);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div
+                                style="width:24px;height:24px;background:var(--green);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;">
+                                🧪</div>
+                            <h4
+                                style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-3);">
+                                Test Verification Lab ({{ test_cases.get(p['id'], []) | length }})</h4>
+                        </div>
                     </div>
 
-                    <p
-                        style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.5rem; font-size: 0.95rem;">
-                        <code
-                            style="font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 0.1rem 0.4rem; border-radius: 4px; color: var(--accent-primary); font-size: 0.8rem; margin-right: 0.5rem;">{{ p['id'] }}</code>
-                        {{ p['description'] }}
-                    </p>
-
-                    <!-- Test Cases Section -->
-                    <div style="background: rgba(0,0,0,0.2); border-radius: 10px; padding: 1.25rem;">
-                        <h4
-                            style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
-                            🧪 Test Suites ({{ test_cases.get(p['id'], []) | length }})
-                        </h4>
-
-                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                            {% for tc in test_cases.get(p['id'], []) %}
-                            <div class="d-flex align-center justify-between"
-                                style="background: #f1f5f9; border: 1px solid var(--border-color); padding: 0.6rem 1rem; border-radius: 8px;">
-                                <div class="d-flex align-center gap-1"
-                                    style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; overflow: hidden;">
-                                    <div style="flex-shrink: 0;">
-                                        <span style="color: var(--text-muted);">IN:</span>
-                                        <span style="color: var(--text-main); font-weight: 700;">{{ tc['input'][:40]
-                                            }}{% if tc['input']|length > 40 %}...{% endif %}</span>
-                                    </div>
-                                    <div style="color: var(--text-muted);">|</div>
-                                    <div>
-                                        <span style="color: var(--text-muted);">OUT:</span>
-                                        <span style="color: var(--accent-secondary); font-weight: 700;">{{
-                                            tc['expected_output'][:40] }}{% if tc['expected_output']|length > 40 %}...{%
-                                            endif %}</span>
-                                    </div>
+                    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
+                        {% for tc in test_cases.get(p['id'], []) %}
+                        <div
+                            style="display:flex;align-items:center;justify-content:space-between;background:var(--card-bg);border:1px solid var(--border);padding:12px 16px;border-radius:12px;transition:0.2s;">
+                            <div style="display:flex;gap:24px;flex:1;overflow:hidden;">
+                                <div style="flex:1;">
+                                    <div
+                                        style="font-size:10px;font-weight:800;color:var(--text-4);text-transform:uppercase;margin-bottom:4px;">
+                                        Input</div>
+                                    <code
+                                        style="font-family:'Fira Code', monospace;color:var(--text);font-size:13px;white-space:nowrap;">{{ tc['input'][:50] }}{% if tc['input']|length > 50 %}...{% endif %}</code>
                                 </div>
-                                <form method="POST" style="margin: 0; flex-shrink: 0;">
-                                    <input type="hidden" name="action" value="delete_test">
-                                    <input type="hidden" name="tc_id" value="{{ tc['id'] }}">
-                                    <button type="submit" class="btn"
-                                        style="background: rgba(251, 113, 133, 0.1); color: var(--accent-danger); width: 24px; height: 24px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 4px;">✕</button>
-                                </form>
+                                <div style="flex:1;">
+                                    <div
+                                        style="font-size:10px;font-weight:800;color:var(--text-4);text-transform:uppercase;margin-bottom:4px;">
+                                        Expected</div>
+                                    <code
+                                        style="font-family:'Fira Code', monospace;color:var(--green);font-size:13px;white-space:nowrap;">{{ tc['expected_output'][:50] }}{% if tc['expected_output']|length > 50 %}...{% endif %}</code>
+                                </div>
                             </div>
-                            {% endfor %}
-
-                            <!-- Add TC Inline -->
-                            <form method="POST" class="d-flex gap-1 mt-1">
-                                <input type="hidden" name="action" value="add_test">
+                            <form method="POST">
+                                <input type="hidden" name="action" value="delete_test">
                                 <input type="hidden" name="problem_id" value="{{ p['id'] }}">
-                                <input type="text" name="tc_input" class="form-input" placeholder="Input string"
-                                    style="flex: 2; padding: 0.4rem 0.8rem; font-size: 0.85rem;" required>
-                                <input type="text" name="tc_output" class="form-input" placeholder="Expected output"
-                                    style="flex: 2; padding: 0.4rem 0.8rem; font-size: 0.85rem;" required>
-                                <button type="submit" class="btn btn-success"
-                                    style="padding: 0.4rem 1rem; font-size: 0.8rem;">+ Save TC</button>
+                                <input type="hidden" name="tc_id" value="{{ tc['id'] }}">
+                                <button type="submit"
+                                    style="background:var(--bg-gray);color:var(--text-3);border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;transition:0.2s;"
+                                    onmouseover="this.style.background='var(--red)';this.style.color='#fff'"
+                                    onmouseout="this.style.background='var(--bg-gray)';this.style.color='var(--text-3)'">Remove</button>
                             </form>
                         </div>
+                        {% else %}
+                        <div
+                            style="text-align:center;padding:32px;background:var(--bg-gray);border:2px dashed var(--border);border-radius:16px;">
+                            <div style="font-size:24px;margin-bottom:8px;">📡</div>
+                            <p style="font-size:13px;color:var(--text-4);margin:0;">No active test cycles
+                                detected.</p>
+                        </div>
+                        {% endfor %}
                     </div>
+
+                    <!-- Add Test Interface -->
+                    <form method="POST" style="display:flex;gap:12px;">
+                        <input type="hidden" name="action" value="add_test">
+                        <input type="hidden" name="problem_id" value="{{ p['id'] }}">
+                        <input type="text" name="tc_input" placeholder="Inbound data (Input)" required
+                            style="flex:1;background:var(--card-bg);border:1px solid var(--border);padding:12px 18px;border-radius:12px;color:var(--text);font-family:'Fira Code',monospace;font-size:13px;outline:none;"
+                            onfocus="this.style.borderColor='var(--blue)'">
+                        <input type="text" name="tc_output" placeholder="Target signal (Expected)" required
+                            style="flex:1;background:var(--card-bg);border:1px solid var(--border);padding:12px 18px;border-radius:12px;color:var(--text);font-family:'Fira Code',monospace;font-size:13px;outline:none;"
+                            onfocus="this.style.borderColor='var(--green)'">
+                        <button type="submit"
+                            style="background:var(--blue);color:#fff;padding:0 24px;border-radius:12px;font-weight:900;font-size:13px;border:none;cursor:pointer;transition:0.2s;"
+                            onmouseover="this.style.transform='translateY(-1px)'"
+                            onmouseout="this.style.transform='translateY(0)'">+
+                            Add Probe</button>
+                    </form>
                 </div>
-                {% endfor %}
             </div>
-            {% else %}
-            <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
-                <p style="font-size: 3rem; margin-bottom: 1rem;">📦</p>
-                <p>No challenges found. Create your first problem to start the contest!</p>
-            </div>
-            {% endif %}
         </div>
+        {% endfor %}
+        {% else %}
+        <div
+            style="padding:100px;text-align:center;background:var(--card-bg);border-radius:32px;box-shadow:var(--shadow-lg);border:1px solid var(--border);">
+            <div style="font-size:64px;margin-bottom:24px;">🏗️</div>
+            <h3 style="font-size:24px;font-weight:900;color:var(--text);">Architect's Log is Empty</h3>
+            <p style="color:var(--text-3);font-size:16px;max-width:400px;margin:16px auto 32px;">No problems have been
+                drafted
+                yet. Start building your first challenge above.</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

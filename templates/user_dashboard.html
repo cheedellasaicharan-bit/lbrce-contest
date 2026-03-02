@@ -2,204 +2,311 @@
 {% block title %}My Dashboard — CSE(AI&ML) Coding Contest{% endblock %}
 
 {% block head %}
-<!-- Chart.js for performance visualization -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
 
 {% block content %}
-<div class="container container-md">
-    <div class="dashboard-header fade-in" style="margin-bottom: 3rem;">
-        <h1 style="font-size: 2.5rem; font-weight: 900; letter-spacing: -0.02em;">📊 My Dashboard</h1>
-        <p style="color: var(--text-secondary); font-size: 1.1rem;">Welcome back, <span
-                style="color: var(--accent-purple); font-weight: 700;">{{ user['name'] }}</span>!</p>
+<div style="max-width:1200px;margin:0 auto;padding-bottom:80px;">
+
+    <!-- Modern Profile Section -->
+    <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:24px;margin-bottom:32px;" class="fade-in">
+        <!-- Left: Premium Profile Card -->
+        <div
+            style="background:var(--blue-card);padding:40px;border-radius:32px;color:#fff;box-shadow:0 20px 50px var(--blue-bg);position:relative;overflow:hidden;">
+            <div
+                style="position:absolute;top:-20px;right:-20px;width:150px;height:150px;background:rgba(255,255,255,0.05);border-radius:50%;filter:blur(40px);">
+            </div>
+
+            <div style="position:relative;z-index:1;">
+                <div
+                    style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:0.2em;opacity:0.75;margin-bottom:8px;">
+                    Student Operator</div>
+                <h2 style="font-size:32px;font-weight:900;margin:0;letter-spacing:-0.02em;">Welcome, {{ user['name'] }}
+                </h2>
+                <div
+                    style="display:flex;gap:12px;margin-top:20px;padding:20px;background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border-radius:24px;border:1px solid rgba(255,255,255,0.1);">
+                    <div style="flex:1;">
+                        <div
+                            style="font-size:10px;font-weight:800;text-transform:uppercase;opacity:0.6;margin-bottom:4px;">
+                            Roll Number</div>
+                        <div style="font-size:14px;font-weight:700;">{{ user['roll'] or '—' }}</div>
+                    </div>
+                    <div style="width:1px;background:rgba(255,255,255,0.1);"></div>
+                    <div style="flex:1;">
+                        <div
+                            style="font-size:10px;font-weight:800;text-transform:uppercase;opacity:0.6;margin-bottom:4px;">
+                            Reg ID</div>
+                        <div style="font-size:14px;font-weight:700;">{{ user['reg_id'] or '—' }}</div>
+                    </div>
+                    <div style="width:1px;background:rgba(255,255,255,0.1);"></div>
+                    <div style="flex:1.5;">
+                        <div
+                            style="font-size:10px;font-weight:800;text-transform:uppercase;opacity:0.6;margin-bottom:4px;">
+                            Academic Tracking</div>
+                        <div style="font-size:14px;font-weight:700;">LBRCE • CSE(AI&ML)</div>
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:12px;margin-top:28px;">
+                    <button onclick="document.getElementById('pw-modal').style.display='flex'"
+                        style="background:#fff;color:var(--blue);padding:12px 24px;border-radius:14px;font-weight:900;font-size:13px;border:none;cursor:pointer;transition:0.2s;"
+                        onmouseover="this.style.transform='translateY(-2px)';"
+                        onmouseout="this.style.transform='translateY(0)';">🔑 Change Access Token</button>
+                    <a href="{{ url_for('logout') }}"
+                        style="background:rgba(255,255,255,0.15);color:#fff;padding:12px 24px;border-radius:14px;font-weight:800;font-size:13px;text-decoration:none;transition:0.2s;backdrop-filter:blur(5px);border:1px solid rgba(255,255,255,0.1);"
+                        onmouseover="this.style.background='rgba(255,255,255,0.25)';"
+                        onmouseout="this.style.background='rgba(255,255,255,0.15)';">Terminal Logout</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Performance Snapshot -->
+        <div class="glass-card"
+            style="background:var(--card-bg);padding:32px;border-radius:32px;color:var(--text);display:flex;flex-direction:column;justify-content:center;box-shadow:var(--shadow-xl);position:relative;overflow:hidden;border:1px solid var(--border);">
+            <div
+                style="position:absolute;bottom:-30px;left:-30px;width:120px;height:120px;background:rgba(26,86,219,0.1);border-radius:50%;filter:blur(30px);">
+            </div>
+
+            <div style="position:relative;z-index:1;">
+                <div
+                    style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:0.15em;color:var(--text-3);margin-bottom:6px;">
+                    Current Intelligence Score</div>
+                <div style="display:flex;align-items:baseline;gap:8px;">
+                    <div style="font-size:64px;font-weight:900;line-height:1;letter-spacing:-0.03em;color:var(--text);">
+                        {{ total_score }}
+                    </div>
+                    <div style="font-size:20px;font-weight:700;color:var(--text-4);">/ 60</div>
+                </div>
+                <div
+                    style="margin-top:20px;display:flex;align-items:center;justify-content:space-between;background:var(--bg-gray);padding:14px 20px;border-radius:16px;border:1px solid var(--border);">
+                    <div>
+                        <div style="font-size:10px;font-weight:800;color:var(--text-3);text-transform:uppercase;">
+                            Global Ranking</div>
+                        <div style="font-size:20px;font-weight:900;color:var(--green);margin-top:2px;">#{{ rank }}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:10px;font-weight:800;color:var(--text-3);text-transform:uppercase;">
+                            Transmission Count</div>
+                        <div style="font-size:20px;font-weight:900;color:var(--blue);margin-top:2px;">{{ submissions |
+                            length }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Stats Grid -->
-    <div class="stats-grid fade-in stagger-1"
-        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
-        <div class="stat-card card stat-card-premium text-center" style="padding: 2rem;">
-            <div class="stat-value" style="font-size: 3rem; font-weight: 900; color: var(--accent-purple);">#{{ rank }}
+    <!-- Activity Cards Row -->
+    <!-- Enhanced Activity & Performance -->
+    <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:24px;margin-bottom:40px;" class="fade-in stagger-1">
+
+        <!-- Left: Quick Navigation & Stats Cards -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+            <div
+                style="background:#fff;border-radius:24px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,0.04);border:1px solid #f1f5f9;">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+                    <div style="width:8px;height:8px;background:#1a56db;border-radius:50%;"></div>
+                    <h4 style="font-size:14px;font-weight:900;color:#111827;margin:0;">Assessment Vectors</h4>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <a href="{{ url_for('contest') }}" class="nav-card-premium blue">
+                        <span style="font-size:18px;">⚡</span>
+                        <span style="font-size:13px;font-weight:900;color:#111827;">Enter Arena</span>
+                        <span style="font-size:10px;font-weight:800;color:#9ca3af;text-transform:uppercase;">Live
+                            Contest</span>
+                    </a>
+                    <a href="{{ url_for('leaderboard') }}" class="nav-card-premium green">
+                        <span style="font-size:18px;">🏆</span>
+                        <span style="font-size:13px;font-weight:900;color:#111827;">Leaderboard</span>
+                        <span style="font-size:10px;font-weight:800;color:#9ca3af;text-transform:uppercase;">View
+                            Standings</span>
+                    </a>
+                    <a href="mailto:support@lbrce.edu" class="nav-card-premium gray">
+                        <span style="font-size:18px;">📧</span>
+                        <span style="font-size:13px;font-weight:900;color:#111827;">Support Request</span>
+                        <span style="font-size:10px;font-weight:800;color:#9ca3af;text-transform:uppercase;">Technical
+                            Assistance</span>
+                    </a>
+                </div>
             </div>
-            <div class="stat-label"
-                style="text-transform: uppercase; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.2em; color: var(--text-secondary); margin-top: 0.5rem;">
-                Global Rank</div>
-        </div>
-        <div class="stat-card card stat-card-premium text-center" style="padding: 2rem;">
-            <div class="stat-value" style="font-size: 3rem; font-weight: 900; color: var(--accent-purple);">{{
-                total_score }}</div>
-            <div class="stat-label"
-                style="text-transform: uppercase; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.2em; color: var(--text-secondary); margin-top: 0.5rem;">
-                Total Points</div>
-        </div>
-        <div class="stat-card card stat-card-premium text-center" style="padding: 2rem;">
-            <div class="stat-value" style="font-size: 3rem; font-weight: 900; color: var(--accent-purple);">{{
-                submissions | length }}
+
+            <div
+                style="background:#fff;border-radius:24px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,0.04);border:1px solid #f1f5f9;">
+                <h4 style="font-size:14px;font-weight:900;color:#111827;margin-bottom:20px;">Skill Mastery Breakdown
+                </h4>
+                <div style="display:flex;flex-direction:column;gap:16px;">
+                    <!-- Problem scores here (Easy/Med/Hard) -->
+                    {% set easy_score = namespace(val=0) %}{% set med_score = namespace(val=0) %}{% set hard_score =
+                    namespace(val=0) %}
+                    {% for sub in submissions %}{% if 'Sum' in sub['problem_title'] %}{% set easy_score.val =
+                    sub['score'] %}{% elif 'Factorial' in sub['problem_title'] %}{% set med_score.val = sub['score']
+                    %}{% elif 'Shortest' in sub['problem_title'] %}{% set hard_score.val = sub['score'] %}{% endif %}{%
+                    endfor %}
+
+                    <div style="--prog: {{ (easy_score.val/10*100)|round }}%;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;">
+                            <span style="font-weight:800;color:var(--text-3);">Basic Algorithmics</span>
+                            <span style="font-weight:900;color:var(--blue);">{{ easy_score.val }}/10</span>
+                        </div>
+                        <div
+                            style="height:6px;background:var(--bg-gray);border-radius:100px;overflow:hidden;padding:0;display:flex;">
+                            <div style="width:var(--prog); height:100%; background:var(--blue); border-radius:100px;">
+                            </div>
+                        </div>
+                    </div>
+                    <div style="--prog: {{ (med_score.val/20*100)|round }}%;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;">
+                            <span style="font-weight:800;color:var(--text-3);">Core Computing</span>
+                            <span style="font-weight:900;color:var(--yellow, #eab308);">{{ med_score.val }}/20</span>
+                        </div>
+                        <div
+                            style="height:6px;background:var(--bg-gray);border-radius:100px;overflow:hidden;padding:0;display:flex;">
+                            <div
+                                style="width:var(--prog); height:100%; background:var(--yellow, #eab308); border-radius:100px;">
+                            </div>
+                        </div>
+                    </div>
+                    <div style="--prog: {{ (hard_score.val/30*100)|round }}%;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;">
+                            <span style="font-weight:800;color:var(--text-3);">Advanced Logic</span>
+                            <span style="font-weight:900;color:var(--red, #ef4444);">{{ hard_score.val }}/30</span>
+                        </div>
+                        <div
+                            style="height:6px;background:var(--bg-gray);border-radius:100px;overflow:hidden;padding:0;display:flex;">
+                            <div
+                                style="width:var(--prog); height:100%; background:var(--red, #ef4444); border-radius:100px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="stat-label"
-                style="text-transform: uppercase; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.2em; color: var(--text-secondary); margin-top: 0.5rem;">
-                Submissions</div>
+        </div>
+
+        <!-- Right: Modern Performance Graph -->
+        <div
+            style="background:#fff;border-radius:32px;padding:32px;box-shadow:0 15px 40px rgba(0,0,0,0.06);border:1px solid #f1f5f9;display:flex;flex-direction:column;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+                <h4 style="font-size:16px;font-weight:900;color:#111827;margin:0;">Performance Timeline</h4>
+                <div
+                    style="font-size:10px;font-weight:900;text-transform:uppercase;color:#9ca3af;background:#f9fafb;padding:4px 12px;border-radius:100px;border:1px solid #f1f5f9;">
+                    Live Real-time Feed</div>
+            </div>
+            <div style="flex:1;min-height:220px;">
+                <canvas id="performanceChart"></canvas>
+            </div>
         </div>
     </div>
 
-    <div class="dashboard-main fade-in stagger-2" style="display: grid; grid-template-columns: 1fr 320px; gap: 2.5rem;">
-        <div class="left-col">
-            <!-- Performance Graph -->
-            <div class="graph-section" style="margin-bottom: 3rem;">
-                <h3 style="margin-bottom: 1.5rem; font-weight: 800;">📈 Performance Graph</h3>
-                <div class="card" style="padding: 1.5rem;">
-                    <canvas id="performanceChart" height="200"></canvas>
-                </div>
-            </div>
-
-            <!-- Recent Submissions -->
-            <div class="submissions-section">
-                <h3 style="margin-bottom: 1.5rem; font-weight: 800;">🕒 Recent Activity</h3>
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Problem</th>
-                                    <th>Score</th>
-                                    <th class="text-center">Status</th>
-                                    <th class="text-right">Applied On</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for sub in submissions %}
-                                <tr>
-                                    <td style="font-weight: 600; color: var(--text-main);">{{ sub['problem_title'] }}
-                                    </td>
-                                    <td style="font-weight: 800; color: var(--accent-purple);">{{ sub['score'] }}</td>
-                                    <td class="text-center"><span class="status-badge">{{ sub['status'] }}</span></td>
-                                    <td class="text-right" style="font-size: 0.85rem; color: var(--text-secondary);">{{
-                                        sub['timestamp'] }}</td>
-                                </tr>
-                                {% else %}
-                                <tr>
-                                    <td colspan="4" class="text-center"
-                                        style="padding: 3rem; color: var(--text-secondary);">No submissions yet. Go
-                                        solve
-                                        some problems!</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+    <!-- Recent Activity Table -->
+    <div class="card" style="padding:0;overflow:hidden;" id="activity-table">
+        <div
+            style="padding:16px 20px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
+            <h4 style="font-size:14px;font-weight:700;">🕒 Recent Submissions</h4>
+            <a href="{{ url_for('contest') }}" class="btn btn-primary btn-sm">+ New Submission</a>
         </div>
-
-        <!-- Right Side: Account & Settings -->
-        <div class="right-col">
-            <h3 style="margin-bottom: 1.5rem; font-weight: 800;">👤 Account Info</h3>
-            <div class="card float-animation" style="padding: 2rem; border-top: 4px solid var(--accent-purple);">
-                <div class="profile-details" style="margin-bottom: 2.5rem;">
-                    <div class="detail-item" style="margin-bottom: 1.5rem;">
-                        <span
-                            style="display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 0.4rem;">Roll
-                            Number</span>
-                        <span style="font-weight: 700; font-size: 1.1rem;">{{ user['roll'] or 'LBRCE_STU_2026' }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span
-                            style="display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 0.4rem;">Registration
-                            ID</span>
-                        <span style="font-weight: 700; font-size: 1.1rem; color: var(--accent-purple);">{{
-                            user['reg_id'] }}</span>
-                    </div>
-                </div>
-
-                <div style="padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
-                    <h4 style="margin-bottom: 1.2rem; font-size: 0.9rem; color: var(--text-main);">Security</h4>
-                    <form action="/user/change-password" method="POST">
-                        <input type="password" name="new_password" class="form-input" placeholder="New Password"
-                            required style="margin-bottom: 1rem;">
-                        <button type="submit" class="btn btn-primary btn-glow"
-                            style="width: 100%; border-radius: 12px;">Update Password</button>
-                    </form>
-                </div>
-            </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Problem</th>
+                        <th>Score</th>
+                        <th>Status</th>
+                        <th>Language</th>
+                        <th class="text-right">Submitted At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sub in submissions %}
+                    <tr>
+                        <td style="font-weight:600;color:#111827;">{{ sub['problem_title'] }}</td>
+                        <td style="font-weight:700;color:#1a56db;">{{ sub['score'] }} pts</td>
+                        <td><span class="status-badge">{{ sub['status'] }}</span></td>
+                        <td style="color:#6b7280;">{{ sub['language'] }}</td>
+                        <td class="text-right" style="color:#9ca3af;font-size:12px;">{{ sub['timestamp'] }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center" style="padding:40px;color:#9ca3af;">
+                            No submissions yet. <a href="{{ url_for('contest') }}"
+                                style="color:#1a56db;font-weight:600;">Go solve some problems!</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+    </div>
+
+</div>
+
+<!-- Change Password Modal -->
+<div id="pw-modal"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9999;align-items:center;justify-content:center;">
+    <div class="card" style="width:100%;max-width:400px;padding:32px;">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:20px;">Change Password</h3>
+        <form action="/user/change-password" method="POST">
+            <div class="form-group">
+                <label class="form-label">New Password</label>
+                <input type="password" name="new_password" class="form-input" placeholder="Enter new password" required>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:16px;">
+                <button type="submit" class="btn btn-primary" style="flex:1;">Update Password</button>
+                <button type="button" onclick="document.getElementById('pw-modal').style.display='none'"
+                    class="btn btn-outline">Cancel</button>
+            </div>
+        </form>
     </div>
 </div>
 
-<style>
-    .status-badge {
-        display: inline-block;
-        padding: 0.4rem 0.8rem;
-        border-radius: 20px;
-        font-size: 0.7rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        background: rgba(129, 140, 248, 0.15);
-        color: var(--accent-primary);
-        border: 1px solid rgba(129, 140, 248, 0.3);
-    }
-
-    .text-right {
-        text-align: right;
-    }
-
-    .btn-glow {
-        box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
-    }
-
-    .btn-glow:hover {
-        box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
-    }
-</style>
-
+<script id="submission-data" type="application/json">
+        [
+            {% for sub in submissions | reverse %}
+            {
+                "timestamp": "{{ sub['timestamp'][:10] }}",
+                "score": {{ sub['score'] or 0 }}
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ]
+    </script>
 <script>
-    // Initialize Performance Chart
     document.addEventListener('DOMContentLoaded', function () {
         const ctx = document.getElementById('performanceChart').getContext('2d');
+        const dataEl = document.getElementById('submission-data');
+        const rawData = dataEl ? JSON.parse(dataEl.textContent) : [];
 
-        // Extract data from submissions
-        const labels = [{% for sub in submissions | reverse %}"{{ sub['timestamp'][:10] }}", {% endfor %}];
-    const scores = [{% for sub in submissions | reverse %}{ { sub['score'] } }, {% endfor %}];
+        const labels = rawData.map(d => d.timestamp || 'Initial');
+        const scores = rawData.map(d => d.score || 0);
 
-    // If no data, show dummy zero
-    if (labels.length === 0) {
-        labels.push("New User");
-        scores.push(0);
-    }
+        if (labels.length === 0) { labels.push("Start"); scores.push(0); }
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Score per Submission',
-                data: scores,
-                borderColor: '#c084fc',
-                backgroundColor: 'rgba(192, 132, 252, 0.1)',
-                borderWidth: 3,
-                tension: 0.4,
-                fill: true,
-                pointBackgroundColor: '#fff',
-                pointRadius: 5
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false }
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Score',
+                    data: scores,
+                    borderColor: '#1a56db',
+                    backgroundColor: 'rgba(26,86,219,0.08)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#1a56db',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                    ticks: { color: '#94a3b8' }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { color: '#94a3b8' }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false }, ticks: { color: '#9ca3af', font: { size: 11, weight: 'bold' } } },
+                    x: { grid: { display: false }, border: { display: false }, ticks: { color: '#9ca3af', font: { size: 11, weight: 'bold' } } }
                 }
             }
-        }
-    });
+        });
     });
 </script>
 {% endblock %}

@@ -1,77 +1,148 @@
 {% extends "base.html" %}
-{% block title %}Sign In — CSE(AI&ML) Coding Contest{% endblock %}
+{% block title %}Intelligence Portal — CSE(AI&ML) Coding Contest{% endblock %}
 
 {% block content %}
-<div class="login-body">
-    <!-- Branding Header -->
-    <header class="branding-header">
-        <div class="container">
-            <img src="{{ url_for('static', filename='college_logo.png') }}"
-                alt="Lakireddy Bali Reddy College of Engineering">
-        </div>
-    </header>
+<div
+    style="min-height:90vh;display:flex;align-items:center;justify-content:center;padding:40px 0;background:radial-gradient(circle at top right, rgba(26, 86, 219, 0.03), transparent), radial-gradient(circle at bottom left, rgba(63, 185, 80, 0.03), transparent);">
 
-    <main class="login-wrapper">
-        <div class="login-split-card fade-in">
-            <!-- Left Hero Component -->
-            <div class="login-hero">
-                <h1 class="login-hero-title">CSE(AI&ML) Coding Contest</h1>
-                <p class="login-hero-subtitle">
-                    Put your coding skills to the test. Solve problems, climb the leaderboard, and prove you're the
-                    best.
-                </p>
-                <div class="hero-decoration">
-                    <div class="circle-decoration"></div>
+    <div class="glass-card"
+        style="display:flex;width:100%;max-width:1080px;background:var(--card-bg);backdrop-filter:blur(24px);border-radius:40px;overflow:hidden;border:1px solid var(--border);box-shadow:0 40px 100px rgba(0,0,0,0.08);"
+        class="fade-in">
+
+        <!-- Left: Intelligence Hero Panel -->
+        <div
+            style="flex:1.3;background:#111827;padding:64px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;color:#fff;">
+            <div
+                style="position:absolute;top:-50px;right:-50px;width:300px;height:300px;background:rgba(26,86,219,0.1);border-radius:50%;filter:blur(60px);">
+            </div>
+            <div
+                style="position:absolute;bottom:-80px;left:-80px;width:250px;height:250px;background:rgba(16,185,129,0.08);border-radius:50%;filter:blur(50px);">
+            </div>
+
+            <div style="position:relative;z-index:1;">
+                <div
+                    style="display:inline-flex;align-items:center;padding:6px 16px;background:var(--blue-bg);border:1px solid var(--border);border-radius:100px;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:0.15em;color:var(--blue);margin-bottom:32px;">
+                    <span
+                        style="display:inline-block;width:6px;height:6px;background:var(--blue);border-radius:50%;margin-right:8px;box-shadow:0 0 10px var(--blue);"></span>
+                    Active Operational Phase
+                </div>
+                <h1 style="font-size:48px;font-weight:900;line-height:1;margin:0 0 24px;letter-spacing:-0.03em;">
+                    LBRCE<br><span style="color:var(--blue);">Intelligence</span> Portal</h1>
+                <p
+                    style="font-size:15px;color:rgba(255,255,255,0.5);line-height:1.7;max-width:400px;margin-bottom:48px;font-weight:500;">
+                    Access the competitive workspace for CSE(AI&ML) innovators. Deploy logic, track rankings, and master
+                    technical complexities.</p>
+
+                <div style="display:grid;grid-template-columns:1fr;gap:20px;">
+                    <div style="display:flex;align-items:center;gap:16px;">
+                        <div
+                            style="width:40px;height:40px;background:rgba(255,255,255,0.05);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;">
+                            ⚒️</div>
+                        <div>
+                            <div style="font-size:14px;font-weight:800;">Subsurface Execution</div>
+                            <div style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:600;">Cloud-based Judge
+                                Intelligence</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:16px;">
+                        <div
+                            style="width:40px;height:40px;background:rgba(255,255,255,0.05);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;">
+                            📊</div>
+                        <div>
+                            <div style="font-size:14px;font-weight:800;">Global Manifest</div>
+                            <div style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:600;">Real-time Ranking
+                                Dynamics</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Right Form Component -->
-            <div class="login-form-container">
-                <h2 style="margin-bottom: 2rem; font-size: 1.8rem; font-weight: 700;">Sign In</h2>
-
-                <div class="login-tabs">
-                    <div class="login-tab active" id="user-tab" onclick="switchTab('user')">User</div>
-                    <div class="login-tab" id="admin-tab" onclick="switchTab('admin')">Admin</div>
-                </div>
-
-                <!-- User Login Form -->
-                <form id="user-form" action="/login/credentials" method="POST">
-                    <div class="form-group">
-                        <label class="form-label">Registration ID</label>
-                        <div class="form-input-wrapper">
-                            <input type="text" name="reg_id" required placeholder="Registration ID" class="form-input">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Password</label>
-                        <div class="form-input-wrapper">
-                            <input type="password" name="password" required placeholder="Password" class="form-input">
-                        </div>
-                    </div>
-                    <div class="form-footer">
-                        <label class="remember-me">
-                            <input type="checkbox" name="remember"> Remember me
-                        </label>
-                        <a href="/forgot-password" class="forgot-link">Forgot password?</a>
-                    </div>
-                    <button type="submit" class="btn-login">Login</button>
-                </form>
-
-                <!-- Admin Login Form (Hidden by default) -->
-                <form id="admin-form" action="/admin_login" method="POST" style="display: none;">
-                    <div class="form-group">
-                        <label class="form-label">Admin Username</label>
-                        <input type="text" name="username" required placeholder="Username" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Password</label>
-                        <input type="password" name="password" required placeholder="Password" class="form-input">
-                    </div>
-                    <button type="submit" class="btn-login">Admin Login</button>
-                </form>
-            </div>
+            <div
+                style="position:absolute;bottom:40px;right:40px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:0.1em;opacity:0.2;">
+                v2.0 // LBRCE-CORE</div>
         </div>
-    </main>
+
+        <!-- Right: Modernized Auth Form -->
+        <div
+            style="width:440px;padding:64px;display:flex;flex-direction:column;justify-content:center;background:transparent;">
+            <div
+                style="width:48px;height:48px;background:var(--blue);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:32px;box-shadow:var(--shadow-md);">
+                <span style="color:#fff;font-weight:900;font-size:18px;">LB</span>
+            </div>
+            <h2 style="font-size:24px;font-weight:900;color:var(--text);margin:0 0 8px;letter-spacing:-0.02em;">
+                Authentication</h2>
+            <p style="font-size:14px;color:var(--text-3);font-weight:600;margin-bottom:32px;">Choose your identification
+                vector</p>
+
+            <!-- Refined Tabs -->
+            <div
+                style="display:flex;background:var(--bg-gray);padding:6px;border-radius:16px;margin-bottom:32px;gap:4px;">
+                <button id="user-tab" onclick="switchTab('user')"
+                    style="flex:1;padding:12px;border-radius:12px;font-size:13px;font-weight:900;cursor:pointer;border:none;background:var(--card-bg);color:var(--text);box-shadow:0 4px 12px rgba(0,0,0,0.05);transition:0.3s;">Student</button>
+                <button id="admin-tab" onclick="switchTab('admin')"
+                    style="flex:1;padding:12px;border-radius:12px;font-size:13px;font-weight:900;cursor:pointer;border:none;background:transparent;color:var(--text-3);transition:0.3s;">Admin</button>
+            </div>
+
+            <!-- Student Login -->
+            <form id="user-form" action="/login/credentials" method="POST"
+                style="display:flex;flex-direction:column;gap:20px;">
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    <label
+                        style="font-size:11px;font-weight:900;color:var(--text-3);text-transform:uppercase;letter-spacing:0.1em;">Registration
+                        UID</label>
+                    <input type="text" name="reg_id" required placeholder="e.g. 22A31A6301"
+                        style="padding:14px 18px;border-radius:14px;border:1px solid var(--border);font-size:15px;font-weight:600;outline:none;background:var(--bg-gray);color:var(--text);transition:0.2s;">
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    <label
+                        style="font-size:11px;font-weight:900;color:var(--text-3);text-transform:uppercase;letter-spacing:0.1em;">Access
+                        Token</label>
+                    <input type="password" name="password" required placeholder="••••••••••••"
+                        style="padding:14px 18px;border-radius:14px;border:1px solid var(--border);font-size:15px;font-weight:600;outline:none;background:var(--bg-gray);color:var(--text);transition:0.2s;">
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;">
+                    <label
+                        style="display:flex;align-items:center;gap:8px;color:#64748b;cursor:pointer;font-weight:700;">
+                        <input type="checkbox" name="remember" style="accent-color:#1a56db;width:16px;height:16px;">
+                        Persist Session
+                    </label>
+                    <a href="/forgot-password" style="color:#1a56db;text-decoration:none;font-weight:800;">Token
+                        Recovery</a>
+                </div>
+                <button type="submit"
+                    style="background:var(--text);color:var(--bg);padding:16px;border-radius:16px;font-weight:900;font-size:14px;border:none;cursor:pointer;transition:0.3s;box-shadow:var(--shadow-lg);margin-top:8px;"
+                    onmouseover="this.style.transform='translateY(-2px)';"
+                    onmouseout="this.style.transform='translateY(0)';">Initialize
+                    Session →</button>
+            </form>
+
+            <!-- Admin Login -->
+            <form id="admin-form" action="/admin_login" method="POST"
+                style="display:none;flex-direction:column;gap:20px;">
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    <label
+                        style="font-size:11px;font-weight:900;color:#9ca3af;text-transform:uppercase;letter-spacing:0.1em;">Admin
+                        Identifier</label>
+                    <input type="text" name="username" required placeholder="Username"
+                        style="padding:14px 18px;border-radius:14px;border:1px solid #e2e8f0;font-size:15px;font-weight:600;outline:none;background:#fff;transition:0.2s;"
+                        onfocus="this.style.borderColor='#1a56db';" onblur="this.style.borderColor='#e2e8f0';">
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    <label
+                        style="font-size:11px;font-weight:900;color:var(--text-3);text-transform:uppercase;letter-spacing:0.1em;">Master
+                        Key</label>
+                    <input type="password" name="password" required placeholder="••••••••••••"
+                        style="padding:14px 18px;border-radius:14px;border:1px solid var(--border);font-size:15px;font-weight:600;outline:none;background:var(--bg-gray);color:var(--text);transition:0.2s;"
+                        onfocus="this.style.borderColor='var(--blue)';">
+                </div>
+                <button type="submit"
+                    style="background:var(--text);color:var(--bg);padding:16px;border-radius:16px;font-weight:900;font-size:14px;border:none;cursor:pointer;transition:0.3s;box-shadow:var(--shadow-lg);margin-top:20px;"
+                    onmouseover="this.style.transform='translateY(-2px)';"
+                    onmouseout="this.style.transform='translateY(0)';">Master Override
+                    →</button>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -81,16 +152,23 @@
         const userForm = document.getElementById('user-form');
         const adminForm = document.getElementById('admin-form');
 
+        // Use CSS variables for colors
+        const activeBg = 'var(--card-bg)';
+        const activeColor = 'var(--text)';
+        const inactiveColor = 'var(--text-3)';
+
         if (type === 'user') {
-            userTab.classList.add('active');
-            adminTab.classList.remove('active');
-            userForm.style.display = 'block';
-            adminForm.style.display = 'none';
+            userTab.style.background = activeBg; userTab.style.color = activeColor;
+            userTab.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+            adminTab.style.background = 'transparent'; adminTab.style.color = inactiveColor;
+            adminTab.style.boxShadow = 'none';
+            userForm.style.display = 'flex'; adminForm.style.display = 'none';
         } else {
-            adminTab.classList.add('active');
-            userTab.classList.remove('active');
-            adminForm.style.display = 'block';
-            userForm.style.display = 'none';
+            adminTab.style.background = activeBg; adminTab.style.color = activeColor;
+            adminTab.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+            userTab.style.background = 'transparent'; userTab.style.color = inactiveColor;
+            userTab.style.boxShadow = 'none';
+            adminForm.style.display = 'flex'; userForm.style.display = 'none';
         }
     }
 </script>

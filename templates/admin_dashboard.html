@@ -2,134 +2,220 @@
 {% block title %}Admin Dashboard — CSE(AI&ML) Coding Contest{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="d-flex justify-between align-center mb-3 fade-in" style="flex-wrap: wrap; gap: 1rem;">
+<div style="max-width:1200px;margin:0 auto;padding-bottom:100px;">
+
+    <!-- Modern Header -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:48px;padding:0 10px;"
+        class="fade-in">
         <div>
-            <h2 style="font-weight: 800; font-size: 1.75rem;">📊 Admin Dashboard</h2>
-            <p style="color: var(--text-muted);">Manage your contest from here</p>
+            <div
+                style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:0.2em;color:#1a56db;margin-bottom:8px;">
+                Command Center</div>
+            <h1 style="font-size:32px;font-weight:900;color:var(--text);margin:0;letter-spacing:-0.02em;">📊 Admin
+                Intelligence</h1>
+            <p style="font-size:15px;color:var(--text-3);margin-top:6px;">Real-time analytics and contest control</p>
         </div>
-        <div class="admin-nav">
-            <a href="/admin/problems" class="btn btn-outline">📝 Manage Problems</a>
-            <a href="/admin/download_csv" class="btn btn-success">📥 Download CSV</a>
-            <a href="/leaderboard" class="btn btn-outline">🏆 Leaderboard</a>
-        </div>
-    </div>
-
-    <!-- Stats -->
-    <div class="stats-grid fade-in stagger-1">
-        <div class="stat-card stat-card-premium">
-            <div class="stat-icon" style="background: rgba(99, 102, 241, 0.1); color: #818cf8;">👥</div>
-            <div class="stat-value">{{ stats.total_users }}</div>
-            <div class="stat-label">Registered Users</div>
-        </div>
-        <div class="stat-card stat-card-premium">
-            <div class="stat-icon" style="background: rgba(192, 132, 252, 0.1); color: #c084fc;">📨</div>
-            <div class="stat-value">{{ stats.total_submissions }}</div>
-            <div class="stat-label">Submissions</div>
-        </div>
-        <div class="stat-card stat-card-premium">
-            <div class="stat-icon" style="background: rgba(52, 211, 153, 0.1); color: #34d399;">📋</div>
-            <div class="stat-value">{{ stats.total_problems }}</div>
-            <div class="stat-label">Problems</div>
+        <div style="display:flex;gap:12px;">
+            <a href="/admin/problems" class="btn"
+                style="background:#1a56db;color:#fff;padding:12px 24px;border-radius:12px;font-weight:900;font-size:13px;display:flex;align-items:center;gap:8px;box-shadow:0 10px 20px rgba(26, 86, 219, 0.2);text-decoration:none;">📝
+                Problem Manager</a>
+            <a href="/leaderboard" class="btn"
+                style="background:rgba(0,0,0,0.03);color:#4b5563;border:1px solid rgba(0,0,0,0.1);padding:12px 24px;border-radius:12px;font-weight:800;font-size:13px;text-decoration:none;">🏆
+                Leaderboard</a>
         </div>
     </div>
 
-    <div class="dashboard-grid">
+    <!-- Stat cards -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:48px;"
+        class="fade-in stagger-1">
+        <div class="stat-card-premium glass-card"
+            style="background:var(--card-bg);border-radius:24px;padding:32px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;text-align:center;">
+            <div
+                style="width:56px;height:56px;background:var(--bg-gray);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:16px;color:var(--blue);">
+                👥</div>
+            <div style="font-size:36px;font-weight:900;color:var(--text);">{{ stats.total_users }}</div>
+            <div
+                style="font-size:12px;color:var(--text-3);font-weight:900;text-transform:uppercase;letter-spacing:0.1em;margin-top:8px;">
+                Enrolled Students</div>
+        </div>
+        <div class="stat-card-premium glass-card"
+            style="background:var(--card-bg);border-radius:24px;padding:32px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;text-align:center;">
+            <div
+                style="width:56px;height:56px;background:var(--bg-gray);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:16px;color:var(--green);">
+                📨</div>
+            <div style="font-size:36px;font-weight:900;color:var(--text);">{{ stats.total_submissions }}</div>
+            <div
+                style="font-size:12px;color:var(--text-3);font-weight:900;text-transform:uppercase;letter-spacing:0.1em;margin-top:8px;">
+                Signal Transmissions</div>
+        </div>
+        <div class="stat-card-premium glass-card"
+            style="background:var(--card-bg);border-radius:24px;padding:32px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;text-align:center;">
+            <div
+                style="width:56px;height:56px;background:var(--bg-gray);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:16px;color:var(--blue);">
+                📋</div>
+            <div style="font-size:36px;font-weight:900;color:var(--text);">{{ stats.total_problems }}</div>
+            <div
+                style="font-size:12px;color:var(--text-3);font-weight:900;text-transform:uppercase;letter-spacing:0.1em;margin-top:8px;">
+                Active Challenges</div>
+        </div>
+    </div>
+
+    <!-- Layout Grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:48px;" class="fade-in stagger-2">
         <!-- Contest Settings -->
-        <div class="card fade-in stagger-2">
-            <div class="card-header">
-                <span class="card-title">⚙️ Contest Settings</span>
+        <div class="card glass-card"
+            style="background:var(--card-bg);border-radius:32px;padding:32px;border:1px solid var(--border);">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+                <div style="width:10px;height:10px;background:var(--blue);border-radius:50%;"></div>
+                <h3 style="font-size:18px;font-weight:900;color:var(--text);margin:0;">Contest Timeline</h3>
             </div>
             <form action="/admin/settings" method="POST">
-                <div class="form-group">
-                    <label class="form-label">Start Time</label>
-                    <input type="text" name="start" class="form-control" value="{{ settings.get('contest_start', '') }}"
-                        placeholder="YYYY-MM-DD HH:MM:SS" required>
+                <div style="margin-bottom:20px;">
+                    <label
+                        style="font-size:11px;font-weight:900;color:var(--text-3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;display:block;">Initiation
+                        Vector (Start)</label>
+                    <input type="text" name="start" value="{{ settings.get('contest_start', '') }}"
+                        placeholder="YYYY-MM-DD HH:MM:SS" required
+                        style="width:100%;padding:14px 18px;border-radius:14px;border:1px solid var(--border);font-size:15px;font-weight:600;outline:none;background:var(--bg-gray);color:var(--text);">
                 </div>
-                <div class="form-group">
-                    <label class="form-label">End Time</label>
-                    <input type="text" name="end" class="form-control" value="{{ settings.get('contest_end', '') }}"
-                        placeholder="YYYY-MM-DD HH:MM:SS" required>
+                <div style="margin-bottom:24px;">
+                    <label
+                        style="font-size:11px;font-weight:900;color:var(--text-3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;display:block;">Termination
+                        Vector (End)</label>
+                    <input type="text" name="end" value="{{ settings.get('contest_end', '') }}"
+                        placeholder="YYYY-MM-DD HH:MM:SS" required
+                        style="width:100%;padding:14px 18px;border-radius:14px;border:1px solid var(--border);font-size:15px;font-weight:600;outline:none;background:var(--bg-gray);color:var(--text);">
                 </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
-                    💾 Update Settings
-                </button>
+                <button type="submit" class="btn"
+                    style="width:100%;background:#111827;color:#fff;padding:16px;border-radius:16px;font-weight:900;font-size:14px;border:none;cursor:pointer;transition:0.2s;"
+                    onmouseover="this.style.background='#000'" onmouseout="this.style.background='#111827'">💾
+                    Synchronize Timeline</button>
             </form>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="card fade-in stagger-3">
-            <div class="card-header">
-                <span class="card-title">🚀 Quick Actions</span>
+        <!-- Quick Actions & Downloads -->
+        <div class="card glass-card"
+            style="background:var(--card-bg);border-radius:32px;padding:32px;border:1px solid var(--border);">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+                <div style="width:10px;height:10px;background:var(--green);border-radius:50%;"></div>
+                <h3 style="font-size:18px;font-weight:900;color:var(--text);margin:0;">Tactical Exports</h3>
             </div>
-            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                <a href="/admin/problems" class="btn btn-outline" style="justify-content: center;">
-                    ➕ Add New Problem
+            <div style="display:flex;flex-direction:column;gap:16px;">
+                <a href="/admin/download_csv" class="btn"
+                    style="background:#ecfdf5;color:#059669;padding:20px;border-radius:20px;font-weight:900;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:12px;border:1px solid rgba(5, 150, 105, 0.1);transition:0.3s;"
+                    onmouseover="this.style.transform='translateX(5px)';this.style.background='#d1fae5'"
+                    onmouseout="this.style.transform='translateX(0)';this.style.background='#ecfdf5'">
+                    <span style="font-size:20px;">📥</span>
+                    <div>
+                        <div style="font-size:15px;">Download Performance Data</div>
+                        <div style="font-size:10px;font-weight:700;text-transform:uppercase;opacity:0.6;">Full CSV
+                            Ranking Manifest</div>
+                    </div>
                 </a>
-                <a href="/admin/download_csv" class="btn btn-outline" style="justify-content: center;">
-                    📊 Export All Results
-                </a>
-                <a href="/leaderboard" class="btn btn-outline" style="justify-content: center;">
-                    🏆 View Public Leaderboard
-                </a>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <a href="/admin/problems"
+                        style="background:#eff6ff;color:#1a56db;padding:16px;border-radius:20px;text-align:center;text-decoration:none;font-weight:800;font-size:13px;border:1px solid rgba(26, 86, 219, 0.1);">🧩
+                        Manage Logic</a>
+                    <a href="{{ url_for('logout') }}"
+                        style="background:#fff1f2;color:#e11d48;padding:16px;border-radius:20px;text-align:center;text-decoration:none;font-weight:800;font-size:13px;border:1px solid rgba(225, 29, 72, 0.1);">🚪
+                        Terminal Exit</a>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- User Management -->
-    <div class="card fade-in stagger-4 mt-3"
-        style="background: var(--card-bg); border: 1px solid var(--border-color); backdrop-filter: blur(12px);">
-        <div class="card-header" style="border-bottom: 1px solid var(--border-color);">
-            <span class="card-title">👤 User Management</span>
-            <span style="color: var(--text-muted); font-size: 0.85rem;">Provision student accounts</span>
+    <!-- User Management Workspace -->
+    <div class="card glass-card fade-in stagger-3"
+        style="background:var(--card-bg);border-radius:32px;padding:0;overflow:hidden;border:1px solid var(--border);margin-bottom:48px;">
+        <div
+            style="padding:24px 32px;background:var(--bg-gray);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:10px;height:10px;background:var(--blue);border-radius:50%;"></div>
+                <h3 style="font-size:18px;font-weight:900;color:var(--text);margin:0;">Account Provisioning</h3>
+            </div>
+            <span style="font-size:12px;color:#9ca3af;font-weight:700;text-transform:uppercase;">Active Student
+                Nodes</span>
         </div>
-
-        <div style="padding: 1.5rem;">
-            <form action="/admin/users" method="POST" class="mb-3"
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; padding: 1.25rem; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid var(--border-color);">
+        <div style="padding:32px;">
+            <form action="/admin/users" method="POST"
+                style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:32px;padding:24px;background:#f8fafc;border-radius:24px;">
                 <input type="hidden" name="action" value="add">
-                <div class="form-group" style="margin-bottom: 0;">
-                    <input type="text" name="name" class="form-input" placeholder="Full Name" required>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    <label style="font-size:10px;font-weight:900;color:#9ca3af;text-transform:uppercase;">Student
+                        Identity</label>
+                    <input type="text" name="name" placeholder="Full Name" required
+                        style="padding:12px 16px;border-radius:12px;border:1px solid #e2e8f0;outline:none;">
                 </div>
-                <div class="form-group" style="margin-bottom: 0;">
-                    <input type="email" name="email" class="form-input" placeholder="Email Address" required>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    <label style="font-size:10px;font-weight:900;color:#9ca3af;text-transform:uppercase;">Email
+                        Vector</label>
+                    <input type="email" name="email" placeholder="Email Address" required
+                        style="padding:12px 16px;border-radius:12px;border:1px solid #e2e8f0;outline:none;">
                 </div>
-                <div class="form-group" style="margin-bottom: 0;">
-                    <input type="text" name="reg_id" class="form-input" placeholder="Reg ID" required>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    <label style="font-size:10px;font-weight:900;color:#9ca3af;text-transform:uppercase;">Registration
+                        UID</label>
+                    <input type="text" name="reg_id" placeholder="Reg ID" required
+                        style="padding:12px 16px;border-radius:12px;border:1px solid #e2e8f0;outline:none;">
                 </div>
-                <div class="form-group" style="margin-bottom: 0;">
-                    <input type="text" name="password" class="form-input" placeholder="Password" required>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    <label style="font-size:10px;font-weight:900;color:#9ca3af;text-transform:uppercase;">Access
+                        Token</label>
+                    <input type="text" name="password" placeholder="Password" required
+                        style="padding:12px 16px;border-radius:12px;border:1px solid #e2e8f0;outline:none;">
                 </div>
-                <button type="submit" class="btn btn-primary" style="justify-content: center;">➕ Add student</button>
+                <div style="display:flex;align-items:flex-end;">
+                    <button type="submit" class="btn"
+                        style="width:100%;background:#1a56db;color:#fff;padding:12px;border-radius:12px;font-weight:900;border:none;cursor:pointer;">➕
+                        Provision Student</button>
+                </div>
             </form>
 
-            <div class="table-container" style="background: transparent; border: none;">
-                <table class="leaderboard-table">
+            <div class="table-container" style="border-radius:20px;border:1px solid #f1f5f9;overflow:hidden;">
+                <table style="width:100%;border-collapse:collapse;">
                     <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Reg ID</th>
-                            <th style="text-align: right;">Actions</th>
+                        <tr style="background:#f9fafb;">
+                            <th
+                                style="padding:16px 24px;text-align:left;font-size:11px;font-weight:900;color:#9ca3af;text-transform:uppercase;">
+                                Identity</th>
+                            <th
+                                style="padding:16px 24px;text-align:left;font-size:11px;font-weight:900;color:#9ca3af;text-transform:uppercase;">
+                                Reg ID</th>
+                            <th
+                                style="padding:16px 24px;text-align:right;font-size:11px;font-weight:900;color:#9ca3af;text-transform:uppercase;">
+                                Operations</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for row in leaderboard %}
-                        <tr>
-                            <td style="font-weight: 700; color: var(--text-main);">{{ row['name'] or 'Anonymous' }}</td>
-                            <td style="color: var(--text-secondary); font-size: 0.9rem;">{{ row['email'] }}</td>
-                            <td><code
-                                    style="background: rgba(129, 140, 248, 0.1); color: var(--accent-primary); padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid rgba(129, 140, 248, 0.2);">{{ row['reg_id'] }}</code>
+                        <tr style="border-bottom:1px solid #f8fafc;">
+                            <td style="padding:16px 24px;">
+                                <div style="font-weight:800;color:#111827;font-size:14px;">{{ row['name'] or 'Anonymous'
+                                    }}</div>
+                                <div style="color:#6b7280;font-size:11px;margin-top:2px;">{{ row['email'] }}</div>
                             </td>
-                            <td style="text-align: right;">
-                                <form action="/admin/users" method="POST" style="display: inline;">
+                            <td style="padding:16px 24px;">
+                                <code
+                                    style="background:#f0f7ff;color:#1a56db;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:700;border:1px solid rgba(26, 86, 219, 0.1);">{{ row['reg_id'] or '—' }}</code>
+                            </td>
+                            <td style="padding:16px 24px;text-align:right;">
+                                <form action="/admin/users" method="POST" style="display:inline;"
+                                    onsubmit="return confirm('Purge this student identity?')">
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="id" value="{{ row['id'] }}">
-                                    <button type="submit" class="btn btn-outline"
-                                        style="padding: 0.4rem 0.8rem; font-size: 0.8rem; color: var(--accent-danger); border-color: rgba(251, 113, 133, 0.2);">
-                                        🗑️ Delete
-                                    </button>
+                                    <button type="submit"
+                                        style="background:#fff1f2;color:#e11d48;border:none;padding:6px 14px;border-radius:10px;font-size:11px;font-weight:800;cursor:pointer;transition:0.2s;"
+                                        onmouseover="this.style.background='#ffe4e6'"
+                                        onmouseout="this.style.background='#fff1f2'">Deprovision</button>
                                 </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" style="padding:100px;text-align:center;">
+                                <div style="font-size:48px;margin-bottom:16px;">👥</div>
+                                <p style="font-size:14px;color:#9ca3af;font-weight:700;">Zero student nodes detected.
+                                </p>
                             </td>
                         </tr>
                         {% endfor %}
@@ -139,45 +225,70 @@
         </div>
     </div>
 
-    <!-- Student Performance -->
-    <div class="card fade-in stagger-4 mt-3">
-        <div class="card-header">
-            <span class="card-title">🎓 Student Performance</span>
-            <span style="color: var(--text-muted); font-size: 0.85rem;">{{ leaderboard | length }} students</span>
+    <!-- Student Performance Manifest -->
+    <div class="card fade-in stagger-4"
+        style="background:#fff;border-radius:32px;padding:0;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.08);border:none;">
+        <div
+            style="padding:24px 32px;background:#f9fafb;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:10px;height:10px;background:#fbbf24;border-radius:50%;"></div>
+                <h3 style="font-size:18px;font-weight:900;color:#111827;margin:0;">Performance Manifest</h3>
+            </div>
+            <span style="font-size:12px;color:#9ca3af;font-weight:700;text-transform:uppercase;">Scoring Data</span>
         </div>
-        {% if leaderboard %}
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 60px;">Rank</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Total Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in leaderboard %}
-                    <tr>
-                        <td>
-                            {% if loop.index <= 3 %} <span style="font-size: 1.1rem;">{% if loop.index == 1 %}🥇{% elif
-                                loop.index == 2 %}🥈{% else %}🥉{% endif %}</span>
-                                {% else %}
-                                <span class="rank-number">{{ loop.index }}</span>
-                                {% endif %}
-                        </td>
-                        <td style="font-weight: 600;">{{ row['name'] or 'No Name' }}</td>
-                        <td style="color: var(--text-secondary);">{{ row['email'] }}</td>
-                        <td style="font-weight: 700; color: var(--accent-primary);">{{ row['total_score'] if
-                            row['total_score'] else 0 }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
+        <div style="padding:32px;">
+            <div class="table-container" style="border-radius:20px;border:1px solid #f1f5f9;overflow:hidden;">
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:#f9fafb;">
+                            <th
+                                style="padding:16px 24px;text-align:left;font-size:11px;font-weight:900;color:#9ca3af;text-transform:uppercase;width:80px;">
+                                S.No</th>
+                            <th
+                                style="padding:16px 24px;text-align:left;font-size:11px;font-weight:900;color:#9ca3af;text-transform:uppercase;">
+                                Candidate Entity</th>
+                            <th
+                                style="padding:16px 24px;text-align:right;font-size:11px;font-weight:900;color:#9ca3af;text-transform:uppercase;">
+                                Intelligence Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in leaderboard %}
+                        <tr style="border-bottom:1px solid #f8fafc;">
+                            <td style="padding:16px 24px;">
+                                {% if loop.index <= 3 %} <div
+                                    style="width:32px;height:32px;background:#fff7ed;color:#ea580c;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;border:1px solid #ffedd5;">
+                                    {{ loop.index }}
+            </div>
+            {% else %}
+            <div
+                style="width:32px;height:32px;color:#9ca3af;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;">
+                {{ loop.index }}</div>
+            {% endif %}
+            </td>
+            <td style="padding:16px 24px;">
+                <div style="font-weight:800;color:#111827;font-size:14px;">{{ row['name'] or 'Anonymous' }}</div>
+                <div style="color:#6b7280;font-size:11px;margin-top:2px;">Verified Candidate</div>
+            </td>
+            <td style="padding:16px 24px;text-align:right;">
+                <div style="display:flex;flex-direction:column;align-items:flex-end;">
+                    <div style="font-size:18px;font-weight:900;color:#1a56db;">{{ row['total_score'] or 0 }}</div>
+                    <div style="font-size:10px;color:#9ca3af;font-weight:800;text-transform:uppercase;">PTS</div>
+                </div>
+            </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3" style="padding:100px;text-align:center;">
+                    <div style="font-size:48px;margin-bottom:16px;">📊</div>
+                    <p style="font-size:14px;color:#9ca3af;font-weight:700;">Waiting for first transmission data...</p>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
             </table>
         </div>
-        {% else %}
-        <p style="text-align: center; color: var(--text-muted); padding: 2rem;">No students registered yet.</p>
-        {% endif %}
     </div>
+</div>
 </div>
 {% endblock %}

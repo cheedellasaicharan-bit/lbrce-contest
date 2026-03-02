@@ -2,12 +2,13 @@
 __pycache__/
 *.py[cod]
 *$py.class
-vwen/
+venv/
 env/
 .env
 
-# Database
-database.db
+# Databases
+*.db
+*.sqlite3
 
 # OS
 .DS_Store
