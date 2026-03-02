@@ -1,307 +1,122 @@
 {% extends "base.html" %}
 {% block title %}Contest Arena — CSE(AI&ML) Coding Contest{% endblock %}
 
-{% block head %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
-<script id="problem-data" type="application/json">{{ problems_json | safe }}</script>
-<style>
-    /* Glassmorphism & Modern UI */
-    .glass-header {
-        background: var(--card-bg) !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border-bottom: 1px solid var(--border) !important;
-    }
-
-    .zen-mode .left-panel,
-    .zen-mode .glass-header {
-        display: none !important;
-    }
-
-    .zen-mode .main-content {
-        width: 100% !important;
-    }
-
-    /* CodeMirror & Editor */
-    #cm-wrap {
-        flex: 1;
-        min-height: 0;
-        overflow: hidden;
-    }
-
-    .CodeMirror {
-        font-family: 'Fira Code', 'Consolas', monospace !important;
-        font-size: 14px !important;
-        line-height: 1.75 !important;
-    }
-
-    .CodeMirror-gutters {
-        background: var(--bg-gray) !important;
-        border-right: 1px solid var(--border) !important;
-    }
-
-    /* Breadcrumb Nav */
-    .q-breadcrumb {
-        display: flex;
-        gap: 6px;
-        align-items: center;
-    }
-
-    .q-step {
-        width: 28px;
-        height: 28px;
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 12px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.2s;
-        border: 1px solid var(--border);
-        color: var(--text-3);
-        background: var(--card-bg);
-    }
-
-    .q-step.active {
-        background: #1a56db;
-        color: #fff;
-        border-color: #1a56db;
-        box-shadow: 0 0 12px rgba(26, 86, 219, 0.4);
-        animation: active-pulse 2s infinite;
-    }
-
-    @keyframes active-pulse {
-        0% {
-            transform: scale(1);
-            box-shadow: 0 0 0 0 rgba(26, 86, 219, 0.4);
-        }
-
-        50% {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px 5px rgba(26, 86, 219, 0.2);
-        }
-
-        100% {
-            transform: scale(1);
-            box-shadow: 0 0 0 0 rgba(26, 86, 219, 0.4);
-        }
-    }
-
-    .q-step.solved {
-        border-color: var(--green);
-        background: var(--green-bg);
-        color: var(--green);
-    }
-
-    /* Output tabs */
-    .out-tab {
-        padding: 7px 18px;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        border: none;
-        background: transparent;
-        color: #8b949e;
-        border-bottom: 2px solid transparent;
-        font-family: inherit;
-        transition: all .15s;
-    }
-
-    .out-tab.active {
-        color: #1a56db;
-        border-bottom-color: #1a56db;
-    }
-
-    /* Stats Mini Ring */
-    .mini-ring {
-        position: relative;
-        width: 34px;
-        height: 34px;
-    }
-
-    .mini-ring svg {
-        transform: rotate(-90deg);
-    }
-
-    @keyframes pulse {
-
-        0%,
-        100% {
-            opacity: 1
-        }
-
-        50% {
-            opacity: .4
-        }
-    }
-
-    .zen-toggle {
-        background: #21262d;
-        border: 1px solid #30363d;
-        color: #c9d1d9;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 11px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: 0.2s;
-    }
-
-    .zen-toggle:hover {
-        background: #30363d;
-        border-color: #8b949e;
-    }
-
-    .zen-toggle.active {
-        background: #1a56db;
-        color: #fff;
-        border-color: #1a56db;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<!-- Hero Banner -->
-<div
-    style="background:var(--blue-card);border-radius:18px;padding:32px 40px;margin-bottom:32px;overflow:hidden;position:relative;display:flex;justify-content:space-between;align-items:center;color:#fff;box-shadow:var(--shadow-lg);">
-    <div style="position:relative;z-index:1;">
-        <div
-            style="display:inline-flex;align-items:center;padding:5px 12px;background:rgba(255,255,255,0.1);border-radius:100px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.15);">
-            <span
-                style="width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;margin-right:8px;box-shadow:0 0 10px rgba(74,222,128,0.5);"></span>
-            <span style="font-size:10px;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;">LIVE
-                CONTEST</span>
-        </div>
-        <h1 style="font-size:32px;font-weight:800;margin:0 0 6px;letter-spacing:-0.025em;">CSE(AI&ML) Coding Contest
-        </h1>
-        <p style="font-size:14px;color:rgba(255,255,255,0.7);font-weight:500;">LBRCE · Department of CSE(AI&ML)</p>
-    </div>
+<div style="max-width: 1200px; margin: 0 auto; padding-bottom: 80px;">
 
-    <div style="display:flex;align-items:center;gap:32px;position:relative;z-index:1;">
-        <div
-            style="background:rgba(0,0,0,0.1);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:18px 28px;text-align:center;min-width:160px;">
-            <div id="timer-display"
-                style="font-family:monospace;font-size:28px;font-weight:800;letter-spacing:2px;margin-bottom:2px;">
-                --:--:--</div>
-            <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;opacity:0.6;">TIME
-                REMAINING</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:8px;text-align:left;">
-            <div style="font-size:12px;font-weight:700;display:flex;align-items:center;gap:10px;"><span
-                    style="font-size:15px;opacity:0.8;">📄</span> {{ problems|length }} Problems</div>
-            <div style="font-size:12px;font-weight:700;display:flex;align-items:center;gap:10px;"><span
-                    style="font-size:15px;opacity:0.8;">🏆</span> <b style="color:#fcd34d;">{{
-                    problems|sum(attribute='score') }}</b> max pts</div>
-            <div style="font-size:12px;font-weight:700;display:flex;align-items:center;gap:10px;"><span
-                    style="font-size:15px;opacity:0.8;">⚡</span> C · C++ · Java · Python</div>
-        </div>
-    </div>
-</div>
-
-<!-- Problems Table -->
-<div class="card" style="border-radius:14px;overflow:hidden;padding:0;margin-bottom:20px;">
+    <!-- Breadcrumb / Welcome -->
     <div
-        style="padding:14px 24px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
-        <h2 style="font-size:15px;font-weight:700;color:#111827;">📋 Problems</h2>
-        <span style="font-size:13px;color:#6b7280;">Click to start coding</span>
-    </div>
-    {% if problems %}
-    <table style="width:100%;border-collapse:collapse;">
-        <thead>
-            <tr style="background:#f9fafb;">
-                <th
-                    style="padding:10px 24px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">
-                    #</th>
-                <th
-                    style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">
-                    Problem</th>
-                <th
-                    style="padding:10px 16px;text-align:center;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">
-                    Difficulty</th>
-                <th
-                    style="padding:10px 16px;text-align:center;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">
-                    Points</th>
-                <th style="padding:10px 24px;"></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for p in problems %}
-            <tr style="border-top:1px solid #f1f5f9;cursor:pointer;transition:background .1s;"
-                onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
-                <td style="padding:16px 24px;font-size:13px;color:#94a3b8;font-weight:600;">{{ loop.index }}
-                </td>
-                <td style="padding:16px 16px;">
-                    <div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:2px;">{{ p['title'] }}</div>
-                    <div
-                        style="font-size:12px;color:#64748b;max-width:450px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-                        {{ p['description'] }}</div>
-                </td>
-                <td style="padding:16px 16px;text-align:center;">
-                    {% if p['difficulty']=='easy' %}<span
-                        style="background:#f0fdf4;color:#166534;font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px;">Easy</span>
-                    {% elif p['difficulty']=='medium' %}<span
-                        style="background:#fffbeb;color:#92400e;font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px;">Medium</span>
-                    {% else %}<span
-                        style="background:#fef2f2;color:#991b1b;font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px;">Hard</span>{%
-                    endif %}
-                </td>
-                <td style="padding:16px 16px;text-align:center;">
-                    <span style="font-size:14px;font-weight:700;color:var(--blue);">{{ p['score'] }}</span><span
-                        style="font-size:10px;color:#94a3b8;font-weight:750;margin-left:1px;text-transform:lowercase;">pts</span>
-                </td>
-                <td style="padding:16px 24px;text-align:right;">
-                    <button type="button" class="solve-btn-arena" data-idx="{{ loop.index0 }}"
-                        style="background:var(--blue);color:#fff;border:none;padding:8px 20px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;transition:0.15s;box-shadow:var(--shadow-sm);">Solve
-                        →</button>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <div style="padding:60px;text-align:center;color:#9ca3af;">
-        <div style="font-size:2.5rem;margin-bottom:12px;">🏗️</div>
-        <p>No problems added yet</p>
-    </div>
-    {% endif %}
-</div>
-
-<!-- Rules + Languages -->
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-    <div class="card" style="border-radius:12px;padding:20px;">
-        <h3 style="font-size:14px;font-weight:700;color:#111827;margin-bottom:14px;">📜 Contest Rules</h3>
-        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;">
-            <li style="font-size:13px;color:#374151;display:flex;gap:8px;"><span
-                    style="color:#1a56db;font-weight:700;">1.</span>Each problem can be attempted multiple times.</li>
-            <li style="font-size:13px;color:#374151;display:flex;gap:8px;"><span
-                    style="color:#1a56db;font-weight:700;">2.</span>Only your highest score per problem counts.</li>
-            <li style="font-size:13px;color:#374151;display:flex;gap:8px;"><span
-                    style="color:#1a56db;font-weight:700;">3.</span>Code is auto-submitted when timer reaches zero.</li>
-            <li style="font-size:13px;color:#374151;display:flex;gap:8px;"><span
-                    style="color:#1a56db;font-weight:700;">4.</span>Plagiarism will result in disqualification.</li>
-        </ul>
-    </div>
-    <div class="card" style="border-radius:12px;padding:20px;">
-        <h3 style="font-size:14px;font-weight:700;color:#111827;margin-bottom:14px;">💻 Supported Languages</h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            {% for lang,icon in [('Python 3','🐍'),('C','⚡'),('C++','🔧'),('Java','☕')] %}
-            <div
-                style="display:flex;align-items:center;gap:10px;background:#f9fafb;border-radius:8px;padding:10px 14px;">
-                <span style="font-size:18px;">{{ icon }}</span><span
-                    style="font-size:13px;font-weight:600;color:#374151;">{{ lang }}</span>
-            </div>
-            {% endfor %}
+        style="background: #f0fdf4; border: 1px solid #dcfce7; padding: 12px 24px; border-radius: 12px; color: #166534; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 12px; margin-bottom: 32px;">
+        Welcome back, {{ session['user']['name'].split()[0] }} !
+        <div
+            style="margin-left: auto; background: #fff; border: 1px solid #dcfce7; padding: 4px 12px; border-radius: 8px; font-size: 13px; color: #15803d; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+            Welcome back, {{ session['user']['name'].split()[0] }} !
         </div>
     </div>
+
+    <!-- Header Section -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+        <div>
+            <h1
+                style="font-size: 24px; font-weight: 800; color: #111827; margin: 0; display: flex; align-items: center; gap: 12px;">
+                <span style="color: #f97316;">⚡</span> Contest Arena
+            </h1>
+            <p style="font-size: 13px; color: #6b7280; font-weight: 600; margin: 8px 0 0;">Solve problems and climb the
+                leaderboard</p>
+        </div>
+
+        <!-- Blue Timer Box -->
+        <div
+            style="background: #1d4ed8; color: #fff; padding: 8px 20px; border-radius: 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 25px rgba(29,78,216,0.2);">
+            <span style="font-size: 16px;">🕙</span>
+            <div id="timer-display"
+                style="font-family: monospace; font-size: 18px; font-weight: 800; letter-spacing: 1px;">--:--:--</div>
+        </div>
+    </div>
+
+    <!-- Category Tabs -->
+    <div style="display: flex; gap: 32px; border-bottom: 1px solid #e5e7eb; margin-bottom: 32px; padding-bottom: 1px;">
+        <div
+            style="font-size: 14px; font-weight: 800; color: #1d4ed8; padding: 12px 0; border-bottom: 2px solid #1d4ed8; cursor: pointer;">
+            All</div>
+        <div style="font-size: 14px; font-weight: 700; color: #6b7280; padding: 12px 0; cursor: pointer;">Competitive
+            Coding</div>
+    </div>
+
+    <!-- Problem Cards Grid -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 60px;">
+        {% for p in problems %}
+        <div
+            style="background: #fff; border-radius: 20px; border: 1px solid #f1f5f9; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
+            <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                <span
+                    style="background: #f3f4f6; color: #6b7280; font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 100px; text-transform: uppercase;">Competitive
+                    Coding</span>
+                <span
+                    style="background: #eff6ff; color: #3b82f6; font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 100px; text-transform: uppercase;">Free</span>
+            </div>
+
+            <!-- Difficulty Badge -->
+            <div style="margin-bottom: 16px;">
+                {% if p['difficulty']=='easy' %}
+                <span
+                    style="background: #f0fdf4; color: #166534; font-size: 10px; font-weight: 800; padding: 2px 10px; border-radius: 100px;">Easy</span>
+                {% elif p['difficulty']=='medium' %}
+                <span
+                    style="background: #fffbeb; color: #92400e; font-size: 10px; font-weight: 800; padding: 2px 10px; border-radius: 100px;">Medium</span>
+                {% else %}
+                <span
+                    style="background: #fef2f2; color: #991b1b; font-size: 10px; font-weight: 800; padding: 2px 10px; border-radius: 100px;">Hard</span>
+                {% endif %}
+            </div>
+
+            <h3 style="font-size: 16px; font-weight: 800; color: #111827; margin: 0 0 8px;">{{ p['title'] }}</h3>
+            <p style="font-size: 12px; color: #94a3b8; font-weight: 600; margin-bottom: 20px;">{{ p['score'] }} pts</p>
+
+            <button type="button" class="solve-btn-arena" data-idx="{{ loop.index0 }}"
+                style="width: 100%; background: #fff; border: 1px solid #e5e7eb; color: #1d4ed8; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; margin-top: auto;">
+                Open
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Footer of Page -->
+    <div
+        style="border-top: 1px solid #f1f5f9; padding-top: 48px; display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 64px;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                <div
+                    style="width: 32px; height: 32px; background: #1d4ed8; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 900; font-size: 14px;">
+                    LB</div>
+                <span style="font-size: 15px; font-weight: 800; color: #1e293b;">LBRCE CSM</span>
+            </div>
+            <p style="font-size: 13px; color: #94a3b8; line-height: 1.6; font-weight: 600; max-width: 300px;">
+                A premier platform for CSE(AI&ML) students to showcase coding skills.
+            </p>
+        </div>
+        <div>
+            <h4 style="font-size: 14px; font-weight: 800; color: #111827; margin-bottom: 24px;">Quick Links</h4>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <a href="/" style="font-size: 13px; color: #64748b; font-weight: 700; text-decoration: none;">Home</a>
+                <a href="/leaderboard"
+                    style="font-size: 13px; color: #64748b; font-weight: 700; text-decoration: none;">Leaderboard</a>
+                <a href="/contest"
+                    style="font-size: 13px; color: #64748b; font-weight: 700; text-decoration: none;">Contest Arena</a>
+            </div>
+        </div>
+        <div>
+            <h4 style="font-size: 14px; font-weight: 800; color: #111827; margin-bottom: 24px;">College</h4>
+            <p style="font-size: 13px; color: #64748b; line-height: 1.6; font-weight: 700;">
+                Lakireddy Bali Reddy College of Engineering, Mylavaram
+            </p>
+        </div>
+    </div>
+
+    <div style="margin-top: 64px; text-align: center; font-size: 12px; color: #94a3b8; font-weight: 700;">
+        © 2026 LBRCE CSE(AI&ML) Department. All Rights Reserved.
+    </div>
+
 </div>
 {% endblock %}
 
@@ -341,7 +156,7 @@
                 <div class="mini-ring">
                     <svg width="34" height="34" viewBox="0 0 34 34">
                         <circle cx="17" cy="17" r="14" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="3" />
-                        <circle id="mini-ring-prog" cx="17" cy="17" r="14" fill="none" stroke="#1a56db" stroke-width="3"
+                        <circle id="mini-ring-prog" cx="17" cy="17" r="14" fill="none" stroke="#1d4ed8" stroke-width="3"
                             stroke-dasharray="88" stroke-dashoffset="88" stroke-linecap="round"
                             style="transition:stroke-dashoffset .5s;" />
                     </svg>
@@ -352,377 +167,213 @@
                 </div>
             </div>
 
-            <div style="width:1px;height:24px;background:rgba(255,255,255,0.1);"></div>
-
-            <button class="zen-toggle" id="zen-btn" onclick="toggleZen()"
-                title="Zen Mode (Maximize Editor)">Zen</button>
-
-            <select id="language" onchange="updateBoilerplate()"
-                style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:4px 10px;border-radius:8px;font-size:13px;height:32px;cursor:pointer;font-family:inherit;font-weight:700;outline:none;">
-                <option value="50">C</option>
-                <option value="54">C++</option>
-                <option value="62">Java</option>
-                <option value="71" selected>Python</option>
-            </select>
-
-            <div style="display:flex;gap:8px;">
-                <button id="run-btn" onclick="submitCode(true)"
-                    style="background:#238636;color:#fff;border:none;padding:0 16px;height:32px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;">
-                    <span style="font-size:10px;">▶</span> Run
-                </button>
-                <button id="submit-btn" onclick="submitCode(false)"
-                    style="background:#1a56db;color:#fff;border:none;padding:0 16px;height:32px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(26, 86, 219, 0.3);">
-                    <span style="font-size:12px;">🚀</span> Submit
-                </button>
-            </div>
-
-            <button onclick="closeAssessment()"
-                style="background:rgba(255,255,255,0.05);border:none;color:#8b949e;font-size:18px;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:0.2s;"
-                onmouseover="this.style.background='rgba(239, 68, 68, 0.1)';this.style.color='#ef4444'"
-                onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.color='#8b949e'">✕</button>
+            <button onclick="closeArena()" class="arena-close-btn"
+                style="background:rgba(255,255,255,0.05);border:none;color:#8b949e;width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;">×</button>
         </div>
     </div>
 
-    <!-- 2-Column Body -->
-    <div id="arena-body" style="display:flex;flex:1;overflow:hidden;min-height:0;">
-
-        <!-- LEFT: Problem Info (340px) -->
-        <div class="left-panel"
-            style="width:340px;background:#0d1117;border-right:1px solid #30363d;overflow-y:auto;padding:24px 20px 80px;flex-shrink:0;">
-            <h2 id="left-title" style="font-size:18px;font-weight:900;color:#fff;margin-bottom:8px;line-height:1.3;">
-            </h2>
-            <div id="left-badges" style="margin-bottom:20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <!-- Main Workspace -->
+    <div style="flex:1;display:flex;min-height:0;background:#0d1117;">
+        <!-- Left: Problem Panel -->
+        <div id="problem-panel"
+            style="width:30%;border-right:1px solid #30363d;display:flex;flex-direction:column;overflow-y:auto;padding:24px;color:#c9d1d9;">
+            <div id="prob-meta" style="margin-bottom:24px;">
+                <span id="prob-difficulty"
+                    style="font-size:10px;font-weight:800;text-transform:uppercase;padding:4px 12px;border-radius:100px;background:rgba(63,185,80,0.1);color:#3fb950;border:1px solid rgba(63,185,80,0.2);">EASY</span>
             </div>
+            <h2 id="prob-title" style="font-size:20px;font-weight:800;color:#fff;margin:0 0 16px;"></h2>
+            <div id="prob-description" style="font-size:14px;line-height:1.6;color:#8b949e;"></div>
 
-            <div style="display:flex;flex-direction:column;gap:24px;">
-                <section>
-                    <div
-                        style="font-size:11px;font-weight:800;text-transform:uppercase;color:#484f58;margin-bottom:8px;letter-spacing:.1em;display:flex;align-items:center;gap:6px;">
-                        <span style="width:6px;height:6px;background:#1a56db;border-radius:50%;"></span> Description
-                    </div>
-                    <p id="left-desc" style="font-size:14px;color:#c9d1d9;line-height:1.8;white-space:pre-wrap;"></p>
-                </section>
+            <div style="height:1px;background:#30363d;margin:32px 0;"></div>
 
-                <section>
-                    <div
-                        style="font-size:11px;font-weight:800;text-transform:uppercase;color:#484f58;margin-bottom:8px;letter-spacing:.1em;display:flex;align-items:center;gap:6px;">
-                        <span style="width:6px;height:6px;background:#facc15;border-radius:50%;"></span> Constraints
-                    </div>
-                    <p id="left-constraints"
-                        style="font-size:14px;color:#c9d1d9;line-height:1.6;font-family:'Fira Code', monospace;background:rgba(255,255,255,0.03);padding:8px 12px;border-radius:8px;">
-                        NA</p>
-                </section>
+            <h4 style="font-size:13px;font-weight:800;color:#fff;margin:0 0 12px;text-transform:uppercase;">Sample Input
+            </h4>
+            <pre id="sample-input"
+                style="background:#161b22;padding:16px;border-radius:12px;font-family:monospace;font-size:13px;color:#3fb950;margin-bottom:24px;border:1px solid #30363d;"></pre>
 
-                <section>
-                    <div
-                        style="font-size:11px;font-weight:800;text-transform:uppercase;color:#484f58;margin-bottom:12px;letter-spacing:.1em;display:flex;align-items:center;gap:6px;">
-                        <span style="width:6px;height:6px;background:#3fb950;border-radius:50%;"></span> Examples
-                    </div>
-                    <div id="left-testcases" style="display:flex;flex-direction:column;gap:16px;"></div>
-                </section>
+            <h4 style="font-size:13px;font-weight:800;color:#fff;margin:0 0 12px;text-transform:uppercase;">Sample
+                Output
+            </h4>
+            <pre id="sample-output"
+                style="background:#161b22;padding:16px;border-radius:12px;font-family:monospace;font-size:13px;color:#3fb950;border:1px solid #30363d;"></pre>
+        </div>
+
+        <!-- Center: Editor Panel -->
+        <div id="editor-panel" style="flex:1.2;display:flex;flex-direction:column;border-right:1px solid #30363d;">
+            <div class="editor-header"
+                style="height:48px;background:#161b22;border-bottom:1px solid #30363d;display:flex;align-items:center;padding:0 16px;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="font-size:11px;font-weight:800;color:#8b949e;text-transform:uppercase;">Language</div>
+                    <select id="lang-select" onchange="changeLanguage()"
+                        style="background:#0d1117;color:#fff;border:1px solid #30363d;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:700;outline:none;">
+                        <option value="python">Python 3</option>
+                        <option value="c">C</option>
+                        <option value="cpp">C++</option>
+                        <option value="java">Java</option>
+                    </select>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button onclick="runCode()" class="btn-run"
+                        style="background:transparent;color:#3fb950;border:1px solid #3fb950;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">Compile
+                        & Run</button>
+                    <button onclick="submitCode()" class="btn-submit"
+                        style="background:#1d4ed8;color:#fff;border:none;padding:6px 20px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">Submit
+                        Final Code</button>
+                </div>
+            </div>
+            <div style="flex:1;position:relative;background:#0d1117;">
+                <!-- Modern Styled Textarea instead of CodeMirror to ensure it works on all browsers -->
+                <textarea id="code-editor" spellcheck="false"
+                    style="width:100%;height:100%;background:#0d1117;color:#c9d1d9;border:none;font-family:'JetBrains Mono', 'Fira Code', monospace;font-size:14px;padding:24px;resize:none;outline:none;line-height:1.6;"></textarea>
             </div>
         </div>
 
-        <!-- RIGHT: Workspace (Flex-1) -->
-        <div class="main-content"
-            style="flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;background:#0d1117;">
-            <!-- Editor -->
-            <div style="flex:1;display:flex;flex-direction:column;min-height:0;position:relative;">
-                <textarea id="code-editor" oninput="this.style.height=''"
-                    style="flex:1;width:100%;background:#0d1117;color:#e6edf3;font-family:'Fira Code','Consolas','Courier New',monospace;font-size:15px;line-height:1.8;padding:24px;border:none;outline:none;resize:none;tab-size:4;box-sizing:border-box;caret-color:#58a6ff;overflow-y:auto;"
-                    placeholder="Write your code here..." spellcheck="false" autocomplete="off" autocorrect="off"
-                    autocapitalize="off"></textarea>
-
-                <!-- Floating Nav for editor -->
-                <div style="position:absolute;bottom:16px;right:24px;display:flex;gap:10px;z-index:10;">
-                    <button onclick="prevProblem()" title="Previous Problem"
-                        style="background:#21262d;border:1px solid #30363d;color:#8b949e;width:34px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:0.2s;"
-                        onmouseover="this.style.borderColor='#1a56db';this.style.color='#fff'"
-                        onmouseout="this.style.borderColor='#30363d';this.style.color='#8b949e'">←</button>
-                    <button onclick="nextProblem()" title="Next Problem"
-                        style="background:#1a56db;border:none;color:#fff;width:34px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:0.2s;box-shadow:0 4px 12px rgba(26, 86, 219, 0.2);"
-                        onmouseover="this.style.transform='translateY(-2px)'"
-                        onmouseout="this.style.transform='translateY(0)'">→</button>
+        <!-- Right: Output Panel -->
+        <div id="output-panel" style="width:25%;display:flex;flex-direction:column;background:#0d1117;">
+            <div
+                style="height:48px;background:#161b22;border-bottom:1px solid #30363d;display:flex;align-items:center;padding:0 16px;">
+                <div style="font-size:11px;font-weight:800;color:#8b949e;text-transform:uppercase;">Output & Test Result
                 </div>
             </div>
-
-            <!-- Console -->
-            <div
-                style="height:210px;border-top:1px solid #30363d;display:flex;flex-direction:column;flex-shrink:0;background:#161b22;">
-                <div
-                    style="display:flex;align-items:center;border-bottom:1px solid #30363d;background:#0d1117;padding:0 12px;height:40px;">
-                    <div style="display:flex;gap:4px;">
-                        <button class="out-tab active" id="tab-output" onclick="switchTab('output')">Console</button>
-                        <button class="out-tab" id="tab-stdin" onclick="switchTab('stdin')">Test Input</button>
-                    </div>
-                    <button onclick="clearOutput()"
-                        style="margin-left:auto;background:transparent;border:none;color:#8b949e;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;font-family:inherit;transition:0.2s;"
-                        onmouseover="this.style.color='#fff';this.style.background='rgba(255,255,255,0.05)'"
-                        onmouseout="this.style.color='#8b949e';this.style.background='transparent'">Clear</button>
+            <div id="output-box"
+                style="flex:1;padding:24px;font-family:monospace;font-size:13px;overflow-y:auto;white-space:pre-wrap;color:#8b949e;">
+                <div style="text-align:center;margin-top:40px;opacity:0.5;">
+                    <div style="font-size:32px;margin-bottom:12px;">🏃</div>
+                    Run your code to see results here
                 </div>
-                <div id="panel-output"
-                    style="flex:1;padding:16px;font-family:'Fira Code',monospace;font-size:13px;color:#c9d1d9;white-space:pre-wrap;overflow-y:auto;line-height:1.6;background:#0d1117;">
-                    Run your code to see results here...</div>
-                <div id="panel-stdin" style="display:none;flex:1;padding:0;background:#0d1117;">
-                    <textarea id="stdin" placeholder="Type your input here..."
-                        style="width:100%;height:100%;background:transparent;color:#c9d1d9;font-family:'Fira Code',monospace;font-size:13px;border:none;padding:16px;resize:none;outline:none;box-sizing:border-box;"></textarea>
-                </div>
-            </div>
-
-            <!-- Bottom Status Bar -->
-            <div
-                style="height:28px;background:#161b22;border-top:1px solid #30363d;display:flex;align-items:center;padding:0 16px;justify-content:space-between;">
-                <div style="font-size:10px;color:#8b949e;font-weight:600;">ESC to exit arena • Ctrl+/ to comment</div>
-                <div style="font-size:10px;color:#8b949e;font-weight:600;">Connected to Cloud Judge</div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
 <script>
-    const allProblems = JSON.parse(document.getElementById('problem-data').textContent);
-    const endTime = new Date("{{ end_time }}").getTime();
-    const startTime = new Date("{{ start_time }}").getTime();
-    let currentIdx = 0;
-    let currentProblem = allProblems.length ? allProblems[0].id : '';
-    let isZen = false;
+    const PROBLEMS = {{ problems_json | safe }};
+    let currentProblem = null;
+    let timerInterval = null;
 
-    // Resolve Assessment triggers
-    document.querySelectorAll('.solve-btn-arena').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const idx = parseInt(btn.getAttribute('data-idx'));
-            openAssessment(idx);
-        });
-    });
-
-    /* Stats Initialization */
-    let stats = { correct: 0, wrong: 0, score: 0 };
-    const solvedProblems = new Set();
-
-    function updateStats(ok, earned, probId) {
-        if (ok) {
-            stats.correct++;
-            solvedProblems.add(probId);
-        } else {
-            stats.wrong++;
-        }
-        stats.score += earned;
-
-        // Update Mini UI
-        const pct = allProblems.length ? Math.round(stats.correct / allProblems.length * 100) : 0;
-        const miniRing = document.getElementById('mini-ring-prog');
-        const miniPct = document.getElementById('mini-ring-pct');
-        const miniScore = document.getElementById('mini-score');
-
-        if (miniRing) miniRing.style.strokeDashoffset = 88 - (88 * pct / 100);
-        if (miniPct) miniPct.textContent = pct + '%';
-        if (miniScore) miniScore.textContent = stats.score + ' pts';
-
-        // Color coding for progress
-        if (miniRing) miniRing.style.stroke = pct >= 80 ? '#3fb950' : pct >= 50 ? '#e3b341' : '#1a56db';
-
-        buildDots(); // Refresh solved status colors in dots
+    function formatTime(ms) {
+        if (ms <= 0) return "00:00:00";
+        const h = Math.floor(ms / 3600000);
+        const m = Math.floor((ms % 3600000) / 60000);
+        const s = Math.floor((ms % 60000) / 1000);
+        return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':');
     }
 
-    /* Zen Mode */
-    function toggleZen() {
-        isZen = !isZen;
-        const view = document.getElementById('assessment-view');
-        const btn = document.getElementById('zen-btn');
-        if (isZen) {
-            view.classList.add('zen-mode');
-            btn.classList.add('active');
-            btn.textContent = 'Exit Zen';
-        } else {
-            view.classList.remove('zen-mode');
-            btn.classList.remove('active');
-            btn.textContent = 'Zen';
-        }
-    }
-
-    /* Editor helpers */
-    const getTA = () => document.getElementById('code-editor');
-    const getCode = () => getTA() ? getTA().value : '';
-    const setCode = v => { const ta = getTA(); if (ta) { ta.value = v || ''; ta.focus(); } };
-
-    function updateBoilerplate() {
-        const v = document.getElementById('language').value;
-        const bp = {
-            "71": "# Python 3\n\n",
-            "50": "#include <stdio.h>\nint main() {\n    int a, b;\n    // Write your code here\n    return 0;\n}\n",
-            "54": "#include <iostream>\nusing namespace std;\nint main() {\n    int a, b;\n    // Write your code here\n    return 0;\n}\n",
-            "62": "public class Main {\n    public static void main(String[] args) {\n        // Write your code here\n    }\n}\n"
-        };
-        if (!getCode().trim()) setCode(bp[v] || '');
-    }
-
-    // Tab key inserts 4 spaces
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Tab' && document.activeElement === getTA()) {
-            e.preventDefault();
-            const ta = getTA(), s = ta.selectionStart, en = ta.selectionEnd;
-            ta.value = ta.value.substring(0, s) + '    ' + ta.value.substring(en);
-            ta.selectionStart = ta.selectionEnd = s + 4;
-        }
-    });
-
-    /* Output tabs */
-    function switchTab(n) {
-        document.querySelectorAll('.out-tab').forEach(t => t.classList.remove('active'));
-        document.getElementById('tab-' + n).classList.add('active');
-        document.getElementById('panel-output').style.display = n === 'output' ? 'block' : 'none';
-        document.getElementById('panel-stdin').style.display = n === 'stdin' ? 'block' : 'none';
-    }
-
-    /* Problem Nav Dots in Header */
-    function buildDots() {
-        const c = document.getElementById('header-q-picker');
-        if (!c) return;
-        c.innerHTML = '';
-        allProblems.forEach((p, i) => {
-            const b = document.createElement('div');
-            b.className = 'q-step' + (i === currentIdx ? ' active' : '') + (solvedProblems.has(p.id) ? ' solved' : '');
-            b.textContent = i + 1;
-            b.onclick = () => loadProblem(i);
-            c.appendChild(b);
-        });
-    }
-
-    function loadProblem(idx) {
-        if (idx < 0 || idx >= allProblems.length) return;
-        currentIdx = idx;
-        const p = allProblems[idx];
-        currentProblem = p.id;
-
-        document.getElementById('top-problem-title').textContent = p.title;
-        document.getElementById('left-title').textContent = p.title;
-        document.getElementById('left-desc').textContent = p.desc || p.description || '';
-        document.getElementById('left-constraints').textContent = 'NA';
-        document.getElementById('left-testcases').innerHTML = '';
-
-        const dc = { easy: ['#1a4731', '#3fb950'], medium: ['#3d2b00', '#e3b341'], hard: ['#3d0000', '#f85149'] };
-        const [bg, fg] = dc[p.diff] || ['#21262d', '#c9d1d9'];
-        document.getElementById('left-badges').innerHTML =
-            `<span style="background:${bg};color:${fg};font-size:11px;font-weight:700;padding:3px 12px;border-radius:100px;">${(p.diff || '').toUpperCase()}</span>` +
-            `<span style="font-size:13px;color:#e3b341;font-weight:800;">✨ ${p.score} Points</span>`;
-
-        buildDots();
-        clearOutput();
-        if (!getCode().trim()) updateBoilerplate();
-    }
-
-    function nextProblem() { if (currentIdx < allProblems.length - 1) loadProblem(currentIdx + 1); }
-    function prevProblem() { if (currentIdx > 0) loadProblem(currentIdx - 1); }
-
-    function openAssessment(idx) {
-        const view = document.getElementById('assessment-view');
-        view.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-        buildDots();
-        loadProblem(typeof idx === 'number' ? idx : 0);
-        setTimeout(() => getTA()?.focus(), 100);
-    }
-
-    function closeAssessment() {
-        document.getElementById('assessment-view').style.display = 'none';
-        document.body.style.overflow = '';
-    }
-
-    /* Timer & Auto-Submit */
-    let timerInterval, autoSubmitDone = false;
     function updateTimer() {
-        const now = Date.now(), diff = endTime - now;
-        const tEl = document.getElementById('assess-timer');
-        const fmt = ms => `${String(Math.floor(ms / 3600000)).padStart(2, '0')}:${String(Math.floor(ms % 3600000 / 60000)).padStart(2, '0')}:${String(Math.floor(ms % 60000 / 1000)).padStart(2, '0')}`;
+        const start = new Date("{{ contest_start }}").getTime();
+        const end = new Date("{{ contest_end }}").getTime();
+        const now = new Date().getTime();
 
-        if (diff <= 0) {
-            if (tEl) { tEl.textContent = 'TIME OVER'; tEl.style.color = '#ff4444'; }
-            if (!autoSubmitDone) {
-                autoSubmitDone = true;
-                clearInterval(timerInterval);
-                autoSubmitAll();
-            }
+        let remaining = 0;
+        let label = "Time Remaining";
+
+        if (now < start) {
+            remaining = start - now;
+            label = "STARTS IN";
+        } else if (now < end) {
+            remaining = end - now;
         } else {
-            if (tEl) { tEl.textContent = fmt(diff); if (diff < 60000) tEl.style.color = '#ff4444'; }
+            remaining = 0;
+            label = "CONTEST ENDED";
         }
+
+        const timeStr = formatTime(remaining);
+        document.getElementById('timer-display').innerText = timeStr;
+        const assessTimer = document.getElementById('assess-timer');
+        if (assessTimer) assessTimer.innerText = timeStr;
     }
 
-    function autoSubmitAll() {
-        const code = getCode(), lang = document.getElementById('language')?.value || '71';
-        const ov = document.createElement('div');
-        ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;';
-        ov.innerHTML = `
-            <div style="background:#161b22;border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:48px;text-align:center;max-width:400px;box-shadow:0 20px 50px rgba(0,0,0,0.5);">
-                <div style="font-size:4rem;margin-bottom:20px;">⏰</div>
-                <h2 style="color:#fff;font-size:24px;font-weight:900;margin-bottom:12px;">Contest Finished!</h2>
-                <p style="color:#8b949e;font-size:15px;margin-bottom:24px;">Time is up. We are auto-submitting your progress...</p>
-                <div id="auto-sub-status" style="color:#1a56db;font-size:14px;font-weight:700;">Submitting...</div>
-            </div>
-        `;
-        document.body.appendChild(ov);
-        if (!code.trim() || !currentProblem) {
-            setTimeout(() => window.location.href = '/user/dashboard', 2000);
-            return;
-        }
-        fetch('/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code, language: lang, problem: currentProblem, is_test: false }) })
-            .finally(() => { setTimeout(() => window.location.href = '/user/dashboard', 2500); });
-    }
-
-    timerInterval = setInterval(updateTimer, 1000);
+    setInterval(updateTimer, 1000);
     updateTimer();
 
-    /* Submit / Run */
-    function submitCode(isTest = false) {
-        const btn = isTest ? document.getElementById('run-btn') : document.getElementById('submit-btn');
-        const code = getCode(), statusEl = document.getElementById('output-status');
+    document.querySelectorAll('.solve-btn-arena').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = btn.getAttribute('data-idx');
+            openArena(idx);
+        });
+    });
 
-        if (!code.trim()) {
-            document.getElementById('panel-output').textContent = '⚠️ Please write some code first.';
-            switchTab('output');
-            return;
-        }
+    function openArena(idx) {
+        currentProblem = PROBLEMS[idx];
+        document.getElementById('prob-title').innerText = currentProblem.title;
+        document.getElementById('top-problem-title').innerText = currentProblem.title;
+        document.getElementById('prob-description').innerText = currentProblem.description;
+        document.getElementById('sample-input').innerText = currentProblem.sample_input;
+        document.getElementById('sample-output').innerText = currentProblem.sample_output;
+        document.getElementById('prob-difficulty').innerText = currentProblem.difficulty.toUpperCase();
 
-        btn.disabled = true;
-        statusEl.textContent = isTest ? 'Running...' : 'Submitting...';
-        statusEl.style.color = '#e3b341';
-        document.getElementById('panel-output').textContent = '⏳ Executing on Cloud Judge...';
-        switchTab('output');
+        document.getElementById('assessment-view').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
 
-        fetch('/submit', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code, language: document.getElementById('language').value, problem: currentProblem, is_test: isTest })
+        // Auto-scroll to top of panels
+        document.getElementById('problem-panel').scrollTop = 0;
+        document.getElementById('output-box').scrollTop = 0;
+    }
+
+    function closeArena() {
+        document.getElementById('assessment-view').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    function runCode() {
+        const out = document.getElementById('output-box');
+        out.innerHTML = '<div style="color:#f1c40f;">Compiling and running against sample test cases...</div>';
+        const code = document.getElementById('code-editor').value;
+        const lang = document.getElementById('lang-select').value;
+
+        fetch('/run_code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                code: code,
+                language: lang,
+                problem_id: currentProblem.id
+            })
         })
-            .then(r => r.json()).then(d => {
-                document.getElementById('panel-output').textContent = d.output;
-                if (d.status === 'success') {
-                    statusEl.textContent = 'ACCEPTED'; statusEl.style.color = '#3fb950';
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    out.innerHTML = `<div style="color:#3fb950;margin-bottom:8px;font-weight:800;">PASS: Sample Test Cases</div><div style="color:#8b949e;">${data.output}</div>`;
                 } else {
-                    statusEl.textContent = d.status.toUpperCase(); statusEl.style.color = d.status === 'partial' ? '#e3b341' : '#f85149';
+                    out.innerHTML = `<div style="color:#f85149;margin-bottom:8px;font-weight:800;">ERROR</div><div style="color:#8b949e;background:rgba(248,81,73,0.1);padding:12px;border-radius:8px;border:1px solid rgba(248,81,73,0.2);">${data.message}</div>`;
                 }
-
-                if (!isTest && (d.status === 'success' || d.status === 'partial')) {
-                    updateStats(d.status === 'success', d.score || 0, currentProblem);
-                }
-            })
-            .catch(() => {
-                document.getElementById('panel-output').textContent = '❌ Network error. Check your connection.';
-                statusEl.textContent = 'ERROR'; statusEl.style.color = '#f85149';
-            })
-            .finally(() => {
-                btn.disabled = false;
             });
     }
 
-    function clearOutput() {
-        document.getElementById('panel-output').textContent = 'Run your code to see results here...';
-        document.getElementById('output-status').textContent = 'Ready';
-        document.getElementById('output-status').style.color = '#3fb950';
+    function submitCode() {
+        const code = document.getElementById('code-editor').value;
+        const lang = document.getElementById('lang-select').value;
+
+        fetch('/submit_code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                code: code,
+                language: lang,
+                problem_id: currentProblem.id
+            })
+        })
+            .then(r => r.json())
+            .then(data => {
+                alert(data.message);
+                if (data.status === 'success') {
+                    // Update mini accuracy ring
+                    const pct = data.score_pct || 100;
+                    const offset = 88 - (88 * pct / 100);
+                    document.getElementById('mini-ring-prog').style.strokeDashoffset = offset;
+                    document.getElementById('mini-ring-pct').innerText = pct + '%';
+                    document.getElementById('mini-score').innerText = data.score + ' pts';
+                }
+            });
     }
 
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') closeAssessment();
-    });
+    function changeLanguage() {
+        const lang = document.getElementById('lang-select').value;
+        const editor = document.getElementById('code-editor');
+        if (lang === 'python') editor.placeholder = 'def solve():\n    # your code here';
+        else if (lang === 'c') editor.placeholder = '#include <stdio.h>\n\nint main() {\n    return 0;\n}';
+        else if (lang === 'cpp') editor.placeholder = '#include <iostream>\n\nint main() {\n    return 0;\n}';
+        else if (lang === 'java') editor.placeholder = 'public class Main {\n    public static void main(String[] args) {\n    }\n}';
+    }
 </script>
 {% endblock %}

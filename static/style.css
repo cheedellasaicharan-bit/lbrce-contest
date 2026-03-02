@@ -5,6 +5,10 @@
    Official CSE(AI&ML) Theme
    ============================ */
 :root {
+    --font-main: 'Inter', sans-serif;
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
     --bg: #ffffff;
     --bg-light: #f8fafc;
     --bg-gray: #f1f5f9;
@@ -12,12 +16,12 @@
     --border: #e5e7eb;
     --border-dark: #d1d5db;
 
-    /* Blue Palette (matching screenshot) */
     --blue: #1d4ed8;
     --blue-dark: #1e40af;
     --blue-light: #3b82f6;
     --blue-bg: #eff6ff;
     --blue-card: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+    --blue-dark-card: linear-gradient(135deg, #1e3a8a 0%, #1e4ed8 100%);
 
     /* Accent colors */
     --green: #0e9f6e;

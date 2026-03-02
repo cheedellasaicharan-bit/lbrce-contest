@@ -34,14 +34,14 @@
             </a>
 
             <!-- Nav Links -->
-            <div class="nav-links" style="gap:4px;">
+            <div class="nav-links" style="gap:24px;margin-left:40px;">
                 {% if 'user' in session %}
                 <a href="{{ url_for('contest') }}" class="nav-link"
-                    style="font-size:12px;font-weight:800;color:var(--text-2);padding:10px 20px;text-transform:uppercase;">ASSESSMENTS</a>
+                    style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">ARENA</a>
                 <a href="{{ url_for('leaderboard') }}" class="nav-link"
-                    style="font-size:12px;font-weight:800;color:var(--text-3);padding:10px 20px;text-transform:uppercase;">LEADERBOARD</a>
+                    style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">LEADERBOARD</a>
                 <a href="{{ url_for('user_dashboard') }}" class="nav-link"
-                    style="font-size:12px;font-weight:800;color:var(--text-3);padding:10px 20px;text-transform:uppercase;">DASHBOARD</a>
+                    style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">DASHBOARD</a>
                 {% endif %}
             </div>
 
