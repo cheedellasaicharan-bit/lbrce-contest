@@ -110,8 +110,10 @@
             <p style="font-size: 12px; color: #6b7280; font-weight: 600; margin: 0 0 4px;">Current Rank: #{{ rank }}</p>
             <p style="font-size: 12px; color: #6b7280; font-weight: 600; margin: 0 0 16px;">Total Points: {{ total_score
                 }}</p>
+            {% if session.get('role') == 'admin' %}
             <a href="{{ url_for('leaderboard') }}"
                 style="font-size: 12px; color: #1d4ed8; font-weight: 800; text-decoration: none;">View Leaderboard</a>
+            {% endif %}
         </div>
         <div
             style="background: #fff; padding: 24px; border-radius: 20px; border: 1px solid #f1f5f9; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">

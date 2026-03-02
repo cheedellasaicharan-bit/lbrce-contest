@@ -120,9 +120,11 @@
             <h4 style="font-size: 14px; font-weight: 800; color: #111827; margin-bottom: 24px;">Quick Links</h4>
             <div style="display: flex; flex-direction: column; gap: 12px;">
                 <a href="/" style="font-size: 13px; color: #64748b; font-weight: 700; text-decoration: none;">Home</a>
+                {% if session.get('role') == 'admin' %}
                 <a href="/leaderboard"
                     style="font-size: 13px; color: #64748b; font-weight: 700; text-decoration: none;">Leaderboard</a>
-                <a href="/contest"
+                {% endif %}
+                <a href="/user/dashboard"
                     style="font-size: 13px; color: #64748b; font-weight: 700; text-decoration: none;">Contest</a>
             </div>
         </div>

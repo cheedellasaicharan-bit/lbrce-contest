@@ -129,10 +129,12 @@
                         <li><a href="/" style="color:var(--text-3);text-decoration:none;font-size:13px;transition:0.3s;"
                                 onmouseover="this.style.color='var(--blue)'"
                                 onmouseout="this.style.color='var(--text-3)'">Home</a></li>
+                        {% if session.get('role') == 'admin' %}
                         <li><a href="/leaderboard"
                                 style="color:var(--text-3);text-decoration:none;font-size:13px;transition:0.3s;"
                                 onmouseover="this.style.color='var(--blue)'"
                                 onmouseout="this.style.color='var(--text-3)'">Leaderboard</a></li>
+                        {% endif %}
                         <li><a href="/contest"
                                 style="color:var(--text-3);text-decoration:none;font-size:13px;transition:0.3s;"
                                 onmouseover="this.style.color='var(--blue)'"
