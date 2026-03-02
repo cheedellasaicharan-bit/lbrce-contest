@@ -420,7 +420,8 @@ def user_dashboard():
                            user=user, 
                            submissions=submissions, 
                            rank=rank, 
-                           total_score=total_score)
+                           total_score=total_score,
+                           stats=get_stats())
 
 
 
