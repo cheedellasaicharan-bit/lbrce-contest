@@ -299,6 +299,7 @@
     let currentProblem = null;
     let timerInterval = null;
     let editorInstance = null;
+    let submittedProblems = new Set();
 
     function initEditor() {
         if (!editorInstance) {
@@ -521,6 +522,21 @@
                     document.getElementById('mini-ring-prog').style.strokeDashoffset = offset;
                     document.getElementById('mini-ring-pct').innerText = pct + '%';
                     document.getElementById('mini-score').innerText = score + ' pts';
+
+                    // Track successful submissions
+                    if (data.status === 'success' || pct === 100) {
+                        submittedProblems.add(currentProblem.id);
+                    }
+
+                    // Auto-exit if all problems are successfully completed
+                    if (submittedProblems.size >= PROBLEMS.length && PROBLEMS.length > 0) {
+                        setTimeout(() => {
+                            alert("Congratulations! You have successfully completed all problems. Returning to dashboard...");
+                            closeAssessment();
+                            window.location.href = '/user/dashboard';
+                        }, 500);
+                        return;
+                    }
 
                     // Auto-advance to the next problem on 100% success
                     if (data.status === 'success' || pct === 100) {
