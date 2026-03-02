@@ -362,18 +362,15 @@ def contest():
     con = get_db()
     
     # Check if user has already completed all problems
-    total_problems_val = con.execute("SELECT COUNT(*) as c FROM problems").fetchone()['c']
-    submitted_problems_count = con.execute("""
-        SELECT COUNT(DISTINCT problem_id) as c
-        FROM submissions
-        WHERE user_email = ?
-    """, (session.get("email"),)).fetchone()['c']
-    
-    if total_problems_val > 0 and submitted_problems_count >= total_problems_val:
-        con.close()
-        flash("🎉 You have already completed all problems in the contest!", "success")
-        return redirect(url_for("user_dashboard"))
-        
+    if session.get("role") != "admin":
+        email = session.get("email")
+        stats = get_stats()
+        distinct_submissions = con.execute("SELECT COUNT(DISTINCT problem_id) as count FROM submissions WHERE user_email=?", (email,)).fetchone()['count']
+        if distinct_submissions >= stats['total_problems'] and stats['total_problems'] > 0:
+            con.close()
+            flash("You have already completed the contest. You cannot re-enter the arena.", "success")
+            return redirect(url_for("user_dashboard"))
+
     rows = con.execute("SELECT * FROM problems").fetchall()
     problems = [dict(r) for r in rows]
     con.close()
@@ -438,16 +435,11 @@ def user_dashboard():
         if entry['email'] == email:
             rank = i + 1
             break
-    
+
+    # Calculate contest completion status
     stats = get_stats()
-    total_problems_val = stats['total_problems']
-    submitted_problems_count = con.execute("""
-        SELECT COUNT(DISTINCT problem_id) as c
-        FROM submissions
-        WHERE user_email = ?
-    """, (email,)).fetchone()['c']
-    
-    contest_completed = (submitted_problems_count >= total_problems_val) if total_problems_val > 0 else False
+    distinct_submissions = con.execute("SELECT COUNT(DISTINCT problem_id) as count FROM submissions WHERE user_email=?", (email,)).fetchone()['count']
+    has_completed_contest = distinct_submissions >= stats['total_problems'] and stats['total_problems'] > 0
     
     con.close()
     return render_template("user_dashboard.html", 
@@ -455,8 +447,8 @@ def user_dashboard():
                            submissions=submissions, 
                            rank=rank, 
                            total_score=total_score,
-                           stats=stats,
-                           contest_completed=contest_completed)
+                           has_completed_contest=has_completed_contest,
+                           stats=stats)
 
 
 
@@ -608,33 +600,6 @@ def submit():
 
         output_text = "\n".join(results) + f"\n\nScore: {earned_score}/{prob['score']} ({passed}/{total} test cases passed)"
         return jsonify({"output": output_text, "status": "success" if passed == total else "partial", "score": earned_score})
-
-
-@app.route("/disqualify", methods=["POST"])
-def disqualify():
-    if "user" not in session:
-        return jsonify({"status": "error", "message": "Not logged in"})
-    
-    email = session.get("email")
-    con = get_db()
-    
-    # Get all problems
-    problems = con.execute("SELECT id FROM problems").fetchall()
-    
-    # Get currently submitted problems
-    submitted = con.execute("SELECT DISTINCT problem_id FROM submissions WHERE user_email=?", (email,)).fetchall()
-    submitted_ids = {s['problem_id'] for s in submitted}
-    
-    for p in problems:
-        if p['id'] not in submitted_ids:
-            con.execute("""
-                INSERT INTO submissions (user_email, problem_id, score, code, language, status)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (email, p['id'], 0, "", 71, "Disqualified - Window Switch"))
-    
-    con.commit()
-    con.close()
-    return jsonify({"status": "success"})
 
 # ---------------- ADMIN ----------------
 @app.route("/admin_login", methods=["GET", "POST"])
