@@ -360,6 +360,20 @@ def contest():
     # ─────────────────────────────────────────────────────────
 
     con = get_db()
+    
+    # Check if user has already completed all problems
+    total_problems_val = con.execute("SELECT COUNT(*) as c FROM problems").fetchone()['c']
+    submitted_problems_count = con.execute("""
+        SELECT COUNT(DISTINCT problem_id) as c
+        FROM submissions
+        WHERE user_email = ?
+    """, (session.get("email"),)).fetchone()['c']
+    
+    if total_problems_val > 0 and submitted_problems_count >= total_problems_val:
+        con.close()
+        flash("🎉 You have already completed all problems in the contest!", "success")
+        return redirect(url_for("user_dashboard"))
+        
     rows = con.execute("SELECT * FROM problems").fetchall()
     problems = [dict(r) for r in rows]
     con.close()
@@ -425,13 +439,24 @@ def user_dashboard():
             rank = i + 1
             break
     
+    stats = get_stats()
+    total_problems_val = stats['total_problems']
+    submitted_problems_count = con.execute("""
+        SELECT COUNT(DISTINCT problem_id) as c
+        FROM submissions
+        WHERE user_email = ?
+    """, (email,)).fetchone()['c']
+    
+    contest_completed = (submitted_problems_count >= total_problems_val) if total_problems_val > 0 else False
+    
     con.close()
     return render_template("user_dashboard.html", 
                            user=user, 
                            submissions=submissions, 
                            rank=rank, 
                            total_score=total_score,
-                           stats=get_stats())
+                           stats=stats,
+                           contest_completed=contest_completed)
 
 
 
