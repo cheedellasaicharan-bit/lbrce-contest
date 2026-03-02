@@ -71,10 +71,10 @@ def get_db():
 # ---------------- AUTO INIT DB ----------------
 def init_db():
     con = get_db()
-    cur = con.cursor()
+    # Use the flag from our wrapper to be 100% sure of the driver/type
+    is_pg = con.is_pg
     
-    # Check if we are using PostgreSQL
-    is_pg = os.getenv("DATABASE_URL") is not None
+    cur = con.cursor()
     
     id_type = "SERIAL PRIMARY KEY" if is_pg else "INTEGER PRIMARY KEY AUTOINCREMENT"
     ts_type = "TIMESTAMP" if is_pg else "DATETIME"
@@ -746,9 +746,12 @@ INIT_ERROR = None
 try:
     with app.app_context():
         init_db()
+    print("SUCCESS: Database initialized correctly.")
 except Exception as e:
     INIT_ERROR = str(e)
     print(f"CRITICAL: init_db() failed: {e}")
+
+print("STARTUP: LBRCE Contest Portal is ready.")
 
 @app.errorhandler(500)
 def internal_error(error):
