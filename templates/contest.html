@@ -293,12 +293,6 @@
     setInterval(updateTimer, 1000);
     updateTimer();
 
-    document.querySelectorAll('.solve-btn-assessment').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const idx = btn.getAttribute('data-idx');
-            openAssessment(idx);
-        });
-    });
 
     function openAssessment(idx) {
         currentProblem = PROBLEMS[idx];
