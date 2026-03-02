@@ -174,13 +174,13 @@ body {
     overflow-x: hidden;
 }
 
-/* Arena specific */
-.arena-view {
+/* Assessment specific */
+.assessment-view {
     background: var(--bg);
     color: var(--text);
 }
 
-.arena-header {
+.assessment-header {
     background: var(--card-bg);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);

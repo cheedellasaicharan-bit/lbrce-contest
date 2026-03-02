@@ -4,9 +4,9 @@ A premium, high-performance coding contest platform engineered for the CSE(AI&ML
 
 ## 🚀 Key Features
 
-- **Intelligence Aesthetic**: A state-of-the-art design language with glassmorphism and full Dark Mode sync.
+- **Contest Aesthetic**: A premium design language with glassmorphism and full Dark Mode sync.
 - **Assessment Arena**: 3-panel IDE workspace for high-stakes coding challenges.
-- **Admin Command Center**: Complete control over problems, test cases, and student metrics.
+- **Administrator Portal**: Complete control over problems, test cases, and student results.
 - **Global Leaderboard**: Real-time ranking with dynamic podium visualizations.
 - **Theme Agility**: Fully tokenized CSS variable system for effortless brand adaptation.
 
@@ -19,8 +19,8 @@ This project is pre-configured for **Render** and **Vercel**.
 Set the following environment variables in your deployment dashboard:
 
 - `SECRET_KEY`: A robust secret string for session security.
-- `ADMIN_USER`: Username for the architectural gateway.
-- `ADMIN_PASS`: Password for the architectural gateway.
+- `ADMIN_USER`: Username for the administrator dashboard.
+- `ADMIN_PASS`: Password for the administrator dashboard.
 - `JUDGE0_API_KEY`: Your Judge0 CE API key for code execution.
 - `DATABASE_URL`: (Optional) PostgreSQL connection string for production scale.
 
@@ -39,4 +39,4 @@ python app.py
 - **Execution Engine**: Judge0 API
 
 ---
-*Engineered for Excellence. All Systems Nominal.*
+*Built for the Department of CSE(AI&ML) — LBRCE.*

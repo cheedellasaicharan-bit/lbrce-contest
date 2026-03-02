@@ -42,7 +42,7 @@
             <div class="nav-links" style="gap:24px;margin-left:40px;">
                 {% if 'user' in session %}
                 <a href="{{ url_for('contest') }}" class="nav-link"
-                    style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">ARENA</a>
+                    style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">ASSESSMENT</a>
                 <a href="{{ url_for('leaderboard') }}" class="nav-link"
                     style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">LEADERBOARD</a>
                 <a href="{{ url_for('user_dashboard') }}" class="nav-link"
@@ -129,7 +129,7 @@
                         <li><a href="/contest"
                                 style="color:var(--text-3);text-decoration:none;font-size:13px;transition:0.3s;"
                                 onmouseover="this.style.color='var(--blue)'"
-                                onmouseout="this.style.color='var(--text-3)'">Contest
+                                onmouseout="this.style.color='var(--text-3)'">Assessment
                                 Arena</a></li>
                     </ul>
                 </div>
@@ -161,8 +161,8 @@
             localStorage.setItem('theme', target);
         }
 
-        // Initialize Theme
-        const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        // Initialize Theme - Force Light for White Background
+        const savedTheme = 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
 
         // Auto-hide flash messages

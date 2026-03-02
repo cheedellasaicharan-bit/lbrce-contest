@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Contest Arena — CSE(AI&ML) Coding Contest{% endblock %}
+{% block title %}Assessment — CSE(AI&ML) Coding Contest{% endblock %}
 
 {% block content %}
 <div style="max-width: 1200px; margin: 0 auto; padding-bottom: 80px;">
@@ -19,7 +19,7 @@
         <div>
             <h1
                 style="font-size: 24px; font-weight: 800; color: #111827; margin: 0; display: flex; align-items: center; gap: 12px;">
-                <span style="color: #f97316;">⚡</span> Contest Arena
+                <span style="color: #f97316;">⚡</span> Assessment
             </h1>
             <p style="font-size: 13px; color: #6b7280; font-weight: 600; margin: 8px 0 0;">Solve problems and climb the
                 leaderboard</p>
@@ -73,7 +73,7 @@
             <h3 style="font-size: 16px; font-weight: 800; color: #111827; margin: 0 0 8px;">{{ p['title'] }}</h3>
             <p style="font-size: 12px; color: #94a3b8; font-weight: 600; margin-bottom: 20px;">{{ p['score'] }} pts</p>
 
-            <button type="button" class="solve-btn-arena" data-idx="{{ loop.index0 }}"
+            <button type="button" class="solve-btn-assessment" data-idx="{{ loop.index0 }}"
                 style="width: 100%; background: #fff; border: 1px solid #e5e7eb; color: #1d4ed8; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; margin-top: auto;">
                 Open
             </button>
@@ -102,7 +102,7 @@
                 <a href="/leaderboard"
                     style="font-size: 13px; color: #64748b; font-weight: 700; text-decoration: none;">Leaderboard</a>
                 <a href="/contest"
-                    style="font-size: 13px; color: #64748b; font-weight: 700; text-decoration: none;">Contest Arena</a>
+                    style="font-size: 13px; color: #64748b; font-weight: 700; text-decoration: none;">Assessment</a>
             </div>
         </div>
         <div>
@@ -136,10 +136,10 @@
         <!-- Center-ish: Title & Status -->
         <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
             <div id="top-problem-title"
-                style="font-size:14px;font-weight:800;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                style="font-size:14px;font-weight:800;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
             </div>
             <div id="output-status"
-                style="font-size:10px;color:#3fb950;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">
+                style="font-size:10px;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">
                 Ready</div>
         </div>
 
@@ -147,7 +147,7 @@
         <div style="display:flex;align-items:center;gap:14px;">
             <!-- Timer Box -->
             <div id="assess-timer"
-                style="font-family:monospace;font-size:14px;font-weight:800;color:#fff;background:rgba(255,255,255,0.1);padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);">
+                style="font-family:monospace;font-size:14px;font-weight:800;color:var(--text);background:var(--bg-gray);padding:6px 14px;border-radius:8px;border:1px solid var(--border);">
                 00:00:00</div>
 
             <!-- Mini Accuracy -->
@@ -162,29 +162,31 @@
                     </svg>
                 </div>
                 <div style="text-align:left;">
-                    <div id="mini-ring-pct" style="font-size:11px;font-weight:800;color:#fff;line-height:1;">0%</div>
-                    <div id="mini-score" style="font-size:9px;font-weight:700;color:#8b949e;margin-top:1px;">0 pts</div>
+                    <div id="mini-ring-pct" style="font-size:11px;font-weight:800;color:var(--text);line-height:1;">0%
+                    </div>
+                    <div id="mini-score" style="font-size:9px;font-weight:700;color:var(--text-3);margin-top:1px;">0 pts
+                    </div>
                 </div>
             </div>
 
-            <button onclick="closeArena()" class="arena-close-btn"
-                style="background:rgba(255,255,255,0.05);border:none;color:#8b949e;width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;">×</button>
+            <button onclick="closeAssessment()" class="assessment-close-btn"
+                style="background:var(--bg-gray);border:none;color:var(--text-3);width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;">×</button>
         </div>
     </div>
 
     <!-- Main Workspace -->
-    <div style="flex:1;display:flex;min-height:0;background:#0d1117;">
+    <div style="flex:1;display:flex;min-height:0;background:var(--bg);">
         <!-- Left: Problem Panel -->
         <div id="problem-panel"
-            style="width:30%;border-right:1px solid #30363d;display:flex;flex-direction:column;overflow-y:auto;padding:24px;color:#c9d1d9;">
+            style="width:30%;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;padding:24px;color:var(--text-2);">
             <div id="prob-meta" style="margin-bottom:24px;">
                 <span id="prob-difficulty"
                     style="font-size:10px;font-weight:800;text-transform:uppercase;padding:4px 12px;border-radius:100px;background:rgba(63,185,80,0.1);color:#3fb950;border:1px solid rgba(63,185,80,0.2);">EASY</span>
             </div>
-            <h2 id="prob-title" style="font-size:20px;font-weight:800;color:#fff;margin:0 0 16px;"></h2>
-            <div id="prob-description" style="font-size:14px;line-height:1.6;color:#8b949e;"></div>
+            <h2 id="prob-title" style="font-size:20px;font-weight:800;color:var(--text);margin:0 0 16px;"></h2>
+            <div id="prob-description" style="font-size:14px;line-height:1.6;color:var(--text-3);"></div>
 
-            <div style="height:1px;background:#30363d;margin:32px 0;"></div>
+            <div style="height:1px;background:var(--border);margin:32px 0;"></div>
 
             <h4 style="font-size:13px;font-weight:800;color:#fff;margin:0 0 12px;text-transform:uppercase;">Sample Input
             </h4>
@@ -199,13 +201,15 @@
         </div>
 
         <!-- Center: Editor Panel -->
-        <div id="editor-panel" style="flex:1.2;display:flex;flex-direction:column;border-right:1px solid #30363d;">
+        <div id="editor-panel"
+            style="flex:1.2;display:flex;flex-direction:column;border-right:1px solid var(--border);">
             <div class="editor-header"
-                style="height:48px;background:#161b22;border-bottom:1px solid #30363d;display:flex;align-items:center;padding:0 16px;justify-content:space-between;">
+                style="height:48px;background:var(--bg-light);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;justify-content:space-between;">
                 <div style="display:flex;align-items:center;gap:12px;">
-                    <div style="font-size:11px;font-weight:800;color:#8b949e;text-transform:uppercase;">Language</div>
+                    <div style="font-size:11px;font-weight:800;color:var(--text-3);text-transform:uppercase;">Language
+                    </div>
                     <select id="lang-select" onchange="changeLanguage()"
-                        style="background:#0d1117;color:#fff;border:1px solid #30363d;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:700;outline:none;">
+                        style="background:var(--bg);color:var(--text);border:1px solid var(--border);padding:6px 12px;border-radius:6px;font-size:12px;font-weight:700;outline:none;">
                         <option value="python">Python 3</option>
                         <option value="c">C</option>
                         <option value="cpp">C++</option>
@@ -214,29 +218,30 @@
                 </div>
                 <div style="display:flex;gap:8px;">
                     <button onclick="runCode()" class="btn-run"
-                        style="background:transparent;color:#3fb950;border:1px solid #3fb950;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">Compile
+                        style="background:transparent;color:var(--green);border:1px solid var(--green);padding:6px 16px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">Compile
                         & Run</button>
                     <button onclick="submitCode()" class="btn-submit"
-                        style="background:#1d4ed8;color:#fff;border:none;padding:6px 20px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">Submit
+                        style="background:var(--blue);color:#fff;border:none;padding:6px 20px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">Submit
                         Final Code</button>
                 </div>
             </div>
-            <div style="flex:1;position:relative;background:#0d1117;">
+            <div style="flex:1;position:relative;background:var(--bg);">
                 <!-- Modern Styled Textarea instead of CodeMirror to ensure it works on all browsers -->
                 <textarea id="code-editor" spellcheck="false"
-                    style="width:100%;height:100%;background:#0d1117;color:#c9d1d9;border:none;font-family:'JetBrains Mono', 'Fira Code', monospace;font-size:14px;padding:24px;resize:none;outline:none;line-height:1.6;"></textarea>
+                    style="width:100%;height:100%;background:var(--bg);color:var(--text);border:none;font-family:'JetBrains Mono', 'Fira Code', monospace;font-size:14px;padding:24px;resize:none;outline:none;line-height:1.6;"></textarea>
             </div>
         </div>
 
         <!-- Right: Output Panel -->
-        <div id="output-panel" style="width:25%;display:flex;flex-direction:column;background:#0d1117;">
+        <div id="output-panel" style="width:25%;display:flex;flex-direction:column;background:var(--bg);">
             <div
-                style="height:48px;background:#161b22;border-bottom:1px solid #30363d;display:flex;align-items:center;padding:0 16px;">
-                <div style="font-size:11px;font-weight:800;color:#8b949e;text-transform:uppercase;">Output & Test Result
+                style="height:48px;background:var(--bg-light);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;">
+                <div style="font-size:11px;font-weight:800;color:var(--text-3);text-transform:uppercase;">Output & Test
+                    Result
                 </div>
             </div>
             <div id="output-box"
-                style="flex:1;padding:24px;font-family:monospace;font-size:13px;overflow-y:auto;white-space:pre-wrap;color:#8b949e;">
+                style="flex:1;padding:24px;font-family:monospace;font-size:13px;overflow-y:auto;white-space:pre-wrap;color:var(--text-2);">
                 <div style="text-align:center;margin-top:40px;opacity:0.5;">
                     <div style="font-size:32px;margin-bottom:12px;">🏃</div>
                     Run your code to see results here
@@ -286,10 +291,10 @@
     setInterval(updateTimer, 1000);
     updateTimer();
 
-    document.querySelectorAll('.solve-btn-arena').forEach(btn => {
+    document.querySelectorAll('.solve-btn-assessment').forEach(btn => {
         btn.addEventListener('click', () => {
             const idx = btn.getAttribute('data-idx');
-            openArena(idx);
+            openAssessment(idx);
         });
     });
 
