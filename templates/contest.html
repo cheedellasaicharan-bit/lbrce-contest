@@ -188,16 +188,18 @@
 
             <div style="height:1px;background:var(--border);margin:32px 0;"></div>
 
-            <h4 style="font-size:13px;font-weight:800;color:#fff;margin:0 0 12px;text-transform:uppercase;">Sample Input
+            <h4 style="font-size:13px;font-weight:800;color:var(--text);margin:0 0 12px;text-transform:uppercase;">
+                Sample Input
             </h4>
             <pre id="sample-input"
-                style="background:#161b22;padding:16px;border-radius:12px;font-family:monospace;font-size:13px;color:#3fb950;margin-bottom:24px;border:1px solid #30363d;"></pre>
+                style="background:var(--bg-gray);padding:16px;border-radius:12px;font-family:monospace;font-size:13px;color:var(--green);margin-bottom:24px;border:1px solid var(--border);"></pre>
 
-            <h4 style="font-size:13px;font-weight:800;color:#fff;margin:0 0 12px;text-transform:uppercase;">Sample
+            <h4 style="font-size:13px;font-weight:800;color:var(--text);margin:0 0 12px;text-transform:uppercase;">
+                Sample
                 Output
             </h4>
             <pre id="sample-output"
-                style="background:#161b22;padding:16px;border-radius:12px;font-family:monospace;font-size:13px;color:#3fb950;border:1px solid #30363d;"></pre>
+                style="background:var(--bg-gray);padding:16px;border-radius:12px;font-family:monospace;font-size:13px;color:var(--green);border:1px solid var(--border);"></pre>
         </div>
 
         <!-- Center: Editor Panel -->
@@ -315,7 +317,7 @@
         document.getElementById('output-box').scrollTop = 0;
     }
 
-    function closeArena() {
+    function closeAssessment() {
         document.getElementById('assessment-view').style.display = 'none';
         document.body.style.overflow = 'auto';
     }
