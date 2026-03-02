@@ -248,27 +248,46 @@
                         Final Code</button>
                 </div>
             </div>
-            <div style="flex:1;position:relative;background:#272822;">
+            <div style="flex:1;position:relative;background:#272822;min-height:0;">
                 <!-- Advanced IDE Editor instead of basic textarea -->
                 <textarea id="code-editor" style="display:none;"></textarea>
             </div>
+
+            <!-- Output Panel moved inside Center Panel -->
+            <div
+                style="height:280px;border-top:1px solid var(--border);display:flex;flex-direction:column;background:var(--bg-light);flex-shrink:0;">
+                <div
+                    style="height:40px;background:var(--bg-light);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;">
+                    <div style="font-size:11px;font-weight:800;color:var(--text-3);text-transform:uppercase;">Output &
+                        Test Result</div>
+                </div>
+                <div id="output-box"
+                    style="flex:1;padding:16px;font-family:monospace;font-size:13px;overflow-y:auto;white-space:pre-wrap;color:var(--text-2);background:var(--bg);">
+                    <div style="text-align:center;margin-top:20px;opacity:0.5;">
+                        <div style="font-size:24px;margin-bottom:8px;">🏃</div>
+                        Run your code to see results here
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Right: Output Panel -->
-        <div id="output-panel" style="width:25%;display:flex;flex-direction:column;background:var(--bg);">
+        <!-- Right: Navigation Panel -->
+        <div id="nav-panel"
+            style="width:22%;display:flex;flex-direction:column;background:var(--bg);padding:24px;border-left:1px solid var(--border);">
             <div
-                style="height:48px;background:var(--bg-light);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;">
-                <div style="font-size:11px;font-weight:800;color:var(--text-3);text-transform:uppercase;">Output & Test
-                    Result
-                </div>
+                style="font-size:11px;font-weight:800;color:var(--text-3);text-transform:uppercase;margin-bottom:20px;">
+                Questions
             </div>
-            <div id="output-box"
-                style="flex:1;padding:24px;font-family:monospace;font-size:13px;overflow-y:auto;white-space:pre-wrap;color:var(--text-2);">
-                <div style="text-align:center;margin-top:40px;opacity:0.5;">
-                    <div style="font-size:32px;margin-bottom:12px;">🏃</div>
-                    Run your code to see results here
-                </div>
+
+            <div id="question-grid"
+                style="display:grid;grid-template-columns:repeat(4, 1fr);gap:12px;margin-bottom:auto;">
+                <!-- Rendered dynamically via JS -->
             </div>
+
+            <button id="next-q-btn"
+                style="margin-top:24px;width:100%;background:var(--blue);color:#fff;border:none;padding:12px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;display:none;box-shadow:0 4px 12px rgba(29,78,216,0.2);">
+                Next Question &rarr;
+            </button>
         </div>
     </div>
 </div>
@@ -365,6 +384,50 @@
         document.getElementById('assessment-view').style.display = 'flex';
         document.body.style.overflow = 'hidden';
 
+        // Render Question Grid
+        const qGrid = document.getElementById('question-grid');
+        qGrid.innerHTML = '';
+        PROBLEMS.forEach((p, i) => {
+            const isCurrent = (i === idx);
+            const box = document.createElement('div');
+            box.innerText = (i + 1);
+            box.style.aspectRatio = '1/1';
+            box.style.display = 'flex';
+            box.style.alignItems = 'center';
+            box.style.justifyContent = 'center';
+            box.style.borderRadius = '8px';
+            box.style.fontSize = '14px';
+            box.style.fontWeight = '800';
+            box.style.cursor = 'pointer';
+            box.style.transition = '0.2s';
+            if (isCurrent) {
+                box.style.background = 'var(--blue)';
+                box.style.color = '#fff';
+                box.style.boxShadow = '0 4px 12px rgba(29,78,216,0.3)';
+                box.style.border = '1px solid var(--blue)';
+            } else {
+                box.style.background = 'var(--bg-gray)';
+                box.style.color = 'var(--text-3)';
+                box.style.border = '1px solid var(--border)';
+                // Hover effect
+                box.onmouseover = () => { box.style.borderColor = 'var(--blue)'; box.style.color = 'var(--blue)'; };
+                box.onmouseout = () => { box.style.borderColor = 'var(--border)'; box.style.color = 'var(--text-3)'; };
+            }
+            box.onclick = () => {
+                if (!isCurrent) openAssessment(i);
+            };
+            qGrid.appendChild(box);
+        });
+
+        // Next Button Logic
+        const nextBtn = document.getElementById('next-q-btn');
+        if (idx < PROBLEMS.length - 1) {
+            nextBtn.style.display = 'block';
+            nextBtn.onclick = () => openAssessment(idx + 1);
+        } else {
+            nextBtn.style.display = 'none';
+        }
+
         // Initialize Advanced Code Editor
         initEditor();
         changeLanguage();
@@ -375,6 +438,9 @@
         // Auto-scroll to top of panels
         document.getElementById('problem-panel').scrollTop = 0;
         document.getElementById('output-box').scrollTop = 0;
+
+        // Clear previous output
+        document.getElementById('output-box').innerHTML = '<div style="text-align:center;margin-top:20px;opacity:0.5;"><div style="font-size:24px;margin-bottom:8px;">🏃</div>Run your code to see results here</div>';
     }
 
     function closeAssessment() {
