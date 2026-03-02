@@ -425,9 +425,12 @@
         const nextBtn = document.getElementById('next-q-btn');
         if (idx < PROBLEMS.length - 1) {
             nextBtn.style.display = 'block';
+            nextBtn.innerHTML = 'Next Question &rarr;';
             nextBtn.onclick = () => openAssessment(idx + 1);
         } else {
-            nextBtn.style.display = 'none';
+            nextBtn.style.display = 'block';
+            nextBtn.innerHTML = 'Finish Contest &check;';
+            nextBtn.onclick = () => { window.location.href = '/user/dashboard'; };
         }
 
         // Initialize Advanced Code Editor
@@ -527,7 +530,7 @@
                                 openAssessment(currentIdx + 1);
                             } else {
                                 closeAssessment();
-                                window.location.reload();
+                                window.location.href = '/user/dashboard';
                             }
                         }, 500);
                     }
