@@ -386,6 +386,19 @@ def contest():
         sub_rows = con.execute("SELECT DISTINCT problem_id FROM submissions WHERE user_email=?", (email,)).fetchall()
         submitted_ids = [str(r['problem_id']) for r in sub_rows]
 
+    # Fetch test cases
+    test_cases_rows = con.execute("SELECT id, problem_id, input, expected_output FROM test_cases").fetchall()
+    tc_map = {}
+    for tc in test_cases_rows:
+        pid = str(tc['problem_id'])
+        if pid not in tc_map:
+            tc_map[pid] = []
+        tc_map[pid].append({
+            "id": tc["id"],
+            "input": tc["input"],
+            "expected_output": tc["expected_output"]
+        })
+
     con.close()
 
     return render_template("contest.html",
@@ -398,7 +411,8 @@ def contest():
                                 "sample_input": p.get("sample_input",""),
                                 "sample_output": p.get("sample_output",""),
                                 "difficulty": p.get("difficulty","easy"),
-                                "score": p.get("score",0)}
+                                "score": p.get("score",0),
+                                "test_cases": tc_map.get(str(p["id"]), [])}
                                for p in problems
                            ]),
                            start_time=start_dt.strftime("%Y-%m-%dT%H:%M:%S+05:30"),
@@ -505,8 +519,9 @@ def submit():
     code = data.get("code", "")
     language_id = data.get("language")
     is_test = data.get("is_test", False)
+    is_cheat = data.get("is_cheat", False)
 
-    if not code.strip():
+    if not code.strip() and not is_cheat:
         return jsonify({"output": "Please write some code before submitting.", "status": "error"})
 
     con = get_db()
@@ -521,6 +536,17 @@ def submit():
         if existing:
             con.close()
             return jsonify({"output": "You have already submitted an answer for this problem. Multiple attempts are not allowed.", "status": "error"})
+
+    # Handle explicit anti-cheat submission from frontend
+    if is_cheat:
+        if not is_test:
+            con.execute("""
+                INSERT INTO submissions (user_email, problem_id, score, code, language, status)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (email, problem_id, 0, code, language_id, "CHEATING DETECTED"))
+            con.commit()
+        con.close()
+        return jsonify({"output": "CHEATING DETECTED", "status": "success", "score": 0})
 
     # Get test cases for this problem
     test_cases = con.execute("SELECT * FROM test_cases WHERE problem_id=?", (problem_id,)).fetchall()
