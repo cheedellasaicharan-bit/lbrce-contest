@@ -373,11 +373,20 @@ def contest():
 
     rows = con.execute("SELECT * FROM problems").fetchall()
     problems = [dict(r) for r in rows]
+
+    # Fetch IDs of already submitted problems for this user
+    submitted_ids = []
+    if "email" in session and session.get("role") != "admin":
+        email = session.get("email")
+        sub_rows = con.execute("SELECT DISTINCT problem_id FROM submissions WHERE user_email=?", (email,)).fetchall()
+        submitted_ids = [str(r['problem_id']) for r in sub_rows]
+
     con.close()
 
     return render_template("contest.html",
                            user=session["user"],
                            problems=problems,
+                           submitted_ids_json=json.dumps(submitted_ids),
                            problems_json=json.dumps([
                                {"id": str(p["id"]), "title": p["title"],
                                 "description": p.get("description",""),
@@ -495,6 +504,13 @@ def submit():
     if not prob:
         con.close()
         return jsonify({"output": "Invalid Problem", "status": "error"})
+
+    # Strictly prevent re-submissions for the same problem unless admin
+    if session.get("role") != "admin":
+        existing = con.execute("SELECT id FROM submissions WHERE user_email=? AND problem_id=?", (email, problem_id)).fetchone()
+        if existing:
+            con.close()
+            return jsonify({"output": "You have already submitted an answer for this problem. Multiple attempts are not allowed.", "status": "error"})
 
     # Get test cases for this problem
     test_cases = con.execute("SELECT * FROM test_cases WHERE problem_id=?", (problem_id,)).fetchall()

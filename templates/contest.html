@@ -93,11 +93,19 @@
             <h3 style="font-size: 16px; font-weight: 800; color: #111827; margin: 0 0 8px;">{{ p['title'] }}</h3>
             <p style="font-size: 12px; color: #94a3b8; font-weight: 600; margin-bottom: 20px;">{{ p['score'] }} pts</p>
 
+            {% set pid_str = p['id'] | string %}
+            {% if pid_str in submitted_ids_json %}
+            <button type="button" disabled
+                style="width: 100%; background: #e5e7eb; border: 1px solid #d1d5db; color: #9ca3af; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: not-allowed; transition: 0.2s; margin-top: auto;">
+                Submitted &check;
+            </button>
+            {% else %}
             <button type="button" class="solve-btn-assessment" data-idx="{{ loop.index0 }}"
                 onclick="openAssessment({{ loop.index0 }})"
                 style="width: 100%; background: #fff; border: 1px solid #e5e7eb; color: #1d4ed8; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; margin-top: auto;">
                 Open
             </button>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
@@ -296,33 +304,12 @@
 
 <script>
     const PROBLEMS = {{ problems_json | safe if problems_json else '[]' }};
+    const SUBMITTED_IDS = {{ submitted_ids_json | safe if submitted_ids_json else '[]' }};
+
     let currentProblem = null;
     let timerInterval = null;
     let editorInstance = null;
-    let submittedProblems = new Set();
-    let disqualified = false;
-
-    // Anti-cheat: Detect tab switch or window minimize
-    function enforceAntiCheat() {
-        if (document.getElementById('assessment-view').style.display !== 'none' && !disqualified) {
-            disqualified = true;
-            // Aggressive immediate DOM takeover to prevent further interaction
-            document.body.innerHTML = '<div style="display:flex;flex-direction:column;height:100vh;align-items:center;justify-content:center;background:#111;color:#ff4444;font-size:28px;font-weight:900;text-align:center;padding:40px;font-family:sans-serif;">🚫 CHEATING DETECTED<br><br><span style="font-size:16px;color:#ccc;font-weight:normal;">You switched tabs, clicked outside, or minimized the window.<br>Your exam has been automatically submitted with a 0 score and locked.</span></div>';
-
-            // Guaranteed delivery using beacon, with fetch fallback
-            if (navigator.sendBeacon) {
-                navigator.sendBeacon('/disqualify');
-            }
-            fetch('/disqualify', { method: 'POST' }).finally(() => {
-                setTimeout(() => { window.location.href = "/user/dashboard"; }, 2500);
-            });
-        }
-    }
-
-    document.addEventListener("visibilitychange", () => {
-        if (document.hidden) enforceAntiCheat();
-    });
-    window.addEventListener("blur", enforceAntiCheat);
+    let submittedProblems = new Set(SUBMITTED_IDS);
 
     function initEditor() {
         if (!editorInstance) {
@@ -415,6 +402,7 @@
         qGrid.innerHTML = '';
         PROBLEMS.forEach((p, i) => {
             const isCurrent = (i === idx);
+            const isSubmitted = submittedProblems.has(p.id);
             const box = document.createElement('div');
             box.innerText = (i + 1);
             box.style.aspectRatio = '1/1';
@@ -424,24 +412,32 @@
             box.style.borderRadius = '8px';
             box.style.fontSize = '14px';
             box.style.fontWeight = '800';
-            box.style.cursor = 'pointer';
             box.style.transition = '0.2s';
-            if (isCurrent) {
+
+            if (isSubmitted) {
+                // Disabled state for submitted problems
+                box.style.background = '#e5e7eb';
+                box.style.color = '#9ca3af';
+                box.style.border = '1px solid #d1d5db';
+                box.style.cursor = 'not-allowed';
+                box.style.opacity = '0.7';
+                box.title = "Already submitted";
+            } else if (isCurrent) {
                 box.style.background = 'var(--blue)';
                 box.style.color = '#fff';
                 box.style.boxShadow = '0 4px 12px rgba(29,78,216,0.3)';
                 box.style.border = '1px solid var(--blue)';
+                box.style.cursor = 'default';
             } else {
                 box.style.background = 'var(--bg-gray)';
                 box.style.color = 'var(--text-3)';
                 box.style.border = '1px solid var(--border)';
+                box.style.cursor = 'pointer';
                 // Hover effect
                 box.onmouseover = () => { box.style.borderColor = 'var(--blue)'; box.style.color = 'var(--blue)'; };
                 box.onmouseout = () => { box.style.borderColor = 'var(--border)'; box.style.color = 'var(--text-3)'; };
+                box.onclick = () => { openAssessment(i); };
             }
-            box.onclick = () => {
-                if (!isCurrent) openAssessment(i);
-            };
             qGrid.appendChild(box);
         });
 
@@ -450,7 +446,18 @@
         if (idx < PROBLEMS.length - 1) {
             nextBtn.style.display = 'block';
             nextBtn.innerHTML = 'Next Question &rarr;';
-            nextBtn.onclick = () => openAssessment(idx + 1);
+            nextBtn.onclick = () => {
+                // Find next unsubmitted problem
+                let nextIdx = idx + 1;
+                while (nextIdx < PROBLEMS.length && submittedProblems.has(PROBLEMS[nextIdx].id)) {
+                    nextIdx++;
+                }
+                if (nextIdx < PROBLEMS.length) {
+                    openAssessment(nextIdx);
+                } else {
+                    alert("All remaining problems have been submitted.");
+                }
+            };
         } else {
             nextBtn.style.display = 'block';
             nextBtn.innerHTML = 'Finish Contest &check;';
@@ -546,15 +553,13 @@
                     document.getElementById('mini-ring-pct').innerText = pct + '%';
                     document.getElementById('mini-score').innerText = score + ' pts';
 
-                    // Track successful submissions
-                    if (data.status === 'success' || pct === 100) {
-                        submittedProblems.add(currentProblem.id);
-                    }
+                    // Track ALL final submissions (even if 0 points) so they can exit the contest
+                    submittedProblems.add(currentProblem.id);
 
-                    // Auto-exit if all problems are successfully completed
+                    // Auto-exit if all problems are submitted
                     if (submittedProblems.size >= PROBLEMS.length && PROBLEMS.length > 0) {
                         setTimeout(() => {
-                            alert("Congratulations! You have successfully completed all problems. Returning to dashboard...");
+                            alert("You have submitted answers for all problems. Returning to dashboard...");
                             closeAssessment();
                             window.location.href = '/user/dashboard';
                         }, 500);
