@@ -8,7 +8,10 @@ try:
     HAS_POSTGRES = True
 except ImportError:
     HAS_POSTGRES = False
-from datetime import datetime
+from datetime import datetime, timedelta
+
+def get_ist_now():
+    return datetime.utcnow() + timedelta(hours=5, minutes=30)
 
 from dotenv import load_dotenv
 
@@ -227,7 +230,7 @@ def is_contest_active():
     except (ValueError, TypeError):
         return True # Default to active if settings are corrupted
     
-    now = datetime.now()
+    now = get_ist_now()
     return start <= now <= end
 
 def get_stats():
@@ -333,7 +336,7 @@ def contest():
         start_dt = datetime(2026, 1, 1)
         end_dt   = datetime(2027, 1, 1)
 
-    now = datetime.now()
+    now = get_ist_now()
 
     if now < start_dt:
         # Contest hasn't started yet

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Assessment — CSE(AI&ML) Coding Contest{% endblock %}
+{% block title %}Contest — CSE(AI&ML) Coding Contest{% endblock %}
 
 {% block head %}
 <!-- CodeMirror Editor Dependencies -->
@@ -39,7 +39,7 @@
         <div>
             <h1
                 style="font-size: 24px; font-weight: 800; color: #111827; margin: 0; display: flex; align-items: center; gap: 12px;">
-                <span style="color: #f97316;">⚡</span> Assessment
+                <span style="color: #f97316;">⚡</span> Contest Arena
             </h1>
             <p style="font-size: 13px; color: #6b7280; font-weight: 600; margin: 8px 0 0;">Solve problems and climb the
                 leaderboard</p>
@@ -123,7 +123,7 @@
                 <a href="/leaderboard"
                     style="font-size: 13px; color: #64748b; font-weight: 700; text-decoration: none;">Leaderboard</a>
                 <a href="/contest"
-                    style="font-size: 13px; color: #64748b; font-weight: 700; text-decoration: none;">Assessment</a>
+                    style="font-size: 13px; color: #64748b; font-weight: 700; text-decoration: none;">Contest</a>
             </div>
         </div>
         <div>
@@ -319,6 +319,27 @@
         } else {
             remaining = 0;
             label = "CONTEST ENDED";
+
+            const view = document.getElementById('assessment-view');
+            if (view && !view.hasAttribute('data-ended')) {
+                view.setAttribute('data-ended', 'true');
+                if (view.style.display !== 'none' && currentProblem) {
+                    const code = editorInstance ? editorInstance.getValue() : document.getElementById('code-editor').value;
+                    const lang = document.getElementById('lang-select').value;
+                    let langId = 71;
+                    if (lang === 'c') langId = 50; else if (lang === 'cpp') langId = 54; else if (lang === 'java') langId = 62;
+
+                    fetch('/submit', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code: code, language: langId, problem: currentProblem.id, is_test: false })
+                    }).finally(() => {
+                        window.location.href = "/user/dashboard";
+                    });
+                } else {
+                    window.location.href = "/user/dashboard";
+                }
+            }
         }
 
         const timeStr = formatTime(remaining);
