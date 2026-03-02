@@ -61,8 +61,21 @@ class DbWrapper:
 def get_db():
     db_url = os.getenv("DATABASE_URL")
     if db_url and HAS_POSTGRES:
-        conn = psycopg2.connect(db_url, sslmode='require', cursor_factory=RealDictCursor)
-        return DbWrapper(conn, True)
+        try:
+            # Add a connect_timeout to prevent hanging during startup
+            conn = psycopg2.connect(
+                db_url, 
+                sslmode='require', 
+                cursor_factory=RealDictCursor,
+                connect_timeout=10
+            )
+            return DbWrapper(conn, True)
+        except Exception as e:
+            print(f"DATABASE ERROR: Failed to connect to PostgreSQL: {e}")
+            # Fallback to SQLite so the app at least starts
+            con = sqlite3.connect(DB_PATH)
+            con.row_factory = sqlite3.Row
+            return DbWrapper(con, False)
     else:
         con = sqlite3.connect(DB_PATH)
         con.row_factory = sqlite3.Row
