@@ -356,8 +356,11 @@ def contest():
                            problems=problems,
                            problems_json=json.dumps([
                                {"id": str(p["id"]), "title": p["title"],
-                                "desc": p.get("description",""), "description": p.get("description",""),
-                                "diff": p.get("difficulty","easy"), "score": p.get("score",0)}
+                                "description": p.get("description",""),
+                                "sample_input": p.get("sample_input",""),
+                                "sample_output": p.get("sample_output",""),
+                                "difficulty": p.get("difficulty","easy"),
+                                "score": p.get("score",0)}
                                for p in problems
                            ]),
                            start_time=start_val,
