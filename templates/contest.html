@@ -1,6 +1,26 @@
 {% extends "base.html" %}
 {% block title %}Assessment — CSE(AI&ML) Coding Contest{% endblock %}
 
+{% block head %}
+<!-- CodeMirror Editor Dependencies -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/monokai.min.css">
+<style>
+    .CodeMirror {
+        height: 100% !important;
+        width: 100% !important;
+        font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/clike/clike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closebrackets.min.js"></script>
+{% endblock %}
+
 {% block content %}
 <div style="max-width: 1200px; margin: 0 auto; padding-bottom: 80px;">
 
@@ -228,10 +248,9 @@
                         Final Code</button>
                 </div>
             </div>
-            <div style="flex:1;position:relative;background:var(--bg);">
-                <!-- Modern Styled Textarea instead of CodeMirror to ensure it works on all browsers -->
-                <textarea id="code-editor" spellcheck="false"
-                    style="width:100%;height:100%;background:var(--bg);color:var(--text);border:none;font-family:'JetBrains Mono', 'Fira Code', monospace;font-size:14px;padding:24px;resize:none;outline:none;line-height:1.6;"></textarea>
+            <div style="flex:1;position:relative;background:#272822;">
+                <!-- Advanced IDE Editor instead of basic textarea -->
+                <textarea id="code-editor" style="display:none;"></textarea>
             </div>
         </div>
 
@@ -258,6 +277,23 @@
     const PROBLEMS = {{ problems_json | safe if problems_json else '[]' }};
     let currentProblem = null;
     let timerInterval = null;
+    let editorInstance = null;
+
+    function initEditor() {
+        if (!editorInstance) {
+            editorInstance = CodeMirror.fromTextArea(document.getElementById("code-editor"), {
+                mode: "python",
+                theme: "monokai",
+                lineNumbers: true,
+                matchBrackets: true,
+                autoCloseBrackets: true,
+                indentUnit: 4,
+                tabSize: 4,
+                lineWrapping: true
+            });
+            editorInstance.setSize("100%", "100%");
+        }
+    }
 
     function formatTime(ms) {
         if (ms <= 0) return "00:00:00";
@@ -307,6 +343,13 @@
         document.getElementById('assessment-view').style.display = 'flex';
         document.body.style.overflow = 'hidden';
 
+        // Initialize Advanced Code Editor
+        initEditor();
+        changeLanguage();
+        setTimeout(() => {
+            if (editorInstance) editorInstance.refresh();
+        }, 10);
+
         // Auto-scroll to top of panels
         document.getElementById('problem-panel').scrollTop = 0;
         document.getElementById('output-box').scrollTop = 0;
@@ -320,7 +363,7 @@
     function runCode() {
         const out = document.getElementById('output-box');
         out.innerHTML = '<div style="color:#f1c40f;">Compiling and running against sample test cases...</div>';
-        const code = document.getElementById('code-editor').value;
+        const code = editorInstance ? editorInstance.getValue() : document.getElementById('code-editor').value;
         const lang = document.getElementById('lang-select').value;
 
         fetch('/run_code', {
@@ -343,7 +386,7 @@
     }
 
     function submitCode() {
-        const code = document.getElementById('code-editor').value;
+        const code = editorInstance ? editorInstance.getValue() : document.getElementById('code-editor').value;
         const lang = document.getElementById('lang-select').value;
 
         fetch('/submit_code', {
@@ -371,11 +414,22 @@
 
     function changeLanguage() {
         const lang = document.getElementById('lang-select').value;
-        const editor = document.getElementById('code-editor');
-        if (lang === 'python') editor.placeholder = 'def solve():\n    # your code here';
-        else if (lang === 'c') editor.placeholder = '#include <stdio.h>\n\nint main() {\n    return 0;\n}';
-        else if (lang === 'cpp') editor.placeholder = '#include <iostream>\n\nint main() {\n    return 0;\n}';
-        else if (lang === 'java') editor.placeholder = 'public class Main {\n    public static void main(String[] args) {\n    }\n}';
+        let placeholder = '';
+        let cmMode = 'python';
+
+        if (lang === 'python') { placeholder = 'def solve():\n    # your code here\n    pass'; cmMode = 'python'; }
+        else if (lang === 'c') { placeholder = '#include <stdio.h>\n\nint main() {\n    return 0;\n}'; cmMode = 'text/x-csrc'; }
+        else if (lang === 'cpp') { placeholder = '#include <iostream>\n\nint main() {\n    return 0;\n}'; cmMode = 'text/x-c++src'; }
+        else if (lang === 'java') { placeholder = 'public class Main {\n    public static void main(String[] args) {\n    }\n}'; cmMode = 'text/x-java'; }
+
+        if (editorInstance) {
+            editorInstance.setOption('mode', cmMode);
+            const currentVal = editorInstance.getValue().trim();
+            // Assign template if editor is empty or just has a default template
+            if (!currentVal || currentVal.startsWith('def solve') || currentVal.startsWith('#include') || currentVal.startsWith('public class')) {
+                editorInstance.setValue(placeholder);
+            }
+        }
     }
 </script>
 {% endblock %}
