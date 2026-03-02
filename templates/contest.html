@@ -255,7 +255,7 @@
 </div>
 
 <script>
-    const PROBLEMS = {{ problems_json | safe }} || [];
+    const PROBLEMS = {{ problems_json | safe if problems_json else '[]' }};
     let currentProblem = null;
     let timerInterval = null;
 
