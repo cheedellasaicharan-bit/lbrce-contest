@@ -9,7 +9,7 @@
         class="fade-in">
         <div>
             <div
-                style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:0.2em;color:#1a56db;margin-bottom:8px;">
+                style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:0.2em;color:#1d4ed8;margin-bottom:8px;">
                 Administrator Portal</div>
             <h1 style="font-size:32px;font-weight:900;color:var(--text);margin:0;letter-spacing:-0.02em;">📊 Contest
                 Dashboard</h1>
@@ -17,7 +17,7 @@
         </div>
         <div style="display:flex;gap:12px;">
             <a href="/admin/problems" class="btn"
-                style="background:#1a56db;color:#fff;padding:12px 24px;border-radius:12px;font-weight:900;font-size:13px;display:flex;align-items:center;gap:8px;box-shadow:0 10px 20px rgba(26, 86, 219, 0.2);text-decoration:none;">📝
+                style="background:#1d4ed8;color:#fff;padding:12px 24px;border-radius:12px;font-weight:900;font-size:13px;display:flex;align-items:center;gap:8px;box-shadow:0 10px 20px rgba(29, 78, 216, 0.2);text-decoration:none;">📝
                 Problem Manager</a>
             <a href="/leaderboard" class="btn"
                 style="background:rgba(0,0,0,0.03);color:#4b5563;border:1px solid rgba(0,0,0,0.1);padding:12px 24px;border-radius:12px;font-weight:800;font-size:13px;text-decoration:none;">🏆
@@ -123,7 +123,7 @@
                 </a>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                     <a href="/admin/problems"
-                        style="background:#eff6ff;color:#1a56db;padding:16px;border-radius:20px;text-align:center;text-decoration:none;font-weight:800;font-size:13px;border:1px solid rgba(26, 86, 219, 0.1);">🧩
+                        style="background:#eff6ff;color:#1d4ed8;padding:16px;border-radius:20px;text-align:center;text-decoration:none;font-weight:800;font-size:13px;border:1px solid rgba(29, 78, 216, 0.1);">🧩
                         Manage Problems</a>
                     <a href="{{ url_for('logout') }}"
                         style="background:#fff1f2;color:#e11d48;padding:16px;border-radius:20px;text-align:center;text-decoration:none;font-weight:800;font-size:13px;border:1px solid rgba(225, 29, 72, 0.1);">🚪
@@ -175,7 +175,7 @@
                 </div>
                 <div style="display:flex;align-items:flex-end;">
                     <button type="submit" class="btn"
-                        style="width:100%;background:#1a56db;color:#fff;padding:12px;border-radius:12px;font-weight:900;border:none;cursor:pointer;">➕
+                        style="width:100%;background:#1d4ed8;color:#fff;padding:12px;border-radius:12px;font-weight:900;border:none;cursor:pointer;">➕
                         Add Student</a>
                 </div>
             </form>
@@ -205,7 +205,7 @@
                             </td>
                             <td style="padding:16px 24px;">
                                 <code
-                                    style="background:#f0f7ff;color:#1a56db;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:700;border:1px solid rgba(26, 86, 219, 0.1);">{{ row['reg_id'] or '—' }}</code>
+                                    style="background:#f0f7ff;color:#1d4ed8;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:700;border:1px solid rgba(29, 78, 216, 0.1);">{{ row['reg_id'] or '—' }}</code>
                             </td>
                             <td style="padding:16px 24px;text-align:right;">
                                 <form action="/admin/users" method="POST" style="display:inline;"
@@ -281,7 +281,7 @@
             </td>
             <td style="padding:16px 24px;text-align:right;">
                 <div style="display:flex;flex-direction:column;align-items:flex-end;">
-                    <div style="font-size:18px;font-weight:900;color:#1a56db;">{{ row['total_score'] or 0 }}</div>
+                    <div style="font-size:18px;font-weight:900;color:#1d4ed8;">{{ row['total_score'] or 0 }}</div>
                     <div style="font-size:10px;color:#9ca3af;font-weight:800;text-transform:uppercase;">PTS</div>
                 </div>
             </td>
