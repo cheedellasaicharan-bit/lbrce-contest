@@ -365,7 +365,12 @@ def contest():
     if session.get("role") != "admin":
         email = session.get("email")
         stats = get_stats()
-        distinct_submissions = con.execute("SELECT COUNT(DISTINCT problem_id) as count FROM submissions WHERE user_email=?", (email,)).fetchone()['count']
+        distinct_submissions = con.execute("""
+            SELECT COUNT(DISTINCT s.problem_id) as count 
+            FROM submissions s 
+            JOIN problems p ON s.problem_id = p.id 
+            WHERE s.user_email=?
+        """, (email,)).fetchone()['count']
         if distinct_submissions >= stats['total_problems'] and stats['total_problems'] > 0:
             con.close()
             flash("You have already completed the contest. You cannot re-enter the arena.", "success")
@@ -447,7 +452,12 @@ def user_dashboard():
 
     # Calculate contest completion status
     stats = get_stats()
-    distinct_submissions = con.execute("SELECT COUNT(DISTINCT problem_id) as count FROM submissions WHERE user_email=?", (email,)).fetchone()['count']
+    distinct_submissions = con.execute("""
+        SELECT COUNT(DISTINCT s.problem_id) as count 
+        FROM submissions s 
+        JOIN problems p ON s.problem_id = p.id 
+        WHERE s.user_email=?
+    """, (email,)).fetchone()['count']
     has_completed_contest = distinct_submissions >= stats['total_problems'] and stats['total_problems'] > 0
     
     con.close()
