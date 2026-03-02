@@ -428,6 +428,19 @@
                     document.getElementById('mini-ring-prog').style.strokeDashoffset = offset;
                     document.getElementById('mini-ring-pct').innerText = pct + '%';
                     document.getElementById('mini-score').innerText = score + ' pts';
+
+                    // Auto-advance to the next problem on 100% success
+                    if (data.status === 'success' || pct === 100) {
+                        let currentIdx = PROBLEMS.findIndex(p => p.id === currentProblem.id);
+                        setTimeout(() => {
+                            if (currentIdx !== -1 && currentIdx < PROBLEMS.length - 1) {
+                                openAssessment(currentIdx + 1);
+                            } else {
+                                closeAssessment();
+                                window.location.reload();
+                            }
+                        }, 500);
+                    }
                 }
             });
     }
