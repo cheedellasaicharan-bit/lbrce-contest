@@ -304,8 +304,9 @@
     }
 
     function updateTimer() {
-        const start = new Date("{{ contest_start }}").getTime();
-        const end = new Date("{{ contest_end }}").getTime();
+        // start_time and end_time are passed as ISO-8601 strings with +05:30 offset
+        const start = new Date("{{ start_time }}").getTime();
+        const end = new Date("{{ end_time }}").getTime();
         const now = new Date().getTime();
 
         let remaining = 0;

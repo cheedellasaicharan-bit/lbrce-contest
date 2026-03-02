@@ -366,8 +366,8 @@ def contest():
                                 "score": p.get("score",0)}
                                for p in problems
                            ]),
-                           start_time=start_val,
-                           end_time=end_val)
+                           start_time=start_dt.strftime("%Y-%m-%dT%H:%M:%S+05:30"),
+                           end_time=end_dt.strftime("%Y-%m-%dT%H:%M:%S+05:30"))
 
 
 
