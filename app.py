@@ -76,11 +76,11 @@ def get_db():
         except Exception as e:
             print(f"DATABASE ERROR: Failed to connect to PostgreSQL: {e}")
             # Fallback to SQLite so the app at least starts
-            con = sqlite3.connect(DB_PATH)
+            con = sqlite3.connect(DB_PATH, check_same_thread=False)
             con.row_factory = sqlite3.Row
             return DbWrapper(con, False)
     else:
-        con = sqlite3.connect(DB_PATH)
+        con = sqlite3.connect(DB_PATH, check_same_thread=False)
         con.row_factory = sqlite3.Row
         return DbWrapper(con, False)
 
@@ -279,6 +279,11 @@ def login_credentials():
         }
         session["user"] = user_info
         session["email"] = user_info['email']
+        if reg_id == ADMIN_USER and password == ADMIN_PASS: # Assuming admin can also login via reg_id/pass
+            session["admin"] = True
+            session["role"] = "admin"
+        else:
+            session["role"] = "user"
         flash(f"Welcome back, {user['name']}!", "success")
         return redirect(url_for("contest"))
     
@@ -589,6 +594,7 @@ def admin_login():
         
         if user == ADMIN_USER and pwd == ADMIN_PASS:
             session["admin"] = True
+            session["role"] = "admin"
             flash("Welcome, Admin!", "success")
             return redirect(url_for("admin_dashboard"))
         flash("Invalid credentials.", "error")
