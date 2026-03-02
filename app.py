@@ -247,6 +247,11 @@ def get_stats():
     }
 
 # ---------------- AUTH ----------------
+@app.before_request
+def check_session_format():
+    if 'user' in session and isinstance(session['user'], str):
+        session.clear()
+
 @app.route("/", methods=["GET", "POST"])
 def login():
     if "user" in session:
