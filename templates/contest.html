@@ -300,6 +300,18 @@
     let timerInterval = null;
     let editorInstance = null;
     let submittedProblems = new Set();
+    let disqualified = false;
+
+    // Anti-cheat: Detect tab switch or window minimize
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden && document.getElementById('assessment-view').style.display !== 'none' && !disqualified) {
+            disqualified = true;
+            fetch('/disqualify', { method: 'POST' }).finally(() => {
+                alert("CHEATING DETECTED: You have switched tabs or minimized the window. Your exam has been automatically submitted and locked.");
+                window.location.href = "/user/dashboard";
+            });
+        }
+    });
 
     function initEditor() {
         if (!editorInstance) {

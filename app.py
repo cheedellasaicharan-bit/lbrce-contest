@@ -609,6 +609,33 @@ def submit():
         output_text = "\n".join(results) + f"\n\nScore: {earned_score}/{prob['score']} ({passed}/{total} test cases passed)"
         return jsonify({"output": output_text, "status": "success" if passed == total else "partial", "score": earned_score})
 
+
+@app.route("/disqualify", methods=["POST"])
+def disqualify():
+    if "user" not in session:
+        return jsonify({"status": "error", "message": "Not logged in"})
+    
+    email = session.get("email")
+    con = get_db()
+    
+    # Get all problems
+    problems = con.execute("SELECT id FROM problems").fetchall()
+    
+    # Get currently submitted problems
+    submitted = con.execute("SELECT DISTINCT problem_id FROM submissions WHERE user_email=?", (email,)).fetchall()
+    submitted_ids = {s['problem_id'] for s in submitted}
+    
+    for p in problems:
+        if p['id'] not in submitted_ids:
+            con.execute("""
+                INSERT INTO submissions (user_email, problem_id, score, code, language, status)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (email, p['id'], 0, "", 71, "Disqualified - Window Switch"))
+    
+    con.commit()
+    con.close()
+    return jsonify({"status": "success"})
+
 # ---------------- ADMIN ----------------
 @app.route("/admin_login", methods=["GET", "POST"])
 def admin_login():
