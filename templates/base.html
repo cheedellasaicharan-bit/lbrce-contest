@@ -43,8 +43,10 @@
                 {% if 'user' in session %}
                 <a href="{{ url_for('contest') }}" class="nav-link"
                     style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">CONTEST</a>
+                {% if session.get('role') == 'admin' %}
                 <a href="{{ url_for('leaderboard') }}" class="nav-link"
                     style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">LEADERBOARD</a>
+                {% endif %}
                 <a href="{{ url_for('user_dashboard') }}" class="nav-link"
                     style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">DASHBOARD</a>
                 {% endif %}
@@ -61,10 +63,10 @@
                 {% if 'user' in session %}
                 <div style="display:flex;align-items:center;gap:12px;">
                     <span style="font-size:14px;font-weight:700;color:var(--text-3);">
-                        {% if session['user'] is mapping %}
-                        {{ session['user']['name'].split()[0] }}
-                        {% else %}
+                        {% if session['user'] is string %}
                         {{ session['user'] }}
+                        {% else %}
+                        {{ session['user']['name'].split()[0] }}
                         {% endif %}
                     </span>
                     <a href="{{ url_for('logout') }}" class="btn-dark-nav"
