@@ -366,22 +366,33 @@
         const code = editorInstance ? editorInstance.getValue() : document.getElementById('code-editor').value;
         const lang = document.getElementById('lang-select').value;
 
-        fetch('/run_code', {
+        // Map language strings to Judge0 IDs
+        let langId = 71; // default Python
+        if (lang === 'python') langId = 71;
+        else if (lang === 'c') langId = 50;
+        else if (lang === 'cpp') langId = 54;
+        else if (lang === 'java') langId = 62;
+
+        fetch('/submit', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 code: code,
-                language: lang,
-                problem_id: currentProblem.id
+                language: langId,
+                problem: currentProblem.id,
+                is_test: true
             })
         })
             .then(r => r.json())
             .then(data => {
-                if (data.status === 'success') {
-                    out.innerHTML = `<div style="color:#3fb950;margin-bottom:8px;font-weight:800;">PASS: Sample Test Cases</div><div style="color:#8b949e;">${data.output}</div>`;
+                if (data.status === 'success' || data.status === 'partial') {
+                    out.innerHTML = `<div style="color:#3fb950;margin-bottom:8px;font-weight:800;">Execution Result</div><div style="color:#8b949e;">${data.output}</div>`;
                 } else {
-                    out.innerHTML = `<div style="color:#f85149;margin-bottom:8px;font-weight:800;">ERROR</div><div style="color:#8b949e;background:rgba(248,81,73,0.1);padding:12px;border-radius:8px;border:1px solid rgba(248,81,73,0.2);">${data.message}</div>`;
+                    out.innerHTML = `<div style="color:#f85149;margin-bottom:8px;font-weight:800;">ERROR</div><div style="color:#8b949e;background:rgba(248,81,73,0.1);padding:12px;border-radius:8px;border:1px solid rgba(248,81,73,0.2);">${data.output || data.message}</div>`;
                 }
+            })
+            .catch(err => {
+                out.innerHTML = `<div style="color:#f85149;margin-bottom:8px;font-weight:800;">NETWORK ERROR</div><div style="color:#8b949e;background:rgba(248,81,73,0.1);padding:12px;border-radius:8px;border:1px solid rgba(248,81,73,0.2);">Failed to reach compile server.</div>`;
             });
     }
 
@@ -389,25 +400,34 @@
         const code = editorInstance ? editorInstance.getValue() : document.getElementById('code-editor').value;
         const lang = document.getElementById('lang-select').value;
 
-        fetch('/submit_code', {
+        let langId = 71;
+        if (lang === 'python') langId = 71;
+        else if (lang === 'c') langId = 50;
+        else if (lang === 'cpp') langId = 54;
+        else if (lang === 'java') langId = 62;
+
+        fetch('/submit', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 code: code,
-                language: lang,
-                problem_id: currentProblem.id
+                language: langId,
+                problem: currentProblem.id,
+                is_test: false
             })
         })
             .then(r => r.json())
             .then(data => {
-                alert(data.message);
-                if (data.status === 'success') {
+                alert(data.output || data.message || "Submitted successfully!");
+                if (data.status === 'success' || data.status === 'partial') {
                     // Update mini accuracy ring
-                    const pct = data.score_pct || 100;
+                    const score = parseInt(data.score) || 0;
+                    const maxScore = parseInt(currentProblem.score) || 100;
+                    const pct = Math.round((score / maxScore) * 100) || 100;
                     const offset = 88 - (88 * pct / 100);
                     document.getElementById('mini-ring-prog').style.strokeDashoffset = offset;
                     document.getElementById('mini-ring-pct').innerText = pct + '%';
-                    document.getElementById('mini-score').innerText = data.score + ' pts';
+                    document.getElementById('mini-score').innerText = score + ' pts';
                 }
             });
     }
@@ -424,11 +444,9 @@
 
         if (editorInstance) {
             editorInstance.setOption('mode', cmMode);
-            const currentVal = editorInstance.getValue().trim();
-            // Assign template if editor is empty or just has a default template
-            if (!currentVal || currentVal.startsWith('def solve') || currentVal.startsWith('#include') || currentVal.startsWith('public class')) {
-                editorInstance.setValue(placeholder);
-            }
+            // Completely override the code area to the language starter template 
+            // every time the language dropdown is changed.
+            editorInstance.setValue(placeholder);
         }
     }
 </script>
