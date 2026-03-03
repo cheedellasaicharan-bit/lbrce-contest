@@ -510,25 +510,25 @@
 
         // Next Button Logic
         const nextBtn = document.getElementById('next-q-btn');
-        if (idx < PROBLEMS.length - 1) {
-            nextBtn.style.display = 'block';
+        nextBtn.style.display = 'block';
+
+        let nextIdx = -1;
+        for (let i = 1; i < PROBLEMS.length; i++) {
+            let checkIdx = (idx + i) % PROBLEMS.length;
+            if (!submittedProblems.has(PROBLEMS[checkIdx].id)) {
+                nextIdx = checkIdx;
+                break;
+            }
+        }
+
+        if (nextIdx !== -1) {
             nextBtn.innerHTML = 'Next Question &rarr;';
             nextBtn.onclick = () => {
-                // Find next unsubmitted problem
-                let nextIdx = idx + 1;
-                while (nextIdx < PROBLEMS.length && submittedProblems.has(PROBLEMS[nextIdx].id)) {
-                    nextIdx++;
-                }
-                if (nextIdx < PROBLEMS.length) {
-                    openAssessment(nextIdx);
-                } else {
-                    alert("All remaining problems have been submitted.");
-                }
+                openAssessment(nextIdx);
             };
         } else {
-            nextBtn.style.display = 'block';
             nextBtn.innerHTML = 'Finish Contest &check;';
-            nextBtn.onclick = () => { window.location.href = '/user/dashboard'; };
+            nextBtn.onclick = () => { closeAssessment(); window.location.href = '/user/dashboard'; };
         }
 
         // Initialize Advanced Code Editor
@@ -645,12 +645,22 @@
                         return;
                     }
 
-                    // Auto-advance to the next problem on 100% success
-                    if (data.status === 'success' || pct === 100) {
+                    // Auto-advance to the next problem
+                    // Ensure the UI updates immediately
+                    if (data.status === 'success' || data.status === 'partial') {
                         let currentIdx = PROBLEMS.findIndex(p => p.id === currentProblem.id);
                         setTimeout(() => {
-                            if (currentIdx !== -1 && currentIdx < PROBLEMS.length - 1) {
-                                openAssessment(currentIdx + 1);
+                            let autoNextIdx = -1;
+                            for (let i = 1; i <= PROBLEMS.length; i++) {
+                                let checkIdx = (currentIdx + i) % PROBLEMS.length;
+                                if (!submittedProblems.has(PROBLEMS[checkIdx].id)) {
+                                    autoNextIdx = checkIdx;
+                                    break;
+                                }
+                            }
+
+                            if (autoNextIdx !== -1) {
+                                openAssessment(autoNextIdx);
                             } else {
                                 closeAssessment();
                                 window.location.href = '/user/dashboard';
