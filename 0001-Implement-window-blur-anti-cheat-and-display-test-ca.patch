@@ -1,0 +1,194 @@
+From 89806c9317d13be542fc8cffd43b25a773b89d1f Mon Sep 17 00:00:00 2001
+From: Sai Charan <sai47@example.com>
+Date: Tue, 3 Mar 2026 02:55:16 +0530
+Subject: [PATCH] Implement window blur anti-cheat and display test cases below
+ problem
+
+---
+ app.py                 | 30 +++++++++++++-
+ templates/contest.html | 89 +++++++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 115 insertions(+), 4 deletions(-)
+
+diff --git a/app.py b/app.py
+index b8e03ca..24d893a 100644
+--- a/app.py
++++ b/app.py
+@@ -386,6 +386,19 @@ def contest():
+         sub_rows = con.execute("SELECT DISTINCT problem_id FROM submissions WHERE user_email=?", (email,)).fetchall()
+         submitted_ids = [str(r['problem_id']) for r in sub_rows]
+ 
++    # Fetch test cases
++    test_cases_rows = con.execute("SELECT id, problem_id, input, expected_output FROM test_cases").fetchall()
++    tc_map = {}
++    for tc in test_cases_rows:
++        pid = str(tc['problem_id'])
++        if pid not in tc_map:
++            tc_map[pid] = []
++        tc_map[pid].append({
++            "id": tc["id"],
++            "input": tc["input"],
++            "expected_output": tc["expected_output"]
++        })
++
+     con.close()
+ 
+     return render_template("contest.html",
+@@ -398,7 +411,8 @@ def contest():
+                                 "sample_input": p.get("sample_input",""),
+                                 "sample_output": p.get("sample_output",""),
+                                 "difficulty": p.get("difficulty","easy"),
+-                                "score": p.get("score",0)}
++                                "score": p.get("score",0),
++                                "test_cases": tc_map.get(str(p["id"]), [])}
+                                for p in problems
+                            ]),
+                            start_time=start_dt.strftime("%Y-%m-%dT%H:%M:%S+05:30"),
+@@ -505,8 +519,9 @@ def submit():
+     code = data.get("code", "")
+     language_id = data.get("language")
+     is_test = data.get("is_test", False)
++    is_cheat = data.get("is_cheat", False)
+ 
+-    if not code.strip():
++    if not code.strip() and not is_cheat:
+         return jsonify({"output": "Please write some code before submitting.", "status": "error"})
+ 
+     con = get_db()
+@@ -522,6 +537,17 @@ def submit():
+             con.close()
+             return jsonify({"output": "You have already submitted an answer for this problem. Multiple attempts are not allowed.", "status": "error"})
+ 
++    # Handle explicit anti-cheat submission from frontend
++    if is_cheat:
++        if not is_test:
++            con.execute("""
++                INSERT INTO submissions (user_email, problem_id, score, code, language, status)
++                VALUES (?, ?, ?, ?, ?, ?)
++            """, (email, problem_id, 0, code, language_id, "CHEATING DETECTED"))
++            con.commit()
++        con.close()
++        return jsonify({"output": "CHEATING DETECTED", "status": "success", "score": 0})
++
+     # Get test cases for this problem
+     test_cases = con.execute("SELECT * FROM test_cases WHERE problem_id=?", (problem_id,)).fetchall()
+ 
+diff --git a/templates/contest.html b/templates/contest.html
+index e589f52..f6e9a0c 100644
+--- a/templates/contest.html
++++ b/templates/contest.html
+@@ -226,11 +226,17 @@
+                 style="background:var(--bg-gray);padding:16px;border-radius:12px;font-family:monospace;font-size:13px;color:var(--green);margin-bottom:24px;border:1px solid var(--border);"></pre>
+ 
+             <h4 style="font-size:13px;font-weight:800;color:var(--text);margin:0 0 12px;text-transform:uppercase;">
+-                Sample
+-                Output
++                Sample Output
+             </h4>
+             <pre id="sample-output"
+                 style="background:var(--bg-gray);padding:16px;border-radius:12px;font-family:monospace;font-size:13px;color:var(--green);border:1px solid var(--border);"></pre>
++
++            <div style="height:1px;background:var(--border);margin:32px 0;"></div>
++            <h4 style="font-size:13px;font-weight:800;color:var(--text);margin:0 0 12px;text-transform:uppercase;">
++                All Test Cases
++            </h4>
++            <div id="all-test-cases-container" style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px;">
++            </div>
+         </div>
+ 
+         <!-- Center: Editor Panel -->
+@@ -311,6 +317,61 @@
+     let editorInstance = null;
+     let submittedProblems = new Set(SUBMITTED_IDS);
+ 
++    // ── Anti-Cheat ───────────────────────────────────────────────────────────
++    let isCheatingDetected = false;
++
++    function enforceAntiCheat() {
++        if (isCheatingDetected) return; // Prevent double trigger
++
++        // Only trigger if they are actively in the assessment view
++        const view = document.getElementById('assessment-view');
++        if (!view || view.style.display === 'none' || view.hasAttribute('data-ended')) return;
++
++        isCheatingDetected = true;
++        view.setAttribute('data-ended', 'true');
++
++        // Disable UI
++        document.body.innerHTML = `
++            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0d1117;color:#f85149;font-family:sans-serif;text-align:center;">
++                <h1 style="font-size:32px;margin-bottom:16px;">🚨 CHEATING DETECTED 🚨</h1>
++                <p style="color:#8b949e;font-size:16px;max-width:600px;line-height:1.5;">
++                    You switched tabs, clicked outside, or minimized the window. <br>
++                    Your current exam has been automatically locked and submitted with a 0 score.
++                </p>
++                <div style="margin-top:24px;width:30px;height:30px;border-radius:50%;border:3px solid rgba(248,81,73,0.3);border-top-color:#f85149;animation:spin 1s linear infinite;"></div>
++                <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
++            </div>
++        `;
++
++        // Grab current code
++        const code = editorInstance ? editorInstance.getValue() : "/* CHEATING DETECTED: Code cleared */";
++        const problemId = currentProblem ? currentProblem.id : PROBLEMS[0].id;
++
++        // Force submit with is_cheat flag
++        fetch('/submit', {
++            method: 'POST',
++            headers: { 'Content-Type': 'application/json' },
++            body: JSON.stringify({
++                code: code,
++                language: 71,
++                problem: problemId,
++                is_test: false,
++                is_cheat: true
++            })
++        }).finally(() => {
++            setTimeout(() => {
++                window.location.href = "/user/dashboard";
++            }, 3000);
++        });
++    }
++
++    // Attach listeners
++    document.addEventListener("visibilitychange", () => {
++        if (document.hidden) enforceAntiCheat();
++    });
++    window.addEventListener("blur", enforceAntiCheat);
++    // ─────────────────────────────────────────────────────────────────────────
++
+     function initEditor() {
+         if (!editorInstance) {
+             editorInstance = CodeMirror.fromTextArea(document.getElementById("code-editor"), {
+@@ -394,6 +455,30 @@
+         document.getElementById('sample-output').innerText = currentProblem.sample_output;
+         document.getElementById('prob-difficulty').innerText = currentProblem.difficulty.toUpperCase();
+ 
++        // Render Test Cases
++        const tcContainer = document.getElementById('all-test-cases-container');
++        tcContainer.innerHTML = ''; // Clear previous
++        if (currentProblem.test_cases && currentProblem.test_cases.length > 0) {
++            currentProblem.test_cases.forEach((tc, i) => {
++                const tcBox = document.createElement('div');
++                tcBox.style.background = 'var(--bg-gray)';
++                tcBox.style.border = '1px solid var(--border)';
++                tcBox.style.borderRadius = '8px';
++                tcBox.style.padding = '12px';
++                tcBox.style.fontSize = '12px';
++                tcBox.innerHTML = `
++                    <div style="font-weight:800;color:var(--text);margin-bottom:8px;text-transform:uppercase;">Test Case ${i + 1}</div>
++                    <div style="color:var(--text-3);margin-bottom:4px;">Input:</div>
++                    <pre style="background:rgba(0,0,0,0.05);padding:8px;border-radius:6px;color:var(--green);font-family:monospace;margin:0 0 12px;">${tc.input}</pre>
++                    <div style="color:var(--text-3);margin-bottom:4px;">Expected Output:</div>
++                    <pre style="background:rgba(0,0,0,0.05);padding:8px;border-radius:6px;color:var(--green);font-family:monospace;margin:0;">${tc.expected_output}</pre>
++                `;
++                tcContainer.appendChild(tcBox);
++            });
++        } else {
++            tcContainer.innerHTML = '<div style="color:var(--text-3);font-size:13px;font-style:italic;">No hidden test cases available.</div>';
++        }
++
+         document.getElementById('assessment-view').style.display = 'flex';
+         document.body.style.overflow = 'hidden';
+ 
+-- 
+2.53.0.windows.1
+
