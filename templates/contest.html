@@ -314,9 +314,9 @@
 
 
 
-    let cheat=0;
-function init() {}
-function initEditor() {
+    let cheat = 0;
+    function init() { }
+    function initEditor() {
         if (!editorInstance) {
             editorInstance = CodeMirror.fromTextArea(document.getElementById("code-editor"), {
                 mode: "python",
@@ -537,6 +537,8 @@ function initEditor() {
         else if (lang === 'cpp') langId = 54;
         else if (lang === 'java') langId = 62;
 
+        const out = document.getElementById('output-box');
+
         fetch('/submit', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -549,7 +551,13 @@ function initEditor() {
         })
             .then(r => r.json())
             .then(data => {
-                alert(data.output || data.message || "Submitted successfully!");
+                // Ensure output is displayed
+                if (data.status === 'success' || data.status === 'partial') {
+                    out.innerHTML = `<div style="color:#3fb950;margin-bottom:8px;font-weight:800;">Execution Result</div><div style="color:#8b949e;">${data.output || data.message || "Submitted successfully!"}</div>`;
+                } else {
+                    out.innerHTML = `<div style="color:#f85149;margin-bottom:8px;font-weight:800;">ERROR</div><div style="color:#8b949e;background:rgba(248,81,73,0.1);padding:12px;border-radius:8px;border:1px solid rgba(248,81,73,0.2);">${data.output || data.message || "Error"}</div>`;
+                }
+
                 if (data.status === 'success' || data.status === 'partial') {
                     // Update mini accuracy ring
                     const score = parseInt(data.score) || 0;
