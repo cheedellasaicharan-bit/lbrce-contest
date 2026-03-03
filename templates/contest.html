@@ -156,6 +156,20 @@
 <div id="assessment-view" class="assessment-view"
     style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;flex-direction:column;">
 
+    <!-- Fullscreen Enforcement Overlay -->
+    <div id="fullscreen-overlay"
+        style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:10000;background:rgba(13,17,23,0.95);flex-direction:column;align-items:center;justify-content:center;color:#fff;backdrop-filter:blur(8px);">
+        <h2 style="font-size:24px;margin-bottom:16px;color:#f85149;">⚠️ Full-Screen Required</h2>
+        <p style="font-size:16px;color:#8b949e;max-width:400px;text-align:center;margin-bottom:24px;">
+            The contest environment requires you to stay in full-screen mode without opening other tabs or minimizing.
+            Please click the button below to return to your exam.
+        </p>
+        <button onclick="requestExamFullscreen()"
+            style="background:#1d4ed8;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:800;cursor:pointer;">
+            Return to Full Screen
+        </button>
+    </div>
+
     <!-- Top Bar -->
     <div class="assessment-header"
         style="height:60px;display:flex;align-items:center;padding:0 20px;gap:20px;flex-shrink:0;">
@@ -315,6 +329,52 @@
 
 
     let cheat = 0;
+
+    // ── Full-Screen Enforcement Logic ─────────────────────────────────────────
+    function requestExamFullscreen() {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen().catch(err => console.log("Fullscreen request failed:", err));
+        } else if (elem.webkitRequestFullscreen) { /* Safari */
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { /* IE11 */
+            elem.msRequestFullscreen();
+        }
+        document.getElementById('fullscreen-overlay').style.display = 'none';
+    }
+
+    function exitExamFullscreen() {
+        const overlay = document.getElementById('fullscreen-overlay');
+        if (overlay) overlay.style.display = 'none';
+
+        if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement) {
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(err => console.log("Exit fullscreen failed:", err));
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        }
+    }
+
+    // Listen for tab switching or minimizing
+    document.addEventListener("visibilitychange", () => {
+        const view = document.getElementById('assessment-view');
+        if (document.hidden && view && view.style.display === 'flex') {
+            document.getElementById('fullscreen-overlay').style.display = 'flex';
+        }
+    });
+
+    // Listen for escaping fullscreen
+    document.addEventListener("fullscreenchange", () => {
+        const view = document.getElementById('assessment-view');
+        if (view && view.style.display === 'flex' && !document.fullscreenElement) {
+            document.getElementById('fullscreen-overlay').style.display = 'flex';
+        }
+    });
+    // ────────────────────────────────────────────────────────────────────────
+
     function init() { }
     function initEditor() {
         if (!editorInstance) {
@@ -484,9 +544,13 @@
 
         // Clear previous output
         document.getElementById('output-box').innerHTML = '<div style="text-align:center;margin-top:20px;opacity:0.5;"><div style="font-size:24px;margin-bottom:8px;">🏃</div>Run your code to see results here</div>';
+
+        // Request Full Screen
+        requestExamFullscreen();
     }
 
     function closeAssessment() {
+        exitExamFullscreen();
         document.getElementById('assessment-view').style.display = 'none';
         document.body.style.overflow = 'auto';
     }
