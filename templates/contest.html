@@ -341,9 +341,10 @@
         isCheatingDetected = true;
         view.setAttribute('data-ended', 'true');
 
-        // Disable UI immediately
+        // Disable UI immediately and blur everything
+        document.body.style.filter = 'blur(40px)';
         document.body.innerHTML = `
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0d1117;color:#f85149;font-family:sans-serif;text-align:center;">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0d1117;color:#f85149;font-family:sans-serif;text-align:center;filter:none !important;">
                 <h1 style="font-size:32px;margin-bottom:16px;">🚨 CHEATING DETECTED 🚨</h1>
                 <p style="color:#8b949e;font-size:16px;max-width:600px;line-height:1.5;">
                     You switched tabs, minimized the window, or moved focus elsewhere. <br>
@@ -354,7 +355,7 @@
             </div>
         `;
 
-        // Grab current code (try editor first, then raw textarea)
+        // Grab current code
         const code = editorInstance ? editorInstance.getValue() : "/* CHEATING DETECTED: AUTO-SUBMITTED */";
         const problemId = currentProblem ? currentProblem.id : "";
 
@@ -369,7 +370,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 code: code,
-                language: 71,
+                language: 71, // default to python for cheat log
                 problem: problemId,
                 is_test: false,
                 is_cheat: true
@@ -406,21 +407,41 @@
         }
     }
 
-    // Listen for tab switching or minimizing
-    document.addEventListener("visibilitychange", () => {
-        if (document.hidden) enforceAntiCheat();
-    });
-
-    // Listen for window blur (clicking outside)
-    window.addEventListener("blur", () => {
-        enforceAntiCheat();
-    });
-
-    // Listen for escaping fullscreen
-    document.addEventListener("fullscreenchange", () => {
+    // HEARTBEAT MONITOR (Check every 500ms for solid enforcement)
+    setInterval(() => {
         const view = document.getElementById('assessment-view');
-        if (view && view.style.display === 'flex' && !document.fullscreenElement && !isCheatingDetected) {
+        if (!view || view.style.display === 'none' || view.hasAttribute('data-ended') || isCheatingDetected) return;
+
+        // 1. Check for Tab Switching / Minimizing (Visibility)
+        if (document.hidden) {
+            enforceAntiCheat();
+            return;
+        }
+
+        // 2. Check for Blur (Loss of Focus / Alt-Tab)
+        if (!document.hasFocus()) {
+            enforceAntiCheat();
+            return;
+        }
+
+        // 3. Check for Fullscreen status
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
             document.getElementById('fullscreen-overlay').style.display = 'flex';
+        }
+    }, 500);
+
+    // Apply Blur Class on window blur to hidden sensitivity even in switcher previews
+    window.addEventListener('blur', () => {
+        const view = document.getElementById('assessment-view');
+        if (view && view.style.display === 'flex') {
+            document.body.style.filter = 'blur(15px)';
+            enforceAntiCheat();
+        }
+    });
+
+    window.addEventListener('focus', () => {
+        if (!isCheatingDetected) {
+            document.body.style.filter = 'none';
         }
     });
 
@@ -435,7 +456,6 @@
         if (e.ctrlKey && (e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67) || e.keyCode === 85)) {
             e.preventDefault(); e.stopPropagation(); return false;
         }
-        // Alt+Tab, Win (Hard to block in JS, but blur handles it)
     });
 
     // Disable Right-Click
@@ -710,9 +730,20 @@
                     // Auto-exit if all problems are submitted
                     if (submittedProblems.size >= PROBLEMS.length && PROBLEMS.length > 0) {
                         setTimeout(() => {
-                            alert("You have submitted answers for all problems. Returning to dashboard...");
-                            closeAssessment();
-                            window.location.href = '/user/dashboard';
+                            // Using a custom modal style instead of alert to prevent focus loss
+                            const finishModal = document.createElement('div');
+                            finishModal.style = "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:20000;display:flex;align-items:center;justify-content:center;";
+                            finishModal.innerHTML = `<div style="background:#fff;padding:40px;border-radius:20px;text-align:center;max-width:400px;box-shadow:0 20px 50px rgba(0,0,0,0.3);">
+                                <div style="font-size:48px;margin-bottom:20px;">🎉</div>
+                                <h2 style="color:#111827;margin-bottom:12px;">All Done!</h2>
+                                <p style="color:#6b7280;margin-bottom:24px;">You have submitted all problems. Returning to dashboard...</p>
+                            </div>`;
+                            document.body.appendChild(finishModal);
+
+                            setTimeout(() => {
+                                closeAssessment();
+                                window.location.href = '/user/dashboard';
+                            }, 2000);
                         }, 500);
                         return;
                     }
