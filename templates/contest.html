@@ -326,6 +326,20 @@
     let editorInstance = null;
     let submittedProblems = new Set(SUBMITTED_IDS);
 
+    // Explicit tab switching / minimization / focus loss detection
+    document.addEventListener('visibilitychange', () => {
+        const view = document.getElementById('assessment-view');
+        if (document.hidden && view && view.style.display !== 'none') {
+            enforceAntiCheat();
+        }
+    });
+
+    window.addEventListener('blur', () => {
+        const view = document.getElementById('assessment-view');
+        if (view && view.style.display !== 'none') {
+            enforceAntiCheat();
+        }
+    });
 
 
 
