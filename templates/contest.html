@@ -492,50 +492,47 @@
         return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':');
     }
 
-    function updateTimer() {
-        // start_time and end_time are passed as ISO-8601 strings with +05:30 offset
-        const start = new Date("{{ start_time }}").getTime();
-        const end = new Date("{{ end_time }}").getTime();
-        const now = new Date().getTime();
+    let remaining = 0;
+    let label = "Time Remaining";
 
-        let remaining = 0;
-        let label = "Time Remaining";
+    if (now < start) {
+        remaining = start - now;
+        label = "STARTS IN";
+    } else if (now < end) {
+        remaining = end - now;
+    } else {
+        remaining = 0;
+        label = "CONTEST ENDED";
 
-        if (now < start) {
-            remaining = start - now;
-            label = "STARTS IN";
-        } else if (now < end) {
-            remaining = end - now;
-        } else {
-            remaining = 0;
-            label = "CONTEST ENDED";
+        const view = document.getElementById('assessment-view');
+        if (view && !view.hasAttribute('data-ended')) {
+            view.setAttribute('data-ended', 'true');
+            if (view.style.display !== 'none' && currentProblem) {
+                const code = editorInstance ? editorInstance.getValue() : document.getElementById('code-editor').value;
+                const lang = document.getElementById('lang-select').value;
+                let langId = 71;
+                if (lang === 'c') langId = 50; else if (lang === 'cpp') langId = 54; else if (lang === 'java') langId = 62;
 
-            const view = document.getElementById('assessment-view');
-            if (view && !view.hasAttribute('data-ended')) {
-                view.setAttribute('data-ended', 'true');
-                if (view.style.display !== 'none' && currentProblem) {
-                    const code = editorInstance ? editorInstance.getValue() : document.getElementById('code-editor').value;
-                    const lang = document.getElementById('lang-select').value;
-                    let langId = 71;
-                    if (lang === 'c') langId = 50; else if (lang === 'cpp') langId = 54; else if (lang === 'java') langId = 62;
-
-                    fetch('/submit', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ code: code, language: langId, problem: currentProblem.id, is_test: false })
-                    }).finally(() => {
-                        window.location.href = "/user/dashboard";
-                    });
-                } else {
+                fetch('/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: code, language: langId, problem: currentProblem.id, is_test: false })
+                }).finally(() => {
                     window.location.href = "/user/dashboard";
-                }
+                });
+            } else {
+                window.location.href = "/user/dashboard";
             }
         }
+    }
 
-        const timeStr = formatTime(remaining);
-        document.getElementById('timer-display').innerText = timeStr;
-        const assessTimer = document.getElementById('assess-timer');
-        if (assessTimer) assessTimer.innerText = timeStr;
+    const timeStr = formatTime(remaining);
+    document.getElementById('timer-display').innerText = timeStr;
+    const assessTimer = document.getElementById('assess-timer');
+    if (assessTimer) assessTimer.innerText = timeStr;
+        } catch (e) {
+        console.error("Timer Error:", e);
+    }
     }
 
     setInterval(updateTimer, 1000);

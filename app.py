@@ -148,18 +148,13 @@ def init_db():
         )
     """)
 
-    # Seed defaults
+    # Seed defaults ONLY if they don't exist
     if is_pg:
         cur.execute("INSERT INTO settings VALUES (%s, %s) ON CONFLICT (key) DO NOTHING", ("contest_start", "2026-01-01 00:00:00"))
         cur.execute("INSERT INTO settings VALUES (%s, %s) ON CONFLICT (key) DO NOTHING", ("contest_end", "2027-01-01 00:00:00"))
     else:
         cur.execute("INSERT OR IGNORE INTO settings VALUES (?, ?)", ("contest_start", "2026-01-01 00:00:00"))
         cur.execute("INSERT OR IGNORE INTO settings VALUES (?, ?)", ("contest_end", "2027-01-01 00:00:00"))
-    
-    # Update if already exists to ensure it's active
-    param_char = "%s" if is_pg else "?"
-    cur.execute(f"UPDATE settings SET value={param_char} WHERE key='contest_start'", ("2026-01-01 00:00:00",))
-    cur.execute(f"UPDATE settings SET value={param_char} WHERE key='contest_end'", ("2027-01-01 00:00:00",))
 
     problems = [
         ("easy1", "Sum of Two Numbers", "Write a program that reads two integers from stdin (one per line) and prints their sum.", "easy", 10),
@@ -335,17 +330,17 @@ def contest():
     if "user" not in session:
         return redirect(url_for("login"))
 
-    # ── Time gating ─────────────────────────────────────────
-    start_val = get_setting("contest_start") or "2026-01-01 00:00:00"
-    end_val   = get_setting("contest_end")   or "2027-01-01 00:00:00"
+    # ── Time gating (Robust Parsing) ─────────────────────────────────────────
+    def parse_dt(val):
+        if not val: return datetime(2026, 1, 1)
+        if isinstance(val, datetime): return val
+        try:
+            return datetime.strptime(str(val)[:19], "%Y-%m-%d %H:%M:%S")
+        except:
+            return datetime(2026, 1, 1)
 
-    try:
-        start_dt = start_val if isinstance(start_val, datetime) else datetime.strptime(str(start_val)[:19], "%Y-%m-%d %H:%M:%S")
-        end_dt   = end_val   if isinstance(end_val,   datetime) else datetime.strptime(str(end_val)[:19],   "%Y-%m-%d %H:%M:%S")
-    except (ValueError, TypeError):
-        start_dt = datetime(2026, 1, 1)
-        end_dt   = datetime(2027, 1, 1)
-
+    start_dt = parse_dt(get_setting("contest_start"))
+    end_dt   = parse_dt(get_setting("contest_end"))
     now = get_ist_now()
 
     if now < start_dt:
@@ -474,24 +469,17 @@ def user_dashboard():
     """, (email,)).fetchone()['count']
     has_completed_contest = distinct_submissions >= stats['total_problems'] and stats['total_problems'] > 0
     
-    # Contest Timeline for Dashboard
-    start_val = get_setting("contest_start") or "2026-01-01 00:00:00"
-    end_val   = get_setting("contest_end")   or "2027-01-01 00:00:00"
+    # Contest Timeline for Dashboard (Robust Parsing)
+    def parse_dt(val):
+        if not val: return datetime(2026, 1, 1)
+        if isinstance(val, datetime): return val
+        try:
+            return datetime.strptime(str(val)[:19], "%Y-%m-%d %H:%M:%S")
+        except:
+            return datetime(2026, 1, 1)
 
-    try:
-        # Normalize to string if it's a datetime from DB, then parse
-        if isinstance(start_val, datetime):
-            start_dt = start_val
-        else:
-            start_dt = datetime.strptime(str(start_val)[:19], "%Y-%m-%d %H:%M:%S")
-            
-        if isinstance(end_val, datetime):
-            end_dt = end_val
-        else:
-            end_dt = datetime.strptime(str(end_val)[:19], "%Y-%m-%d %H:%M:%S")
-    except (ValueError, TypeError):
-        start_dt = datetime(2026, 1, 1)
-        end_dt   = datetime(2027, 1, 1)
+    start_dt = parse_dt(get_setting("contest_start"))
+    end_dt   = parse_dt(get_setting("contest_end"))
 
     con.close()
     return render_template("user_dashboard.html", 
@@ -859,7 +847,11 @@ def leaderboard():
 
 @app.context_processor
 def inject_now():
-    return {'now': datetime.now()}
+    now = get_ist_now()
+    return {
+        'now': now,
+        'server_now': now.strftime("%Y-%m-%dT%H:%M:%S") + "+05:30"
+    }
 
 
 # Startup logic

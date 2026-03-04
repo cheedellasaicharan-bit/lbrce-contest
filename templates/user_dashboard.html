@@ -371,52 +371,66 @@
         }
 
         function formatDisplayDate(dateStr) {
-            const d = new Date(dateStr);
-            return d.toLocaleString('en-IN', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-            });
+            try {
+                const d = new Date(dateStr);
+                if (isNaN(d.getTime())) return "Invalid Date";
+                return d.toLocaleString('en-IN', {
+                    year: 'numeric', month: 'short', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit', hour12: true
+                });
+            } catch (e) { return "Invalid Date"; }
         }
 
         const startISO = "{{ start_time }}";
         const endISO = "{{ end_time }}";
+        const serverNowISO = "{{ server_now }}"; // Injected by backend
+
+        // Calculate offset between server and local time
+        const serverTime = new Date(serverNowISO).getTime();
+        const localTime = new Date().getTime();
+        const timeOffset = serverTime - localTime;
 
         document.getElementById('start-time-display').innerText = formatDisplayDate(startISO);
         document.getElementById('end-time-display').innerText = formatDisplayDate(endISO);
 
         function updateDashboardTimer() {
-            const start = new Date(startISO).getTime();
-            const end = new Date(endISO).getTime();
-            const now = new Date().getTime();
+            try {
+                const start = new Date(startISO).getTime();
+                const end = new Date(endISO).getTime();
+                const now = new Date().getTime() + timeOffset; // Use synced time
 
-            let remaining = 0;
-            let label = "Time Remaining";
-            let statusText = "Contest is currently active!";
+                if (isNaN(start) || isNaN(end)) {
+                    document.getElementById('dashboard-timer').innerText = "00:00:00";
+                    return;
+                }
 
-            if (now < start) {
-                remaining = start - now;
-                label = "Starts In";
-                statusText = "The contest has not started yet.";
-                document.getElementById('timeline-status').style.color = "#f97316";
-            } else if (now < end) {
-                remaining = end - now;
-                label = "Time Remaining";
-                statusText = "Contest is live! Good luck!";
-                document.getElementById('timeline-status').style.color = "#16a34a";
-            } else {
-                remaining = 0;
-                label = "Ended";
-                statusText = "The contest has completed.";
-                document.getElementById('timeline-status').style.color = "#64748b";
+                let remaining = 0;
+                let label = "Time Remaining";
+                let statusText = "Contest is currently active!";
+
+                if (now < start) {
+                    remaining = start - now;
+                    label = "Starts In";
+                    statusText = "The contest has not started yet.";
+                    document.getElementById('timeline-status').style.color = "#f97316";
+                } else if (now < end) {
+                    remaining = end - now;
+                    label = "Time Remaining";
+                    statusText = "Contest is live! Good luck!";
+                    document.getElementById('timeline-status').style.color = "#16a34a";
+                } else {
+                    remaining = 0;
+                    label = "Ended";
+                    statusText = "The contest has completed.";
+                    document.getElementById('timeline-status').style.color = "#64748b";
+                }
+
+                document.getElementById('timer-label').innerText = label;
+                document.getElementById('dashboard-timer').innerText = formatTime(remaining);
+                document.getElementById('timeline-status').innerText = statusText;
+            } catch (e) {
+                console.error("Timer Error:", e);
             }
-
-            document.getElementById('timer-label').innerText = label;
-            document.getElementById('dashboard-timer').innerText = formatTime(remaining);
-            document.getElementById('timeline-status').innerText = statusText;
         }
 
         setInterval(updateDashboardTimer, 1000);
