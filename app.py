@@ -474,6 +474,25 @@ def user_dashboard():
     """, (email,)).fetchone()['count']
     has_completed_contest = distinct_submissions >= stats['total_problems'] and stats['total_problems'] > 0
     
+    # Contest Timeline for Dashboard
+    start_val = get_setting("contest_start") or "2026-01-01 00:00:00"
+    end_val   = get_setting("contest_end")   or "2027-01-01 00:00:00"
+
+    try:
+        # Normalize to string if it's a datetime from DB, then parse
+        if isinstance(start_val, datetime):
+            start_dt = start_val
+        else:
+            start_dt = datetime.strptime(str(start_val)[:19], "%Y-%m-%d %H:%M:%S")
+            
+        if isinstance(end_val, datetime):
+            end_dt = end_val
+        else:
+            end_dt = datetime.strptime(str(end_val)[:19], "%Y-%m-%d %H:%M:%S")
+    except (ValueError, TypeError):
+        start_dt = datetime(2026, 1, 1)
+        end_dt   = datetime(2027, 1, 1)
+
     con.close()
     return render_template("user_dashboard.html", 
                            user=user, 
@@ -481,7 +500,9 @@ def user_dashboard():
                            rank=rank, 
                            total_score=total_score,
                            has_completed_contest=has_completed_contest,
-                           stats=stats)
+                           stats=stats,
+                           start_time=start_dt.isoformat() + "+05:30",
+                           end_time=end_dt.isoformat() + "+05:30")
 
 
 
