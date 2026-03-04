@@ -680,7 +680,8 @@ def admin_dashboard():
         ORDER BY total_score DESC
     """).fetchall()
 
-    settings = dict(con.execute("SELECT * FROM settings").fetchall())
+    rows = con.execute("SELECT * FROM settings").fetchall()
+    settings = {r['key']: r['value'] for r in rows}
     stats = get_stats()
     con.close()
 
