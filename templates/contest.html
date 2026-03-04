@@ -492,47 +492,66 @@
         return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':');
     }
 
-    let remaining = 0;
-    let label = "Time Remaining";
+    const startStr = "{{ start_time }}";
+    const endStr = "{{ end_time }}";
+    const serverNowISO = "{{ server_now }}"; // Injected by backend
 
-    if (now < start) {
-        remaining = start - now;
-        label = "STARTS IN";
-    } else if (now < end) {
-        remaining = end - now;
-    } else {
-        remaining = 0;
-        label = "CONTEST ENDED";
+    const serverNow = new Date(serverNowISO).getTime();
+    const localNow = new Date().getTime();
+    const timeOffset = serverNow - localNow;
 
-        const view = document.getElementById('assessment-view');
-        if (view && !view.hasAttribute('data-ended')) {
-            view.setAttribute('data-ended', 'true');
-            if (view.style.display !== 'none' && currentProblem) {
-                const code = editorInstance ? editorInstance.getValue() : document.getElementById('code-editor').value;
-                const lang = document.getElementById('lang-select').value;
-                let langId = 71;
-                if (lang === 'c') langId = 50; else if (lang === 'cpp') langId = 54; else if (lang === 'java') langId = 62;
+    function updateTimer() {
+        try {
+            const start = new Date(startStr).getTime();
+            const end = new Date(endStr).getTime();
+            const now = new Date().getTime() + timeOffset; // Synchronized server time
 
-                fetch('/submit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code: code, language: langId, problem: currentProblem.id, is_test: false })
-                }).finally(() => {
-                    window.location.href = "/user/dashboard";
-                });
-            } else {
-                window.location.href = "/user/dashboard";
+            if (isNaN(start) || isNaN(end)) {
+                document.getElementById('timer-display').innerText = "00:00:00";
+                return;
             }
-        }
-    }
 
-    const timeStr = formatTime(remaining);
-    document.getElementById('timer-display').innerText = timeStr;
-    const assessTimer = document.getElementById('assess-timer');
-    if (assessTimer) assessTimer.innerText = timeStr;
+            let remaining = 0;
+            let label = "Time Remaining";
+
+            if (now < start) {
+                remaining = start - now;
+                label = "STARTS IN";
+            } else if (now < end) {
+                remaining = end - now;
+            } else {
+                remaining = 0;
+                label = "CONTEST ENDED";
+
+                const view = document.getElementById('assessment-view');
+                if (view && !view.hasAttribute('data-ended')) {
+                    view.setAttribute('data-ended', 'true');
+                    if (view.style.display !== 'none' && currentProblem) {
+                        const code = editorInstance ? editorInstance.getValue() : document.getElementById('code-editor').value;
+                        const lang = document.getElementById('lang-select').value;
+                        let langId = 71;
+                        if (lang === 'c') langId = 50; else if (lang === 'cpp') langId = 54; else if (lang === 'java') langId = 62;
+
+                        fetch('/submit', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ code: code, language: langId, problem: currentProblem.id, is_test: false })
+                        }).finally(() => {
+                            window.location.href = "/user/dashboard";
+                        });
+                    } else {
+                        window.location.href = "/user/dashboard";
+                    }
+                }
+            }
+
+            const timeStr = formatTime(remaining);
+            document.getElementById('timer-display').innerText = timeStr;
+            const assessTimer = document.getElementById('assess-timer');
+            if (assessTimer) assessTimer.innerText = timeStr;
         } catch (e) {
-        console.error("Timer Error:", e);
-    }
+            console.error("Timer Error:", e);
+        }
     }
 
     setInterval(updateTimer, 1000);
