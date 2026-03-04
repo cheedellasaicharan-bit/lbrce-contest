@@ -229,9 +229,6 @@ def is_contest_active():
     end = parse_dt(end_val, default=datetime(2027, 1, 1))
     now = get_ist_now()
     return start <= now <= end
-    
-    now = get_ist_now()
-    return start <= now <= end
 
 def get_stats():
     """Get dashboard statistics."""
