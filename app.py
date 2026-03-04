@@ -13,6 +13,14 @@ from datetime import datetime, timedelta
 def get_ist_now():
     return datetime.utcnow() + timedelta(hours=5, minutes=30)
 
+def parse_dt(val, default=datetime(2026, 1, 1)):
+    if not val: return default
+    if isinstance(val, datetime): return val
+    try:
+        return datetime.strptime(str(val)[:19], "%Y-%m-%d %H:%M:%S")
+    except (ValueError, TypeError):
+        return default
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -215,15 +223,12 @@ def get_setting(key):
     return res['value'] if res else None
 
 def is_contest_active():
-    start_val = get_setting("contest_start") or "2026-01-01 00:00:00"
-    end_val = get_setting("contest_end") or "2027-01-01 00:00:00"
-    
-    try:
-        # In some DBs like Postgres, these might already be datetime objects
-        start = start_val if isinstance(start_val, datetime) else datetime.strptime(start_val, "%Y-%m-%d %H:%M:%S")
-        end = end_val if isinstance(end_val, datetime) else datetime.strptime(end_val, "%Y-%m-%d %H:%M:%S")
-    except (ValueError, TypeError):
-        return True # Default to active if settings are corrupted
+    start_val = get_setting("contest_start")
+    end_val = get_setting("contest_end")
+    start = parse_dt(start_val)
+    end = parse_dt(end_val, default=datetime(2027, 1, 1))
+    now = get_ist_now()
+    return start <= now <= end
     
     now = get_ist_now()
     return start <= now <= end
@@ -330,17 +335,8 @@ def contest():
     if "user" not in session:
         return redirect(url_for("login"))
 
-    # ── Time gating (Robust Parsing) ─────────────────────────────────────────
-    def parse_dt(val):
-        if not val: return datetime(2026, 1, 1)
-        if isinstance(val, datetime): return val
-        try:
-            return datetime.strptime(str(val)[:19], "%Y-%m-%d %H:%M:%S")
-        except:
-            return datetime(2026, 1, 1)
-
     start_dt = parse_dt(get_setting("contest_start"))
-    end_dt   = parse_dt(get_setting("contest_end"))
+    end_dt   = parse_dt(get_setting("contest_end"), default=datetime(2027, 1, 1))
     now = get_ist_now()
 
     if now < start_dt:
@@ -469,17 +465,8 @@ def user_dashboard():
     """, (email,)).fetchone()['count']
     has_completed_contest = distinct_submissions >= stats['total_problems'] and stats['total_problems'] > 0
     
-    # Contest Timeline for Dashboard (Robust Parsing)
-    def parse_dt(val):
-        if not val: return datetime(2026, 1, 1)
-        if isinstance(val, datetime): return val
-        try:
-            return datetime.strptime(str(val)[:19], "%Y-%m-%d %H:%M:%S")
-        except:
-            return datetime(2026, 1, 1)
-
     start_dt = parse_dt(get_setting("contest_start"))
-    end_dt   = parse_dt(get_setting("contest_end"))
+    end_dt   = parse_dt(get_setting("contest_end"), default=datetime(2027, 1, 1))
 
     con.close()
     return render_template("user_dashboard.html", 
@@ -759,12 +746,24 @@ def admin_problems():
 def admin_settings():
     if not session.get("admin"):
         return redirect(url_for("admin_login"))
+    
+    start_val = request.form["start"]
+    end_val = request.form["end"]
+    
+    # Basic validation
+    test_start = parse_dt(start_val, default=None)
+    test_end = parse_dt(end_val, default=None)
+    
+    if not test_start or not test_end:
+        flash("Invalid date format. Use YYYY-MM-DD HH:MM:SS", "error")
+        return redirect(url_for("admin_dashboard"))
+
     con = get_db()
-    con.execute("UPDATE settings SET value=? WHERE key='contest_start'", (request.form["start"],))
-    con.execute("UPDATE settings SET value=? WHERE key='contest_end'", (request.form["end"],))
+    con.execute("UPDATE settings SET value=? WHERE key='contest_start'", (start_val,))
+    con.execute("UPDATE settings SET value=? WHERE key='contest_end'", (end_val,))
     con.commit()
     con.close()
-    flash("Contest settings updated!", "success")
+    flash("Contest settings updated successfully!", "success")
     return redirect(url_for("admin_dashboard"))
 
 @app.route("/admin/users", methods=["POST"])
