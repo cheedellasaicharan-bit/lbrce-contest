@@ -328,9 +328,60 @@
 
 
 
-    let cheat = 0;
+    // ── Anti-Cheat ───────────────────────────────────────────────────────────
+    let isCheatingDetected = false;
 
-    // ── Full-Screen Enforcement Logic ─────────────────────────────────────────
+    function enforceAntiCheat() {
+        if (isCheatingDetected) return; // Prevent double trigger
+
+        // Only trigger if they are actively in the assessment view
+        const view = document.getElementById('assessment-view');
+        if (!view || view.style.display === 'none' || view.hasAttribute('data-ended')) return;
+
+        isCheatingDetected = true;
+        view.setAttribute('data-ended', 'true');
+
+        // Disable UI immediately
+        document.body.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0d1117;color:#f85149;font-family:sans-serif;text-align:center;">
+                <h1 style="font-size:32px;margin-bottom:16px;">🚨 CHEATING DETECTED 🚨</h1>
+                <p style="color:#8b949e;font-size:16px;max-width:600px;line-height:1.5;">
+                    You switched tabs, minimized the window, or moved focus elsewhere. <br>
+                    Your exam has been automatically locked and submitted with a 0 score.
+                </p>
+                <div style="margin-top:24px;width:30px;height:30px;border-radius:50%;border:3px solid rgba(248,81,73,0.3);border-top-color:#f85149;animation:spin 1s linear infinite;"></div>
+                <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
+            </div>
+        `;
+
+        // Grab current code (try editor first, then raw textarea)
+        const code = editorInstance ? editorInstance.getValue() : "/* CHEATING DETECTED: AUTO-SUBMITTED */";
+        const problemId = currentProblem ? currentProblem.id : "";
+
+        if (!problemId) {
+            window.location.href = "/user/dashboard";
+            return;
+        }
+
+        // Force submit with is_cheat flag
+        fetch('/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                code: code,
+                language: 71,
+                problem: problemId,
+                is_test: false,
+                is_cheat: true
+            })
+        }).finally(() => {
+            setTimeout(() => {
+                window.location.href = "/user/dashboard";
+            }, 3000);
+        });
+    }
+
+    // Full-Screen Enforcement Logic 
     function requestExamFullscreen() {
         const elem = document.documentElement;
         if (elem.requestFullscreen) {
@@ -344,9 +395,6 @@
     }
 
     function exitExamFullscreen() {
-        const overlay = document.getElementById('fullscreen-overlay');
-        if (overlay) overlay.style.display = 'none';
-
         if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement) {
             if (document.exitFullscreen) {
                 document.exitFullscreen().catch(err => console.log("Exit fullscreen failed:", err));
@@ -360,17 +408,41 @@
 
     // Listen for tab switching or minimizing
     document.addEventListener("visibilitychange", () => {
-        const view = document.getElementById('assessment-view');
-        if (document.hidden && view && view.style.display === 'flex') {
-            document.getElementById('fullscreen-overlay').style.display = 'flex';
-        }
+        if (document.hidden) enforceAntiCheat();
+    });
+
+    // Listen for window blur (clicking outside)
+    window.addEventListener("blur", () => {
+        enforceAntiCheat();
     });
 
     // Listen for escaping fullscreen
     document.addEventListener("fullscreenchange", () => {
         const view = document.getElementById('assessment-view');
-        if (view && view.style.display === 'flex' && !document.fullscreenElement) {
+        if (view && view.style.display === 'flex' && !document.fullscreenElement && !isCheatingDetected) {
             document.getElementById('fullscreen-overlay').style.display = 'flex';
+        }
+    });
+
+    // Disable keys and shortcuts
+    document.addEventListener('keydown', (e) => {
+        const view = document.getElementById('assessment-view');
+        if (!view || view.style.display === 'none') return;
+
+        // F12
+        if (e.keyCode === 123) { e.preventDefault(); e.stopPropagation(); return false; }
+        // Ctrl+Shift+I, J, C, or Ctrl+U
+        if (e.ctrlKey && (e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67) || e.keyCode === 85)) {
+            e.preventDefault(); e.stopPropagation(); return false;
+        }
+        // Alt+Tab, Win (Hard to block in JS, but blur handles it)
+    });
+
+    // Disable Right-Click
+    document.addEventListener('contextmenu', (e) => {
+        const view = document.getElementById('assessment-view');
+        if (view && view.style.display === 'flex') {
+            e.preventDefault();
         }
     });
     // ────────────────────────────────────────────────────────────────────────
