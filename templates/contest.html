@@ -245,7 +245,12 @@
             <pre id="sample-output"
                 style="background:var(--bg-gray);padding:16px;border-radius:12px;font-family:monospace;font-size:13px;color:var(--green);border:1px solid var(--border);"></pre>
 
-
+            <div style="height:1px;background:var(--border);margin:32px 0;"></div>
+            <h4 style="font-size:13px;font-weight:800;color:var(--text);margin:0 0 12px;text-transform:uppercase;">
+                All Test Cases
+            </h4>
+            <div id="all-test-cases-container" style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px;">
+            </div>
         </div>
 
         <!-- Center: Editor Panel -->
@@ -527,10 +532,38 @@
         document.getElementById('sample-output').innerText = currentProblem.sample_output;
         document.getElementById('prob-difficulty').innerText = currentProblem.difficulty.toUpperCase();
 
+        // Render Test Cases (if the container exists)
+        const tcContainer = document.getElementById('all-test-cases-container');
+        if (tcContainer) {
+            tcContainer.innerHTML = '';
+            if (currentProblem.test_cases && currentProblem.test_cases.length > 0) {
+                currentProblem.test_cases.forEach((tc, i) => {
+                    const tcBox = document.createElement('div');
+                    tcBox.style.background = '#f3f4f6';
+                    tcBox.style.border = '1px solid #e5e7eb';
+                    tcBox.style.borderRadius = '8px';
+                    tcBox.style.padding = '12px';
+                    tcBox.style.fontSize = '12px';
+                    tcBox.innerHTML = `
+                        <div style="font-weight:800;color:#111827;margin-bottom:8px;text-transform:uppercase;">Test Case ${i + 1}</div>
+                        <div style="color:#6b7280;margin-bottom:4px;">Input:</div>
+                        <pre style="background:rgba(0,0,0,0.05);padding:8px;border-radius:6px;color:#059669;font-family:monospace;margin:0 0 12px;">${tc.input}</pre>
+                        <div style="color:#6b7280;margin-bottom:4px;">Expected Output:</div>
+                        <pre style="background:rgba(0,0,0,0.05);padding:8px;border-radius:6px;color:#059669;font-family:monospace;margin:0;">${tc.expected_output}</pre>
+                    `;
+                    tcContainer.appendChild(tcBox);
+                });
+            } else {
+                tcContainer.innerHTML = '<div style="color:#9ca3af;font-size:13px;font-style:italic;">No hidden test cases available.</div>';
+            }
+        }
+
 
 
         document.getElementById('assessment-view').style.display = 'flex';
         document.body.style.overflow = 'hidden';
+
+        requestExamFullscreen(); // Trigger fullscreen immediately on open
 
         // Render Question Grid
         const qGrid = document.getElementById('question-grid');
