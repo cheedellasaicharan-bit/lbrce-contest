@@ -703,7 +703,9 @@ def admin_dashboard():
 
     con = get_db()
     leaderboard = con.execute("""
-        SELECT u.id, u.name, u.email, u.reg_id, COALESCE(SUM(s.score), 0) as total_score
+        SELECT u.id, u.name, u.email, u.reg_id, 
+               COALESCE(SUM(s.score), 0) as total_score,
+               COUNT(CASE WHEN s.status = 'CHEATING DETECTED' THEN 1 END) as cheat_count
         FROM users u
         LEFT JOIN submissions s ON u.email = s.user_email
         GROUP BY u.id, u.name, u.email, u.reg_id

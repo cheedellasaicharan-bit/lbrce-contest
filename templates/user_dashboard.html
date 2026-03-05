@@ -301,7 +301,10 @@
                         <td style="padding: 16px 24px; font-size: 13px; font-weight: 800; color: #1d4ed8;">{{
                             sub['score'] }} pts</td>
                         <td style="padding: 16px 24px;">
-                            <span style="font-size: 11px; font-weight: 700; color: #64748b;">{{ sub['status'] }}</span>
+                            <span
+                                style="font-size: 11px; font-weight: 700; color: {% if 'CHEATING' in sub['status'] %}#ef4444{% else %}#64748b{% endif %};">
+                                {{ sub['status'] }}
+                            </span>
                         </td>
                         <td style="padding: 16px 24px; font-size: 13px; color: #64748b; font-weight: 600;">{{
                             sub['language'] }}</td>
