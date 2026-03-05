@@ -158,11 +158,11 @@ def init_db():
 
     # Seed defaults ONLY if they don't exist
     if is_pg:
-        cur.execute("INSERT INTO settings VALUES (%s, %s) ON CONFLICT (key) DO NOTHING", ("contest_start", "2026-01-01 00:00:00"))
-        cur.execute("INSERT INTO settings VALUES (%s, %s) ON CONFLICT (key) DO NOTHING", ("contest_end", "2027-01-01 00:00:00"))
+        cur.execute("INSERT INTO settings (key, value) VALUES (%s, %s) ON CONFLICT (key) DO NOTHING", ("contest_start", "2026-01-01 00:00:00"))
+        cur.execute("INSERT INTO settings (key, value) VALUES (%s, %s) ON CONFLICT (key) DO NOTHING", ("contest_end", "2027-01-01 00:00:00"))
     else:
-        cur.execute("INSERT OR IGNORE INTO settings VALUES (?, ?)", ("contest_start", "2026-01-01 00:00:00"))
-        cur.execute("INSERT OR IGNORE INTO settings VALUES (?, ?)", ("contest_end", "2027-01-01 00:00:00"))
+        cur.execute("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", ("contest_start", "2026-01-01 00:00:00"))
+        cur.execute("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", ("contest_end", "2027-01-01 00:00:00"))
 
     problems = [
         ("easy1", "Sum of Two Numbers", "Write a program that reads two integers from stdin (one per line) and prints their sum.", "easy", 10),
@@ -216,27 +216,46 @@ def b64d(s):
 # ---------------- ID/PASSWORD LOGIN ----------------
 
 # ---------------- HELPERS ----------------
-def get_setting(key):
-    con = get_db()
+def get_setting(key, con=None):
+    should_close = False
+    if con is None:
+        con = get_db()
+        should_close = True
     res = con.execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
-    con.close()
+    if should_close:
+        con.close()
     return res['value'] if res else None
 
-def is_contest_active():
-    start_val = get_setting("contest_start")
-    end_val = get_setting("contest_end")
-    start = parse_dt(start_val)
-    end = parse_dt(end_val, default=datetime(2027, 1, 1))
-    now = get_ist_now()
-    return start <= now <= end
+def is_contest_active(con=None):
+    # If we need a connection, open it once for both settings
+    should_close = False
+    if con is None:
+        con = get_db()
+        should_close = True
 
-def get_stats():
+    start_dt = parse_dt(get_setting("contest_start", con=con))
+    end_dt   = parse_dt(get_setting("contest_end", con=con), default=datetime(2027, 12, 31))
+    
+    if should_close:
+        con.close()
+
+    now = get_ist_now()
+    return start_dt <= now <= end_dt
+
+def get_stats(con=None):
     """Get dashboard statistics."""
-    con = get_db()
+    should_close = False
+    if con is None:
+        con = get_db()
+        should_close = True
+    
     total_users = con.execute("SELECT COUNT(*) as c FROM users").fetchone()['c']
     total_submissions = con.execute("SELECT COUNT(*) as c FROM submissions").fetchone()['c']
     total_problems = con.execute("SELECT COUNT(*) as c FROM problems").fetchone()['c']
-    con.close()
+    
+    if should_close:
+        con.close()
+
     return {
         'total_users': total_users,
         'total_submissions': total_submissions,
@@ -332,79 +351,89 @@ def contest():
     if "user" not in session:
         return redirect(url_for("login"))
 
-    start_dt = parse_dt(get_setting("contest_start"))
-    end_dt   = parse_dt(get_setting("contest_end"), default=datetime(2027, 1, 1))
-    now = get_ist_now()
+    con = None
+    try:
+        con = get_db()
+        
+        start_val = get_setting("contest_start", con=con)
+        end_val   = get_setting("contest_end", con=con)
+        
+        start_dt = parse_dt(start_val)
+        end_dt   = parse_dt(end_val, default=datetime(2027, 1, 1))
+        now = get_ist_now()
 
-    if now < start_dt:
-        # Contest hasn't started yet
-        flash(f"⏳ Contest has not started yet. It begins on {start_dt.strftime('%d %b %Y at %I:%M %p')}.", "info")
-        return redirect(url_for("user_dashboard"))
-
-    if now > end_dt:
-        # Contest has ended
-        flash("🔒 The contest has ended. You can no longer access the arena.", "error")
-        return redirect(url_for("user_dashboard"))
-    # ─────────────────────────────────────────────────────────
-
-    con = get_db()
-    
-    # Check if user has already completed all problems
-    if session.get("role") != "admin":
-        email = session.get("email")
-        stats = get_stats()
-        distinct_submissions = con.execute("""
-            SELECT COUNT(DISTINCT s.problem_id) as count 
-            FROM submissions s 
-            JOIN problems p ON s.problem_id = p.id 
-            WHERE s.user_email=?
-        """, (email,)).fetchone()['count']
-        if distinct_submissions >= stats['total_problems'] and stats['total_problems'] > 0:
+        if now < start_dt:
             con.close()
-            flash("You have already completed the contest. You cannot re-enter the arena.", "success")
+            flash(f"⏳ Contest has not started yet. It begins on {start_dt.strftime('%d %b %Y at %I:%M %p')}.", "info")
             return redirect(url_for("user_dashboard"))
 
-    rows = con.execute("SELECT * FROM problems").fetchall()
-    problems = [dict(r) for r in rows]
+        if now > end_dt:
+            con.close()
+            flash("🔒 The contest has ended. You can no longer access the arena.", "error")
+            return redirect(url_for("user_dashboard"))
 
-    # Fetch IDs of already submitted problems for this user
-    submitted_ids = []
-    if "email" in session and session.get("role") != "admin":
-        email = session.get("email")
-        sub_rows = con.execute("SELECT DISTINCT problem_id FROM submissions WHERE user_email=?", (email,)).fetchall()
-        submitted_ids = [str(r['problem_id']) for r in sub_rows]
+        # Check if user has already completed all problems
+        if session.get("role") != "admin":
+            email = session.get("email")
+            stats = get_stats(con=con)
+            row = con.execute("""
+                SELECT COUNT(DISTINCT s.problem_id) as count 
+                FROM submissions s 
+                JOIN problems p ON s.problem_id = p.id 
+                WHERE s.user_email=?
+            """, (email,)).fetchone()
+            
+            distinct_submissions = row['count'] if row else 0
+            
+            if distinct_submissions >= stats['total_problems'] and stats['total_problems'] > 0:
+                con.close()
+                flash("You have already completed the contest. You cannot re-enter the arena.", "success")
+                return redirect(url_for("user_dashboard"))
 
-    # Fetch test cases
-    test_cases_rows = con.execute("SELECT id, problem_id, input, expected_output FROM test_cases").fetchall()
-    tc_map = {}
-    for tc in test_cases_rows:
-        pid = str(tc['problem_id'])
-        if pid not in tc_map:
-            tc_map[pid] = []
-        tc_map[pid].append({
-            "id": tc["id"],
-            "input": tc["input"],
-            "expected_output": tc["expected_output"]
-        })
+        rows = con.execute("SELECT * FROM problems").fetchall()
+        problems = [dict(r) for r in rows]
 
-    con.close()
+        submitted_ids = []
+        if "email" in session and session.get("role") != "admin":
+            email = session.get("email")
+            sub_rows = con.execute("SELECT DISTINCT problem_id FROM submissions WHERE user_email=?", (email,)).fetchall()
+            submitted_ids = [str(r['problem_id']) for r in sub_rows]
 
-    return render_template("contest.html",
-                           user=session["user"],
-                           problems=problems,
-                           submitted_ids_json=json.dumps(submitted_ids),
-                           problems_json=json.dumps([
-                               {"id": str(p["id"]), "title": p["title"],
-                                "description": p.get("description",""),
-                                "sample_input": p.get("sample_input",""),
-                                "sample_output": p.get("sample_output",""),
-                                "difficulty": p.get("difficulty","easy"),
-                                "score": p.get("score",0),
-                                "test_cases": tc_map.get(str(p["id"]), [])}
-                               for p in problems
-                           ]),
-                           start_time=start_dt.strftime("%Y-%m-%dT%H:%M:%S+05:30"),
-                           end_time=end_dt.strftime("%Y-%m-%dT%H:%M:%S+05:30"))
+        test_cases_rows = con.execute("SELECT id, problem_id, input, expected_output FROM test_cases").fetchall()
+        tc_map = {}
+        for tc in test_cases_rows:
+            pid = str(tc['problem_id'])
+            if pid not in tc_map:
+                tc_map[pid] = []
+            tc_map[pid].append({
+                "id": tc["id"],
+                "input": tc["input"],
+                "expected_output": tc["expected_output"]
+            })
+
+        con.close()
+
+        return render_template("contest.html",
+                               user=session["user"],
+                               problems=problems,
+                               submitted_ids_json=json.dumps(submitted_ids),
+                               problems_json=json.dumps([
+                                   {"id": str(p["id"]), "title": p["title"],
+                                    "description": p.get("description",""),
+                                    "sample_input": p.get("sample_input",""),
+                                    "sample_output": p.get("sample_output",""),
+                                    "difficulty": p.get("difficulty","easy"),
+                                    "score": p.get("score",0),
+                                    "test_cases": tc_map.get(str(p["id"]), [])}
+                                   for p in problems
+                               ]),
+                               start_time=start_dt.strftime("%Y-%m-%dT%H:%M:%S+05:30"),
+                               end_time=end_dt.strftime("%Y-%m-%dT%H:%M:%S+05:30"))
+    except Exception as e:
+        if con: con.close()
+        import traceback
+        print(f"CONTEST ERROR: {e}")
+        return f"<h1>502 Bad Gateway</h1><p>Internal Server Error in Contest Route: {str(e)}</p><pre>{traceback.format_exc()}</pre>", 502
 
 
 
@@ -453,17 +482,18 @@ def user_dashboard():
             break
 
     # Calculate contest completion status
-    stats = get_stats()
-    distinct_submissions = con.execute("""
+    stats = get_stats(con=con)
+    row = con.execute("""
         SELECT COUNT(DISTINCT s.problem_id) as count 
         FROM submissions s 
         JOIN problems p ON s.problem_id = p.id 
         WHERE s.user_email=?
-    """, (email,)).fetchone()['count']
+    """, (email,)).fetchone()
+    distinct_submissions = row['count'] if row else 0
     has_completed_contest = distinct_submissions >= stats['total_problems'] and stats['total_problems'] > 0
     
-    start_dt = parse_dt(get_setting("contest_start"))
-    end_dt   = parse_dt(get_setting("contest_end"), default=datetime(2027, 1, 1))
+    start_dt = parse_dt(get_setting("contest_start", con=con))
+    end_dt   = parse_dt(get_setting("contest_end", con=con), default=datetime(2027, 12, 31))
 
     con.close()
     return render_template("user_dashboard.html", 
