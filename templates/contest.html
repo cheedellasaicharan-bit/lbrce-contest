@@ -364,31 +364,42 @@
         view.setAttribute('data-ended', 'true');
 
         // Disqualification UI
-        document.body.style.filter = 'blur(40px)';
         document.body.innerHTML = `
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0d1117;color:#f85149;font-family:sans-serif;text-align:center;filter:none !important;">
-                <h1 style="font-size:32px;margin-bottom:16px;">🚨 EXAM LOCKED 🚨</h1>
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0d1117;color:#f85149;font-family:sans-serif;text-align:center;">
+                <h1 style="font-size:32px;margin-bottom:16px;">🚨 EXAM TERMINATED 🚨</h1>
                 <p style="color:#8b949e;font-size:16px;max-width:600px;line-height:1.5;">
                     Security Breach: ${reason}<br>
-                    Your exam has been automatically submitted with a 0 score due to minimization, tab switching, or focus loss.
+                    Your entire exam has been automatically locked. All remaining questions have been submitted with a 0 score due to minimization, tab switching, or focus loss.
                 </p>
                 <div style="margin-top:24px;width:30px;height:30px;border-radius:50%;border:3px solid rgba(248,81,73,0.3);border-top-color:#f85149;animation:spin 1s linear infinite;"></div>
                 <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
             </div>
         `;
 
-        // Submission logic
-        const code = editorInstance ? editorInstance.getValue() : "/* CHEATING DETECTED: AUTO-SUBMITTED */";
-        const problemId = currentProblem ? currentProblem.id : "";
-        if (!problemId) { window.location.href = "/user/dashboard"; return; }
+        // Submission logic for ALL unsubmitted problems
+        const unsubmitted = PROBLEMS.filter(p => !submittedProblems.has(p.id));
 
-        fetch('/submit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code: code, language: 71, problem: problemId, is_test: false, is_cheat: true })
-        }).finally(() => {
-            setTimeout(() => { window.location.href = "/user/dashboard"; }, 4000);
+        const submitPromises = unsubmitted.map(p => {
+            return fetch('/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    code: "/* CHEATING DETECTED: AUTO-SUBMITTED (GLOBAL DQ) */",
+                    language: 71,
+                    problem: p.id,
+                    is_test: false,
+                    is_cheat: true
+                })
+            });
         });
+
+        if (submitPromises.length === 0) {
+            window.location.href = "/user/dashboard";
+        } else {
+            Promise.all(submitPromises).finally(() => {
+                setTimeout(() => { window.location.href = "/user/dashboard"; }, 4000);
+            });
+        }
     }
 
     // Unified Heartbeat & Event Listeners
