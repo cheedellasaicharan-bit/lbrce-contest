@@ -540,16 +540,27 @@
         document.getElementById('top-problem-title').innerText = currentProblem.title;
         
         const descEl = document.getElementById('prob-description');
-        descEl.innerText = currentProblem.description;
+        const isPhotoOnly = currentProblem.description === "Problem statement provided via image.";
+        
+        if (isPhotoOnly) {
+            descEl.innerHTML = '<div style="font-weight:700; color:var(--blue); margin-bottom:12px; font-size:12px; text-transform:uppercase;">📸 Problem Statement (Image)</div>';
+        } else {
+            descEl.innerText = currentProblem.description;
+        }
+
         if (currentProblem.image_data) {
             const img = document.createElement('img');
             img.src = 'data:image/jpeg;base64,' + currentProblem.image_data;
             img.style.maxWidth = '100%';
-            img.style.marginTop = '16px';
+            img.style.marginTop = isPhotoOnly ? '0' : '16px';
             img.style.borderRadius = '12px';
             img.style.border = '1px solid var(--border)';
+            img.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
+            img.style.cursor = 'zoom-in';
             img.alt = 'Problem Image';
-            descEl.appendChild(document.createElement('br'));
+            img.onclick = () => window.open(img.src);
+            
+            if (!isPhotoOnly) descEl.appendChild(document.createElement('br'));
             descEl.appendChild(img);
         }
 

@@ -15,13 +15,21 @@
                 Dashboard</h1>
             <p style="font-size:15px;color:var(--text-3);margin-top:6px;">Real-time analytics and contest control</p>
         </div>
-        <div style="display:flex;gap:12px;">
-            <a href="/admin/problems" class="btn"
-                style="background:#1d4ed8;color:#fff;padding:12px 24px;border-radius:12px;font-weight:900;font-size:13px;display:flex;align-items:center;gap:8px;box-shadow:0 10px 20px rgba(29, 78, 216, 0.2);text-decoration:none;">📝
-                Problem Manager</a>
-            <a href="/leaderboard" class="btn"
-                style="background:rgba(0,0,0,0.03);color:#4b5563;border:1px solid rgba(0,0,0,0.1);padding:12px 24px;border-radius:12px;font-weight:800;font-size:13px;text-decoration:none;">🏆
-                Leaderboard</a>
+        <div style="display:flex;align-items:center;gap:24px;">
+            <!-- Live Clock Widget -->
+            <div style="text-align:right; border-right:2px solid var(--border); padding-right:24px; display:flex; flex-direction:column; align-items:flex-end;">
+                <div id="live-clock" style="font-family:'Fira Code', monospace; font-size:20px; font-weight:900; color:#1d4ed8; letter-spacing:-0.05em;">00:00:00 AM</div>
+                <div style="font-size:10px; font-weight:900; color:var(--text-4); text-transform:uppercase; letter-spacing:0.1em; margin-top:2px;">🇮🇳 Asia/Kolkata (IST)</div>
+            </div>
+
+            <div style="display:flex;gap:12px;">
+                <a href="/admin/problems" class="btn"
+                    style="background:#1d4ed8;color:#fff;padding:12px 24px;border-radius:12px;font-weight:900;font-size:13px;display:flex;align-items:center;gap:8px;box-shadow:0 10px 20px rgba(29, 78, 216, 0.2);text-decoration:none;">📝
+                    Problem Manager</a>
+                <a href="/leaderboard" class="btn"
+                    style="background:rgba(0,0,0,0.03);color:#4b5563;border:1px solid rgba(0,0,0,0.1);padding:12px 24px;border-radius:12px;font-weight:800;font-size:13px;text-decoration:none;">🏆
+                    Leaderboard</a>
+            </div>
         </div>
     </div>
 
@@ -307,4 +315,19 @@
     </div>
 </div>
 </div>
+<script>
+function updateClock() {
+    const options = {
+        timeZone: 'Asia/Kolkata',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+    const now = new Date().toLocaleString('en-IN', options);
+    document.getElementById('live-clock').innerText = now;
+}
+setInterval(updateClock, 1000);
+updateClock();
+</script>
 {% endblock %}

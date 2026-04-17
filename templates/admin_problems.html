@@ -15,10 +15,17 @@
                 Manager</h1>
             <p style="font-size:15px;color:var(--text-3);margin-top:6px;">Create and manage contest problems</p>
         </div>
-        <a href="/admin/dashboard" class="btn"
-            style="background:var(--bg-gray);color:var(--text-2);border:1px solid var(--border);padding:10px 20px;border-radius:12px;font-weight:800;font-size:13px;display:flex;align-items:center;gap:8px;transition:0.2s;text-decoration:none;">
-            <span>←</span> Dashboard Overview
-        </a>
+        <div style="display:flex;align-items:center;gap:24px;">
+            <!-- Live Clock Widget -->
+            <div style="text-align:right; border-right:2px solid var(--border); padding-right:24px; display:flex; flex-direction:column; align-items:flex-end;">
+                <div id="live-clock" style="font-family:'Fira Code', monospace; font-size:20px; font-weight:900; color:#1d4ed8; letter-spacing:-0.05em;">00:00:00 AM</div>
+                <div style="font-size:10px; font-weight:900; color:var(--text-4); text-transform:uppercase; letter-spacing:0.1em; margin-top:2px;">🇮🇳 Asia/Kolkata (IST)</div>
+            </div>
+            <a href="/admin/dashboard" class="btn"
+                style="background:var(--bg-gray);color:var(--text-2);border:1px solid var(--border);padding:10px 20px;border-radius:12px;font-weight:800;font-size:13px;display:flex;align-items:center;gap:8px;transition:0.2s;text-decoration:none;">
+                <span>←</span> Dashboard Overview
+            </a>
+        </div>
     </div>
 
     <!-- Create New Problem Section -->
@@ -74,19 +81,47 @@
                         style="font-size:12px;font-weight:900;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;display:block;">Problem
                         Description</label>
                     <textarea name="desc" rows="4"
-                        placeholder="Detail the problem, constraints, and success criteria..." required
+                        placeholder="Detail the problem, constraints, and success criteria (Optional if photo is provided)..."
                         style="width:100%;padding:18px;border-radius:16px;border:1px solid var(--border);font-size:15px;font-weight:500;line-height:1.6;outline:none;resize:vertical;font-family:inherit;background:var(--bg-gray);color:var(--text);"></textarea>
                 </div>
-                <div style="margin-top:24px;">
                     <label
                         style="font-size:12px;font-weight:900;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;display:block;">Problem
-                        Photo (Optional)</label>
-                    <div style="display:flex;align-items:center;gap:12px;background:var(--bg-gray);padding:14px;border-radius:14px;border:1px solid var(--border);">
-                        <input type="file" name="problem_image" accept="image/*" capture="environment"
-                            style="font-size:14px;color:var(--text);outline:none;">
-                        <span style="font-size:12px;color:var(--text-4);">Take a photo or upload an image</span>
+                        Photo / Screenshot</label>
+                    <div id="upload-zone" style="border:2px dashed var(--border); border-radius:16px; padding:32px; text-align:center; background:var(--bg-gray); cursor:pointer; transition:0.3s; position:relative;">
+                        <input type="file" name="problem_image" id="problem_image" accept="image/*" capture="environment"
+                            style="position:absolute; inset:0; opacity:0; cursor:pointer;" onchange="previewImage(this)">
+                        
+                        <div id="upload-placeholder">
+                            <div style="font-size:32px; margin-bottom:12px;">📸</div>
+                            <div style="font-size:14px; font-weight:800; color:var(--text);">Snap Photo / Upload Statement</div>
+                            <div style="font-size:12px; color:var(--text-4); margin-top:4px;">Direct camera access on mobile</div>
+                        </div>
+
+                        <div id="image-preview-container" style="display:none; margin-top:10px;">
+                            <img id="image-preview" src="#" alt="Preview" style="max-width:100%; max-height:300px; border-radius:12px; border:1px solid var(--border);" />
+                            <div style="margin-top:8px; font-size:11px; font-weight:900; color:var(--blue); text-transform:uppercase;">Click to change photo</div>
+                        </div>
                     </div>
-                </div>
+                    <script>
+                    function previewImage(input) {
+                        const preview = document.getElementById('image-preview');
+                        const container = document.getElementById('image-preview-container');
+                        const placeholder = document.getElementById('upload-placeholder');
+                        const zone = document.getElementById('upload-zone');
+                        
+                        if (input.files && input.files[0]) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                preview.src = e.target.result;
+                                container.style.display = 'block';
+                                placeholder.style.display = 'none';
+                                zone.style.borderColor = 'var(--blue)';
+                                zone.style.background = 'var(--card-bg)';
+                            }
+                            reader.readAsDataURL(input.files[0]);
+                        }
+                    }
+                    </script>
                 <div style="margin-top:24px;display:flex;justify-content:flex-end;">
                     <button type="submit" class="btn"
                         style="background:#1d4ed8;color:#fff;padding:14px 32px;border-radius:14px;font-weight:900;font-size:15px;box-shadow:0 10px 25px rgba(29, 78, 216, 0.3);border:none;cursor:pointer;transition:0.2s;"
@@ -239,4 +274,19 @@
         {% endif %}
     </div>
 </div>
+<script>
+function updateClock() {
+    const options = {
+        timeZone: 'Asia/Kolkata',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+    const now = new Date().toLocaleString('en-IN', options);
+    document.getElementById('live-clock').innerText = now;
+}
+setInterval(updateClock, 1000);
+updateClock();
+</script>
 {% endblock %}
