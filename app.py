@@ -141,10 +141,16 @@ def init_db():
     """)
     
     # Migration for existing databases
-    try:
-        cur.execute("ALTER TABLE problems ADD COLUMN image_data TEXT")
-    except Exception:
-        pass  # Column likely already exists
+    if is_pg:
+        cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name='problems' AND column_name='image_data'")
+        if not cur.fetchone():
+            cur.execute("ALTER TABLE problems ADD COLUMN image_data TEXT")
+    else:
+        # SQLite pragma check
+        cur.execute("PRAGMA table_info(problems)")
+        columns = [row[1] for row in cur.fetchall()]
+        if 'image_data' not in columns:
+            cur.execute("ALTER TABLE problems ADD COLUMN image_data TEXT")
 
     cur.execute(f"""
         CREATE TABLE IF NOT EXISTS test_cases (
