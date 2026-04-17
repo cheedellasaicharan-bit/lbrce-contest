@@ -33,7 +33,7 @@
             <h3 style="font-size:16px;font-weight:900;color:var(--text);margin:0;">Create New Problem</h3>
         </div>
         <div style="padding:32px;">
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="add">
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-bottom:24px;">
                     <div>
@@ -76,6 +76,16 @@
                     <textarea name="desc" rows="4"
                         placeholder="Detail the problem, constraints, and success criteria..." required
                         style="width:100%;padding:18px;border-radius:16px;border:1px solid var(--border);font-size:15px;font-weight:500;line-height:1.6;outline:none;resize:vertical;font-family:inherit;background:var(--bg-gray);color:var(--text);"></textarea>
+                </div>
+                <div style="margin-top:24px;">
+                    <label
+                        style="font-size:12px;font-weight:900;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;display:block;">Problem
+                        Photo (Optional)</label>
+                    <div style="display:flex;align-items:center;gap:12px;background:var(--bg-gray);padding:14px;border-radius:14px;border:1px solid var(--border);">
+                        <input type="file" name="problem_image" accept="image/*" capture="environment"
+                            style="font-size:14px;color:var(--text);outline:none;">
+                        <span style="font-size:12px;color:var(--text-4);">Take a photo or upload an image</span>
+                    </div>
                 </div>
                 <div style="margin-top:24px;display:flex;justify-content:flex-end;">
                     <button type="submit" class="btn"
@@ -137,6 +147,13 @@
                 <p style="font-size:15px;color:var(--text-2);line-height:1.7;margin-bottom:28px;">
                     {{ p['description'] }}
                 </p>
+
+                <!-- Problem Image (if any) -->
+                {% if p['image_data'] %}
+                <div style="margin-bottom:28px;">
+                    <img src="data:image/jpeg;base64,{{ p['image_data'] }}" alt="Problem Image" style="max-width:100%; border-radius:12px; border:1px solid var(--border);" />
+                </div>
+                {% endif %}
 
                 <!-- Test Cases Lab -->
                 <div style="background:var(--bg-gray);border-radius:20px;padding:24px;border:1px solid var(--border);">

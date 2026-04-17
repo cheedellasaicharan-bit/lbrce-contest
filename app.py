@@ -135,9 +135,16 @@ def init_db():
             title TEXT,
             description TEXT,
             difficulty TEXT,
-            score INTEGER
+            score INTEGER,
+            image_data TEXT
         )
     """)
+    
+    # Migration for existing databases
+    try:
+        cur.execute("ALTER TABLE problems ADD COLUMN image_data TEXT")
+    except Exception:
+        pass  # Column likely already exists
 
     cur.execute(f"""
         CREATE TABLE IF NOT EXISTS test_cases (
@@ -165,16 +172,16 @@ def init_db():
         cur.execute("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", ("contest_end", "2027-01-01 00:00:00"))
 
     problems = [
-        ("easy1", "Sum of Two Numbers", "Write a program that reads two integers from stdin (one per line) and prints their sum.", "easy", 10),
-        ("medium1", "Factorial", "Write a program that reads an integer N from stdin and prints N! (factorial of N).", "medium", 20),
-        ("hard1", "Shortest Path", "Given an adjacency matrix of a graph, find the shortest path between node 0 and node N-1 using BFS. Input: first line is N (nodes), next N lines are the adjacency matrix rows.", "hard", 30)
+        ("easy1", "Sum of Two Numbers", "Write a program that reads two integers from stdin (one per line) and prints their sum.", "easy", 10, None),
+        ("medium1", "Factorial", "Write a program that reads an integer N from stdin and prints N! (factorial of N).", "medium", 20, None),
+        ("hard1", "Shortest Path", "Given an adjacency matrix of a graph, find the shortest path between node 0 and node N-1 using BFS. Input: first line is N (nodes), next N lines are the adjacency matrix rows.", "hard", 30, None)
     ]
     
     for p in problems:
         if is_pg:
-            cur.execute("INSERT INTO problems VALUES (%s,%s,%s,%s,%s) ON CONFLICT (id) DO NOTHING", p)
+            cur.execute("INSERT INTO problems (id, title, description, difficulty, score, image_data) VALUES (%s,%s,%s,%s,%s,%s) ON CONFLICT (id) DO NOTHING", p)
         else:
-            cur.execute("INSERT OR IGNORE INTO problems VALUES (?,?,?,?,?)", p)
+            cur.execute("INSERT OR IGNORE INTO problems (id, title, description, difficulty, score, image_data) VALUES (?,?,?,?,?,?)", p)
 
     # Seed test cases
     test_cases = [
@@ -420,6 +427,7 @@ def contest():
                                problems_json=json.dumps([
                                    {"id": str(p["id"]), "title": p["title"],
                                     "description": p.get("description",""),
+                                    "image_data": p.get("image_data",""),
                                     "sample_input": p.get("sample_input",""),
                                     "sample_output": p.get("sample_output",""),
                                     "difficulty": p.get("difficulty","easy"),
@@ -732,9 +740,15 @@ def admin_problems():
         action = request.form.get("action")
         if action == "add":
             try:
-                con.execute("INSERT INTO problems VALUES (?,?,?,?,?)",
+                image_data = None
+                if 'problem_image' in request.files:
+                    file = request.files['problem_image']
+                    if file and file.filename:
+                        image_data = base64.b64encode(file.read()).decode('utf-8')
+
+                con.execute("INSERT INTO problems (id, title, description, difficulty, score, image_data) VALUES (?,?,?,?,?,?)",
                             (request.form["id"], request.form["title"],
-                             request.form["desc"], request.form["diff"], int(request.form["score"])))
+                             request.form["desc"], request.form["diff"], int(request.form["score"]), image_data))
                 flash("Problem added successfully!", "success")
             except sqlite3.IntegrityError:
                 flash("Problem ID already exists!", "error")
@@ -750,9 +764,16 @@ def admin_problems():
             con.execute("DELETE FROM test_cases WHERE id=?", (request.form["tc_id"],))
             flash("Test case deleted.", "info")
         elif action == "update":
-            con.execute("""UPDATE problems SET title=?, description=?, difficulty=?, score=? WHERE id=?""",
-                        (request.form["title"], request.form["desc"], request.form["diff"],
-                         int(request.form["score"]), request.form["id"]))
+            if 'problem_image' in request.files and request.files['problem_image'].filename:
+                file = request.files['problem_image']
+                image_data = base64.b64encode(file.read()).decode('utf-8')
+                con.execute("""UPDATE problems SET title=?, description=?, difficulty=?, score=?, image_data=? WHERE id=?""",
+                            (request.form["title"], request.form["desc"], request.form["diff"],
+                             int(request.form["score"]), image_data, request.form["id"]))
+            else:
+                con.execute("""UPDATE problems SET title=?, description=?, difficulty=?, score=? WHERE id=?""",
+                            (request.form["title"], request.form["desc"], request.form["diff"],
+                             int(request.form["score"]), request.form["id"]))
             flash("Problem updated!", "success")
         con.commit()
         con.close()

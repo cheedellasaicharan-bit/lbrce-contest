@@ -132,7 +132,7 @@
                 <a href="/leaderboard"
                     style="font-size: 13px; color: #64748b; font-weight: 700; text-decoration: none;">Leaderboard</a>
                 {% endif %}
-                <a href="/user/dashboard"
+                <a href="/contest"
                     style="font-size: 13px; color: #64748b; font-weight: 700; text-decoration: none;">Contest</a>
             </div>
         </div>
@@ -538,7 +538,21 @@
         currentProblem = PROBLEMS[idx];
         document.getElementById('prob-title').innerText = currentProblem.title;
         document.getElementById('top-problem-title').innerText = currentProblem.title;
-        document.getElementById('prob-description').innerText = currentProblem.description;
+        
+        const descEl = document.getElementById('prob-description');
+        descEl.innerText = currentProblem.description;
+        if (currentProblem.image_data) {
+            const img = document.createElement('img');
+            img.src = 'data:image/jpeg;base64,' + currentProblem.image_data;
+            img.style.maxWidth = '100%';
+            img.style.marginTop = '16px';
+            img.style.borderRadius = '12px';
+            img.style.border = '1px solid var(--border)';
+            img.alt = 'Problem Image';
+            descEl.appendChild(document.createElement('br'));
+            descEl.appendChild(img);
+        }
+
         document.getElementById('sample-input').innerText = currentProblem.sample_input;
         document.getElementById('sample-output').innerText = currentProblem.sample_output;
         document.getElementById('prob-difficulty').innerText = currentProblem.difficulty.toUpperCase();
